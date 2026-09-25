@@ -18,6 +18,9 @@ import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
 import { Route as AppMyCasesRouteImport } from './routes/_app/my-cases'
 import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
 import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
 import { Route as AppBanksIndexRouteImport } from './routes/_app/banks.index'
 import { Route as AppBanksBankIdRouteImport } from './routes/_app/banks.$bankId'
 import { Route as AppBranchesIndexRouteImport } from './routes/_app/branches.index'
@@ -76,6 +79,21 @@ const AppProfileRoute = AppProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AppBanksIndexRoute = AppBanksIndexRouteImport.update({
   id: '/banks/',
@@ -158,6 +176,9 @@ export interface FileRoutesByFullPath {
   '/my-cases': typeof AppMyCasesRoute
   '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/banks/$bankId': typeof AppBanksBankIdRoute
   '/branches/$branchId': typeof AppBranchesBranchIdRoute
   '/cases/new': typeof AppCasesNewRoute
@@ -182,6 +203,9 @@ export interface FileRoutesByTo {
   '/my-cases': typeof AppMyCasesRoute
   '/notifications': typeof AppNotificationsRoute
   '/profile': typeof AppProfileRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/banks/$bankId': typeof AppBanksBankIdRoute
   '/branches/$branchId': typeof AppBranchesBranchIdRoute
   '/cases/new': typeof AppCasesNewRoute
@@ -208,6 +232,9 @@ export interface FileRoutesById {
   '/_app/my-cases': typeof AppMyCasesRoute
   '/_app/notifications': typeof AppNotificationsRoute
   '/_app/profile': typeof AppProfileRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
   '/_app/banks/$bankId': typeof AppBanksBankIdRoute
   '/_app/branches/$branchId': typeof AppBranchesBranchIdRoute
   '/_app/cases/new': typeof AppCasesNewRoute
@@ -234,6 +261,9 @@ export interface FileRouteTypes {
     | '/my-cases'
     | '/notifications'
     | '/profile'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
     | '/banks/$bankId'
     | '/branches/$branchId'
     | '/cases/new'
@@ -258,6 +288,9 @@ export interface FileRouteTypes {
     | '/my-cases'
     | '/notifications'
     | '/profile'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
     | '/banks/$bankId'
     | '/branches/$branchId'
     | '/cases/new'
@@ -283,6 +316,9 @@ export interface FileRouteTypes {
     | '/_app/my-cases'
     | '/_app/notifications'
     | '/_app/profile'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
     | '/_app/banks/$bankId'
     | '/_app/branches/$branchId'
     | '/_app/cases/new'
@@ -305,6 +341,9 @@ export interface RootRouteChildren {
   R403Route: typeof R403Route
   R404Route: typeof R404Route
   R500Route: typeof R500Route
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -371,6 +410,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/profile'
       preLoaderRoute: typeof AppProfileRouteImport
       parentRoute: typeof AppRouteRoute
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_app/banks/': {
       id: '/_app/banks/'
@@ -525,6 +585,9 @@ const rootRouteChildren: RootRouteChildren = {
   R403Route: R403Route,
   R404Route: R404Route,
   R500Route: R500Route,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

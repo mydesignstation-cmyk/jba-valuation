@@ -1,6 +1,6 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
-import { AuthFrame } from "./auth.login";
+import { AuthFrame } from "@/components/app/AuthFrame";
 import { pageMeta } from "@/lib/page-meta";
 
 export const Route = createFileRoute("/auth/forgot-password")({

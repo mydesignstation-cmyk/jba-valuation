@@ -8,7 +8,7 @@ import type { Permission } from "@/lib/permissions";
 
 export interface NavItem {
   title: string;
-  to: LinkProps["to"];
+  to: NonNullable<LinkProps["to"]>;
   icon: LucideIcon;
   permission: Permission;
   badge?: "notifications";
