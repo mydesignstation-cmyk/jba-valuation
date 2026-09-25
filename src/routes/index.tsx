@@ -7,18 +7,25 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// IMPORTANT: Replace this placeholder. See ./README.md for routing conventions.
+// Intentionally blank page — no application UI yet.
 function Index() {
   return (
-    <div
-      className="flex min-h-screen items-center justify-center"
-      style={{ backgroundColor: "#fcfbf8" }}
-    >
-      <img
-        data-lovable-blank-page-placeholder="REMOVE_THIS"
-        src="https://cdn.gpteng.co/blank-app-v1.svg"
-        alt="Your app will live here!"
-      />
-    </div>
+    <html lang="en">
+      <head>
+        <title>Blank Page</title>
+        <meta name="description" content="A blank HTML page." />
+        <style>{`
+          html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: #ffffff;
+          }
+        `}</style>
+      </head>
+      <body>
+      </body>
+    </html>
   );
 }
