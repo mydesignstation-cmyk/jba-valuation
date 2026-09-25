@@ -8,7 +8,7 @@ export const mockCases: ValuationCase[] = [
     caseNumber: "VC-2026-0001",
     bankName: "Example Bank",
     propertyAddress: "12 Sample Street, Mumbai",
-    stage: "created",
+    stage: "CREATED",
     createdById: "user-admin-1",
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
