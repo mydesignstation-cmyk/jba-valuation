@@ -10,33 +10,340 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as R403RouteImport } from './routes/403'
+import { Route as R404RouteImport } from './routes/404'
+import { Route as R500RouteImport } from './routes/500'
+import { Route as AppRouteRouteImport } from './routes/_app/route'
+import { Route as AppDashboardRouteImport } from './routes/_app/dashboard'
+import { Route as AppMyCasesRouteImport } from './routes/_app/my-cases'
+import { Route as AppNotificationsRouteImport } from './routes/_app/notifications'
+import { Route as AppProfileRouteImport } from './routes/_app/profile'
+import { Route as AuthForgotPasswordRouteImport } from './routes/auth.forgot-password'
+import { Route as AuthLoginRouteImport } from './routes/auth.login'
+import { Route as AuthResetPasswordRouteImport } from './routes/auth.reset-password'
+import { Route as AppBanksIndexRouteImport } from './routes/_app/banks.index'
+import { Route as AppBanksBankIdRouteImport } from './routes/_app/banks.$bankId'
+import { Route as AppBranchesIndexRouteImport } from './routes/_app/branches.index'
+import { Route as AppBranchesBranchIdRouteImport } from './routes/_app/branches.$branchId'
+import { Route as AppCasesIndexRouteImport } from './routes/_app/cases.index'
+import { Route as AppCasesNewRouteImport } from './routes/_app/cases.new'
+import { Route as AppCheckerIndexRouteImport } from './routes/_app/checker.index'
+import { Route as AppCheckerCaseIdRouteImport } from './routes/_app/checker.$caseId'
+import { Route as AppMakerIndexRouteImport } from './routes/_app/maker.index'
+import { Route as AppMakerCaseIdRouteImport } from './routes/_app/maker.$caseId'
+import { Route as AppUploaderIndexRouteImport } from './routes/_app/uploader.index'
+import { Route as AppUploaderCaseIdRouteImport } from './routes/_app/uploader.$caseId'
+import { Route as AppCasesCaseIdIndexRouteImport } from './routes/_app/cases.$caseId.index'
+import { Route as AppCasesCaseIdFieldVisitRouteImport } from './routes/_app/cases.$caseId.field-visit'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const R403Route = R403RouteImport.update({
+  id: '/403',
+  path: '/403',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R404Route = R404RouteImport.update({
+  id: '/404',
+  path: '/404',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const R500Route = R500RouteImport.update({
+  id: '/500',
+  path: '/500',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppRouteRoute = AppRouteRouteImport.update({
+  id: '/_app',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppDashboardRoute = AppDashboardRouteImport.update({
+  id: '/dashboard',
+  path: '/dashboard',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMyCasesRoute = AppMyCasesRouteImport.update({
+  id: '/my-cases',
+  path: '/my-cases',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppNotificationsRoute = AppNotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppProfileRoute = AppProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AuthForgotPasswordRoute = AuthForgotPasswordRouteImport.update({
+  id: '/auth/forgot-password',
+  path: '/auth/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthLoginRoute = AuthLoginRouteImport.update({
+  id: '/auth/login',
+  path: '/auth/login',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AuthResetPasswordRoute = AuthResetPasswordRouteImport.update({
+  id: '/auth/reset-password',
+  path: '/auth/reset-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AppBanksIndexRoute = AppBanksIndexRouteImport.update({
+  id: '/banks/',
+  path: '/banks/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBanksBankIdRoute = AppBanksBankIdRouteImport.update({
+  id: '/banks/$bankId',
+  path: '/banks/$bankId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBranchesIndexRoute = AppBranchesIndexRouteImport.update({
+  id: '/branches/',
+  path: '/branches/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppBranchesBranchIdRoute = AppBranchesBranchIdRouteImport.update({
+  id: '/branches/$branchId',
+  path: '/branches/$branchId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCasesIndexRoute = AppCasesIndexRouteImport.update({
+  id: '/cases/',
+  path: '/cases/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCasesNewRoute = AppCasesNewRouteImport.update({
+  id: '/cases/new',
+  path: '/cases/new',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCheckerIndexRoute = AppCheckerIndexRouteImport.update({
+  id: '/checker/',
+  path: '/checker/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCheckerCaseIdRoute = AppCheckerCaseIdRouteImport.update({
+  id: '/checker/$caseId',
+  path: '/checker/$caseId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMakerIndexRoute = AppMakerIndexRouteImport.update({
+  id: '/maker/',
+  path: '/maker/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppMakerCaseIdRoute = AppMakerCaseIdRouteImport.update({
+  id: '/maker/$caseId',
+  path: '/maker/$caseId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppUploaderIndexRoute = AppUploaderIndexRouteImport.update({
+  id: '/uploader/',
+  path: '/uploader/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppUploaderCaseIdRoute = AppUploaderCaseIdRouteImport.update({
+  id: '/uploader/$caseId',
+  path: '/uploader/$caseId',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCasesCaseIdIndexRoute = AppCasesCaseIdIndexRouteImport.update({
+  id: '/cases/$caseId/',
+  path: '/cases/$caseId/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
+const AppCasesCaseIdFieldVisitRoute =
+  AppCasesCaseIdFieldVisitRouteImport.update({
+    id: '/cases/$caseId/field-visit',
+    path: '/cases/$caseId/field-visit',
+    getParentRoute: () => AppRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/404': typeof R404Route
+  '/500': typeof R500Route
+  '/dashboard': typeof AppDashboardRoute
+  '/my-cases': typeof AppMyCasesRoute
+  '/notifications': typeof AppNotificationsRoute
+  '/profile': typeof AppProfileRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/banks/$bankId': typeof AppBanksBankIdRoute
+  '/branches/$branchId': typeof AppBranchesBranchIdRoute
+  '/cases/new': typeof AppCasesNewRoute
+  '/checker/$caseId': typeof AppCheckerCaseIdRoute
+  '/maker/$caseId': typeof AppMakerCaseIdRoute
+  '/uploader/$caseId': typeof AppUploaderCaseIdRoute
+  '/banks/': typeof AppBanksIndexRoute
+  '/branches/': typeof AppBranchesIndexRoute
+  '/cases/': typeof AppCasesIndexRoute
+  '/checker/': typeof AppCheckerIndexRoute
+  '/maker/': typeof AppMakerIndexRoute
+  '/uploader/': typeof AppUploaderIndexRoute
+  '/cases/$caseId/field-visit': typeof AppCasesCaseIdFieldVisitRoute
+  '/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/403': typeof R403Route
+  '/404': typeof R404Route
+  '/500': typeof R500Route
+  '/dashboard': typeof AppDashboardRoute
+  '/my-cases': typeof AppMyCasesRoute
+  '/notifications': typeof AppNotificationsRoute
+  '/profile': typeof AppProfileRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/banks/$bankId': typeof AppBanksBankIdRoute
+  '/branches/$branchId': typeof AppBranchesBranchIdRoute
+  '/cases/new': typeof AppCasesNewRoute
+  '/checker/$caseId': typeof AppCheckerCaseIdRoute
+  '/maker/$caseId': typeof AppMakerCaseIdRoute
+  '/uploader/$caseId': typeof AppUploaderCaseIdRoute
+  '/banks': typeof AppBanksIndexRoute
+  '/branches': typeof AppBranchesIndexRoute
+  '/cases': typeof AppCasesIndexRoute
+  '/checker': typeof AppCheckerIndexRoute
+  '/maker': typeof AppMakerIndexRoute
+  '/uploader': typeof AppUploaderIndexRoute
+  '/cases/$caseId/field-visit': typeof AppCasesCaseIdFieldVisitRoute
+  '/cases/$caseId': typeof AppCasesCaseIdIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/_app': typeof AppRouteRouteWithChildren
+  '/403': typeof R403Route
+  '/404': typeof R404Route
+  '/500': typeof R500Route
+  '/_app/dashboard': typeof AppDashboardRoute
+  '/_app/my-cases': typeof AppMyCasesRoute
+  '/_app/notifications': typeof AppNotificationsRoute
+  '/_app/profile': typeof AppProfileRoute
+  '/auth/forgot-password': typeof AuthForgotPasswordRoute
+  '/auth/login': typeof AuthLoginRoute
+  '/auth/reset-password': typeof AuthResetPasswordRoute
+  '/_app/banks/$bankId': typeof AppBanksBankIdRoute
+  '/_app/branches/$branchId': typeof AppBranchesBranchIdRoute
+  '/_app/cases/new': typeof AppCasesNewRoute
+  '/_app/checker/$caseId': typeof AppCheckerCaseIdRoute
+  '/_app/maker/$caseId': typeof AppMakerCaseIdRoute
+  '/_app/uploader/$caseId': typeof AppUploaderCaseIdRoute
+  '/_app/banks/': typeof AppBanksIndexRoute
+  '/_app/branches/': typeof AppBranchesIndexRoute
+  '/_app/cases/': typeof AppCasesIndexRoute
+  '/_app/checker/': typeof AppCheckerIndexRoute
+  '/_app/maker/': typeof AppMakerIndexRoute
+  '/_app/uploader/': typeof AppUploaderIndexRoute
+  '/_app/cases/$caseId/field-visit': typeof AppCasesCaseIdFieldVisitRoute
+  '/_app/cases/$caseId/': typeof AppCasesCaseIdIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/403'
+    | '/404'
+    | '/500'
+    | '/dashboard'
+    | '/my-cases'
+    | '/notifications'
+    | '/profile'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/banks/$bankId'
+    | '/branches/$branchId'
+    | '/cases/new'
+    | '/checker/$caseId'
+    | '/maker/$caseId'
+    | '/uploader/$caseId'
+    | '/banks/'
+    | '/branches/'
+    | '/cases/'
+    | '/checker/'
+    | '/maker/'
+    | '/uploader/'
+    | '/cases/$caseId/field-visit'
+    | '/cases/$caseId/'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/403'
+    | '/404'
+    | '/500'
+    | '/dashboard'
+    | '/my-cases'
+    | '/notifications'
+    | '/profile'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/banks/$bankId'
+    | '/branches/$branchId'
+    | '/cases/new'
+    | '/checker/$caseId'
+    | '/maker/$caseId'
+    | '/uploader/$caseId'
+    | '/banks'
+    | '/branches'
+    | '/cases'
+    | '/checker'
+    | '/maker'
+    | '/uploader'
+    | '/cases/$caseId/field-visit'
+    | '/cases/$caseId'
+  id:
+    | '__root__'
+    | '/'
+    | '/_app'
+    | '/403'
+    | '/404'
+    | '/500'
+    | '/_app/dashboard'
+    | '/_app/my-cases'
+    | '/_app/notifications'
+    | '/_app/profile'
+    | '/auth/forgot-password'
+    | '/auth/login'
+    | '/auth/reset-password'
+    | '/_app/banks/$bankId'
+    | '/_app/branches/$branchId'
+    | '/_app/cases/new'
+    | '/_app/checker/$caseId'
+    | '/_app/maker/$caseId'
+    | '/_app/uploader/$caseId'
+    | '/_app/banks/'
+    | '/_app/branches/'
+    | '/_app/cases/'
+    | '/_app/checker/'
+    | '/_app/maker/'
+    | '/_app/uploader/'
+    | '/_app/cases/$caseId/field-visit'
+    | '/_app/cases/$caseId/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AppRouteRoute: typeof AppRouteRouteWithChildren
+  R403Route: typeof R403Route
+  R404Route: typeof R404Route
+  R500Route: typeof R500Route
+  AuthForgotPasswordRoute: typeof AuthForgotPasswordRoute
+  AuthLoginRoute: typeof AuthLoginRoute
+  AuthResetPasswordRoute: typeof AuthResetPasswordRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +355,239 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/403': {
+      id: '/403'
+      path: '/403'
+      fullPath: '/403'
+      preLoaderRoute: typeof R403RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/404': {
+      id: '/404'
+      path: '/404'
+      fullPath: '/404'
+      preLoaderRoute: typeof R404RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/500': {
+      id: '/500'
+      path: '/500'
+      fullPath: '/500'
+      preLoaderRoute: typeof R500RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app': {
+      id: '/_app'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof AppRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/dashboard': {
+      id: '/_app/dashboard'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof AppDashboardRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/my-cases': {
+      id: '/_app/my-cases'
+      path: '/my-cases'
+      fullPath: '/my-cases'
+      preLoaderRoute: typeof AppMyCasesRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/notifications': {
+      id: '/_app/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof AppNotificationsRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/profile': {
+      id: '/_app/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof AppProfileRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/auth/forgot-password': {
+      id: '/auth/forgot-password'
+      path: '/auth/forgot-password'
+      fullPath: '/auth/forgot-password'
+      preLoaderRoute: typeof AuthForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/login': {
+      id: '/auth/login'
+      path: '/auth/login'
+      fullPath: '/auth/login'
+      preLoaderRoute: typeof AuthLoginRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/auth/reset-password': {
+      id: '/auth/reset-password'
+      path: '/auth/reset-password'
+      fullPath: '/auth/reset-password'
+      preLoaderRoute: typeof AuthResetPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_app/banks/': {
+      id: '/_app/banks/'
+      path: '/banks'
+      fullPath: '/banks/'
+      preLoaderRoute: typeof AppBanksIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/banks/$bankId': {
+      id: '/_app/banks/$bankId'
+      path: '/banks/$bankId'
+      fullPath: '/banks/$bankId'
+      preLoaderRoute: typeof AppBanksBankIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/branches/': {
+      id: '/_app/branches/'
+      path: '/branches'
+      fullPath: '/branches/'
+      preLoaderRoute: typeof AppBranchesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/branches/$branchId': {
+      id: '/_app/branches/$branchId'
+      path: '/branches/$branchId'
+      fullPath: '/branches/$branchId'
+      preLoaderRoute: typeof AppBranchesBranchIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/cases/': {
+      id: '/_app/cases/'
+      path: '/cases'
+      fullPath: '/cases/'
+      preLoaderRoute: typeof AppCasesIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/cases/new': {
+      id: '/_app/cases/new'
+      path: '/cases/new'
+      fullPath: '/cases/new'
+      preLoaderRoute: typeof AppCasesNewRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/checker/': {
+      id: '/_app/checker/'
+      path: '/checker'
+      fullPath: '/checker/'
+      preLoaderRoute: typeof AppCheckerIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/checker/$caseId': {
+      id: '/_app/checker/$caseId'
+      path: '/checker/$caseId'
+      fullPath: '/checker/$caseId'
+      preLoaderRoute: typeof AppCheckerCaseIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/maker/': {
+      id: '/_app/maker/'
+      path: '/maker'
+      fullPath: '/maker/'
+      preLoaderRoute: typeof AppMakerIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/maker/$caseId': {
+      id: '/_app/maker/$caseId'
+      path: '/maker/$caseId'
+      fullPath: '/maker/$caseId'
+      preLoaderRoute: typeof AppMakerCaseIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/uploader/': {
+      id: '/_app/uploader/'
+      path: '/uploader'
+      fullPath: '/uploader/'
+      preLoaderRoute: typeof AppUploaderIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/uploader/$caseId': {
+      id: '/_app/uploader/$caseId'
+      path: '/uploader/$caseId'
+      fullPath: '/uploader/$caseId'
+      preLoaderRoute: typeof AppUploaderCaseIdRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/cases/$caseId/': {
+      id: '/_app/cases/$caseId/'
+      path: '/cases/$caseId'
+      fullPath: '/cases/$caseId/'
+      preLoaderRoute: typeof AppCasesCaseIdIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
+    '/_app/cases/$caseId/field-visit': {
+      id: '/_app/cases/$caseId/field-visit'
+      path: '/cases/$caseId/field-visit'
+      fullPath: '/cases/$caseId/field-visit'
+      preLoaderRoute: typeof AppCasesCaseIdFieldVisitRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
   }
 }
 
+interface AppRouteRouteChildren {
+  AppDashboardRoute: typeof AppDashboardRoute
+  AppMyCasesRoute: typeof AppMyCasesRoute
+  AppNotificationsRoute: typeof AppNotificationsRoute
+  AppProfileRoute: typeof AppProfileRoute
+  AppBanksBankIdRoute: typeof AppBanksBankIdRoute
+  AppBranchesBranchIdRoute: typeof AppBranchesBranchIdRoute
+  AppCasesNewRoute: typeof AppCasesNewRoute
+  AppCheckerCaseIdRoute: typeof AppCheckerCaseIdRoute
+  AppMakerCaseIdRoute: typeof AppMakerCaseIdRoute
+  AppUploaderCaseIdRoute: typeof AppUploaderCaseIdRoute
+  AppBanksIndexRoute: typeof AppBanksIndexRoute
+  AppBranchesIndexRoute: typeof AppBranchesIndexRoute
+  AppCasesIndexRoute: typeof AppCasesIndexRoute
+  AppCheckerIndexRoute: typeof AppCheckerIndexRoute
+  AppMakerIndexRoute: typeof AppMakerIndexRoute
+  AppUploaderIndexRoute: typeof AppUploaderIndexRoute
+  AppCasesCaseIdFieldVisitRoute: typeof AppCasesCaseIdFieldVisitRoute
+  AppCasesCaseIdIndexRoute: typeof AppCasesCaseIdIndexRoute
+}
+
+const AppRouteRouteChildren: AppRouteRouteChildren = {
+  AppDashboardRoute: AppDashboardRoute,
+  AppMyCasesRoute: AppMyCasesRoute,
+  AppNotificationsRoute: AppNotificationsRoute,
+  AppProfileRoute: AppProfileRoute,
+  AppBanksBankIdRoute: AppBanksBankIdRoute,
+  AppBranchesBranchIdRoute: AppBranchesBranchIdRoute,
+  AppCasesNewRoute: AppCasesNewRoute,
+  AppCheckerCaseIdRoute: AppCheckerCaseIdRoute,
+  AppMakerCaseIdRoute: AppMakerCaseIdRoute,
+  AppUploaderCaseIdRoute: AppUploaderCaseIdRoute,
+  AppBanksIndexRoute: AppBanksIndexRoute,
+  AppBranchesIndexRoute: AppBranchesIndexRoute,
+  AppCasesIndexRoute: AppCasesIndexRoute,
+  AppCheckerIndexRoute: AppCheckerIndexRoute,
+  AppMakerIndexRoute: AppMakerIndexRoute,
+  AppUploaderIndexRoute: AppUploaderIndexRoute,
+  AppCasesCaseIdFieldVisitRoute: AppCasesCaseIdFieldVisitRoute,
+  AppCasesCaseIdIndexRoute: AppCasesCaseIdIndexRoute,
+}
+
+const AppRouteRouteWithChildren = AppRouteRoute._addFileChildren(
+  AppRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AppRouteRoute: AppRouteRouteWithChildren,
+  R403Route: R403Route,
+  R404Route: R404Route,
+  R500Route: R500Route,
+  AuthForgotPasswordRoute: AuthForgotPasswordRoute,
+  AuthLoginRoute: AuthLoginRoute,
+  AuthResetPasswordRoute: AuthResetPasswordRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
