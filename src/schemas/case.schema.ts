@@ -2,13 +2,26 @@ import { z } from "zod";
 
 /** Zod schemas for form validation and data parsing. */
 
+export const roleSchema = z.enum([
+  "SUPER_ADMIN",
+  "ADMIN",
+  "SITE_ENGINEER",
+  "MAKER",
+  "CHECKER",
+  "UPLOADER",
+]);
+
 export const caseStageSchema = z.enum([
-  "created",
-  "engineer_assigned",
-  "field_visit_submitted",
-  "maker_completed",
-  "checker_completed",
-  "uploaded",
+  "CREATED",
+  "ASSIGNED",
+  "FIELD_VISIT_PENDING",
+  "FIELD_VISIT_SUBMITTED",
+  "MAKER_PENDING",
+  "MAKER_COMPLETED",
+  "CHECKER_PENDING",
+  "CHECKER_COMPLETED",
+  "UPLOADER_PENDING",
+  "COMPLETED",
 ]);
 
 export const createCaseSchema = z.object({

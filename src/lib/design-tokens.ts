@@ -1,3 +1,5 @@
+import type { CaseStage } from "@/types";
+
 /**
  * Centralized design tokens (TypeScript mirror of src/styles.css @theme).
  *
@@ -8,14 +10,31 @@
  * dynamic class selection) without hardcoding values.
  */
 
-export const statusColors = {
-  created: "bg-status-created text-status-created-foreground",
-  engineerAssigned: "bg-status-assigned text-status-assigned-foreground",
-  fieldVisitSubmitted: "bg-status-submitted text-status-submitted-foreground",
-  makerCompleted: "bg-status-maker text-status-maker-foreground",
-  checkerCompleted: "bg-status-checker text-status-checker-foreground",
-  uploaded: "bg-status-uploaded text-status-uploaded-foreground",
-} as const;
+export const statusColors: Record<CaseStage, string> = {
+  CREATED: "bg-status-created text-status-created-foreground",
+  ASSIGNED: "bg-status-assigned text-status-assigned-foreground",
+  FIELD_VISIT_PENDING: "bg-status-pending text-status-pending-foreground",
+  FIELD_VISIT_SUBMITTED: "bg-status-submitted text-status-submitted-foreground",
+  MAKER_PENDING: "bg-status-pending text-status-pending-foreground",
+  MAKER_COMPLETED: "bg-status-maker text-status-maker-foreground",
+  CHECKER_PENDING: "bg-status-pending text-status-pending-foreground",
+  CHECKER_COMPLETED: "bg-status-checker text-status-checker-foreground",
+  UPLOADER_PENDING: "bg-status-pending text-status-pending-foreground",
+  COMPLETED: "bg-status-uploaded text-status-uploaded-foreground",
+};
+
+export const stageLabels: Record<CaseStage, string> = {
+  CREATED: "Created",
+  ASSIGNED: "Assigned",
+  FIELD_VISIT_PENDING: "Field Visit Pending",
+  FIELD_VISIT_SUBMITTED: "Field Visit Submitted",
+  MAKER_PENDING: "Maker Pending",
+  MAKER_COMPLETED: "Maker Completed",
+  CHECKER_PENDING: "Checker Pending",
+  CHECKER_COMPLETED: "Checker Completed",
+  UPLOADER_PENDING: "Uploader Pending",
+  COMPLETED: "Completed",
+};
 
 export const typography = {
   display: "text-4xl font-bold tracking-tight",

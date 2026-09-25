@@ -3,15 +3,25 @@
  * Aligned with docs/domain-foundation.md.
  */
 
-export type Role = "super_admin" | "admin" | "site_engineer" | "maker" | "checker" | "uploader";
+export type Role =
+  | "SUPER_ADMIN"
+  | "ADMIN"
+  | "SITE_ENGINEER"
+  | "MAKER"
+  | "CHECKER"
+  | "UPLOADER";
 
 export type CaseStage =
-  | "created"
-  | "engineer_assigned"
-  | "field_visit_submitted"
-  | "maker_completed"
-  | "checker_completed"
-  | "uploaded";
+  | "CREATED"
+  | "ASSIGNED"
+  | "FIELD_VISIT_PENDING"
+  | "FIELD_VISIT_SUBMITTED"
+  | "MAKER_PENDING"
+  | "MAKER_COMPLETED"
+  | "CHECKER_PENDING"
+  | "CHECKER_COMPLETED"
+  | "UPLOADER_PENDING"
+  | "COMPLETED";
 
 export interface User {
   id: string;
