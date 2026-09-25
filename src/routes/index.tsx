@@ -10,12 +10,10 @@ export const Route = createFileRoute("/")({
   component: Index,
 });
 
-// Intentionally blank page — no application UI yet.
 function Index() {
   return (
-    <div
-      className="min-h-screen w-full bg-background"
-      style={{ margin: 0, padding: 0 }}
-    />
+    <div className="flex min-h-screen w-full items-center justify-center bg-background text-foreground">
+      <h1 className="text-4xl font-semibold">Hello world</h1>
+    </div>
   );
 }
