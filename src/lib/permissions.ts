@@ -35,13 +35,14 @@ export type Permission =
 
 const ALL: Role[] = ["SUPER_ADMIN", "ADMIN", "SITE_ENGINEER", "MAKER", "CHECKER", "UPLOADER"];
 const ADMINS: Role[] = ["SUPER_ADMIN", "ADMIN"];
+const SUPER_ADMIN_ONLY: Role[] = ["SUPER_ADMIN"];
 
 export const permissionRoles: Record<Permission, Role[]> = {
   "dashboard.view": ALL,
   "cases.view": ADMINS,
   "cases.create": ADMINS,
   "cases.update": ADMINS,
-  "cases.delete": ADMINS,
+  "cases.delete": SUPER_ADMIN_ONLY,
   "cases.detail": [...ADMINS, "SITE_ENGINEER"],
   "fieldVisit.access": [...ADMINS, "SITE_ENGINEER"],
   "myCases.view": ["SITE_ENGINEER"],
@@ -54,15 +55,15 @@ export const permissionRoles: Record<Permission, Role[]> = {
   "customers.view": ADMINS,
   "customers.create": ADMINS,
   "customers.update": ADMINS,
-  "customers.delete": ADMINS,
+  "customers.delete": SUPER_ADMIN_ONLY,
   "banks.view": ADMINS,
   "banks.create": ADMINS,
   "banks.update": ADMINS,
-  "banks.delete": ADMINS,
+  "banks.delete": SUPER_ADMIN_ONLY,
   "branches.view": ADMINS,
   "branches.create": ADMINS,
   "branches.update": ADMINS,
-  "branches.delete": ADMINS,
+  "branches.delete": SUPER_ADMIN_ONLY,
 };
 
 export function can(role: Role | null | undefined, permission: Permission): boolean {
