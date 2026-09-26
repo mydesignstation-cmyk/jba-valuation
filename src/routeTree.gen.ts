@@ -29,6 +29,7 @@ import { Route as AppCasesIndexRouteImport } from './routes/_app/cases.index'
 import { Route as AppCasesNewRouteImport } from './routes/_app/cases.new'
 import { Route as AppCheckerIndexRouteImport } from './routes/_app/checker.index'
 import { Route as AppCheckerCaseIdRouteImport } from './routes/_app/checker.$caseId'
+import { Route as AppCustomersIndexRouteImport } from './routes/_app/customers.index'
 import { Route as AppMakerIndexRouteImport } from './routes/_app/maker.index'
 import { Route as AppMakerCaseIdRouteImport } from './routes/_app/maker.$caseId'
 import { Route as AppUploaderIndexRouteImport } from './routes/_app/uploader.index'
@@ -135,6 +136,11 @@ const AppCheckerCaseIdRoute = AppCheckerCaseIdRouteImport.update({
   path: '/checker/$caseId',
   getParentRoute: () => AppRouteRoute,
 } as any)
+const AppCustomersIndexRoute = AppCustomersIndexRouteImport.update({
+  id: '/customers/',
+  path: '/customers/',
+  getParentRoute: () => AppRouteRoute,
+} as any)
 const AppMakerIndexRoute = AppMakerIndexRouteImport.update({
   id: '/maker/',
   path: '/maker/',
@@ -189,6 +195,7 @@ export interface FileRoutesByFullPath {
   '/branches/': typeof AppBranchesIndexRoute
   '/cases/': typeof AppCasesIndexRoute
   '/checker/': typeof AppCheckerIndexRoute
+  '/customers/': typeof AppCustomersIndexRoute
   '/maker/': typeof AppMakerIndexRoute
   '/uploader/': typeof AppUploaderIndexRoute
   '/cases/$caseId/field-visit': typeof AppCasesCaseIdFieldVisitRoute
@@ -216,6 +223,7 @@ export interface FileRoutesByTo {
   '/branches': typeof AppBranchesIndexRoute
   '/cases': typeof AppCasesIndexRoute
   '/checker': typeof AppCheckerIndexRoute
+  '/customers': typeof AppCustomersIndexRoute
   '/maker': typeof AppMakerIndexRoute
   '/uploader': typeof AppUploaderIndexRoute
   '/cases/$caseId/field-visit': typeof AppCasesCaseIdFieldVisitRoute
@@ -245,6 +253,7 @@ export interface FileRoutesById {
   '/_app/branches/': typeof AppBranchesIndexRoute
   '/_app/cases/': typeof AppCasesIndexRoute
   '/_app/checker/': typeof AppCheckerIndexRoute
+  '/_app/customers/': typeof AppCustomersIndexRoute
   '/_app/maker/': typeof AppMakerIndexRoute
   '/_app/uploader/': typeof AppUploaderIndexRoute
   '/_app/cases/$caseId/field-visit': typeof AppCasesCaseIdFieldVisitRoute
@@ -274,6 +283,7 @@ export interface FileRouteTypes {
     | '/branches/'
     | '/cases/'
     | '/checker/'
+    | '/customers/'
     | '/maker/'
     | '/uploader/'
     | '/cases/$caseId/field-visit'
@@ -301,6 +311,7 @@ export interface FileRouteTypes {
     | '/branches'
     | '/cases'
     | '/checker'
+    | '/customers'
     | '/maker'
     | '/uploader'
     | '/cases/$caseId/field-visit'
@@ -329,6 +340,7 @@ export interface FileRouteTypes {
     | '/_app/branches/'
     | '/_app/cases/'
     | '/_app/checker/'
+    | '/_app/customers/'
     | '/_app/maker/'
     | '/_app/uploader/'
     | '/_app/cases/$caseId/field-visit'
@@ -488,6 +500,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AppCheckerCaseIdRouteImport
       parentRoute: typeof AppRouteRoute
     }
+    '/_app/customers/': {
+      id: '/_app/customers/'
+      path: '/customers'
+      fullPath: '/customers/'
+      preLoaderRoute: typeof AppCustomersIndexRouteImport
+      parentRoute: typeof AppRouteRoute
+    }
     '/_app/maker/': {
       id: '/_app/maker/'
       path: '/maker'
@@ -548,6 +567,7 @@ interface AppRouteRouteChildren {
   AppBranchesIndexRoute: typeof AppBranchesIndexRoute
   AppCasesIndexRoute: typeof AppCasesIndexRoute
   AppCheckerIndexRoute: typeof AppCheckerIndexRoute
+  AppCustomersIndexRoute: typeof AppCustomersIndexRoute
   AppMakerIndexRoute: typeof AppMakerIndexRoute
   AppUploaderIndexRoute: typeof AppUploaderIndexRoute
   AppCasesCaseIdFieldVisitRoute: typeof AppCasesCaseIdFieldVisitRoute
@@ -569,6 +589,7 @@ const AppRouteRouteChildren: AppRouteRouteChildren = {
   AppBranchesIndexRoute: AppBranchesIndexRoute,
   AppCasesIndexRoute: AppCasesIndexRoute,
   AppCheckerIndexRoute: AppCheckerIndexRoute,
+  AppCustomersIndexRoute: AppCustomersIndexRoute,
   AppMakerIndexRoute: AppMakerIndexRoute,
   AppUploaderIndexRoute: AppUploaderIndexRoute,
   AppCasesCaseIdFieldVisitRoute: AppCasesCaseIdFieldVisitRoute,

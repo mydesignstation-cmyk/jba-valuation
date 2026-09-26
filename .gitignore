@@ -20,6 +20,9 @@ dist-ssr
 .wrangler/
 .dev.vars
 
+# Neon local project reference
+.neon
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
