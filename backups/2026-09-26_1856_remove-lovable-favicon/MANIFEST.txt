@@ -1,0 +1,4 @@
+Backup of the original Lovable favicon before replacing it with a 'J' placeholder favicon.svg.
+Original path: public/favicon.ico
+Reason: user requested removal of Lovable favicon, replace with J placeholder.
+Date: 2026-09-26_1856
