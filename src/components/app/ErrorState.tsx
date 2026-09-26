@@ -2,8 +2,16 @@ import { Link, useRouter } from "@tanstack/react-router";
 import { ArrowLeft, LayoutDashboard, RotateCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export function ErrorState({ code, title, message, onRetry }: {
-  code: string; title: string; message: string; onRetry?: () => void;
+export function ErrorState({
+  code,
+  title,
+  message,
+  onRetry,
+}: {
+  code: string;
+  title: string;
+  message: string;
+  onRetry?: () => void;
 }) {
   const router = useRouter();
   return (
@@ -14,15 +22,20 @@ export function ErrorState({ code, title, message, onRetry }: {
         <p className="mt-3 text-sm text-muted-foreground">{message}</p>
         <div className="mt-8 flex flex-col justify-center gap-2 sm:flex-row">
           <Button variant="outline" onClick={() => router.history.back()}>
-            <ArrowLeft className="mr-2 h-4 w-4" />Back
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back
           </Button>
           {onRetry && (
             <Button variant="outline" onClick={onRetry}>
-              <RotateCcw className="mr-2 h-4 w-4" />Try again
+              <RotateCcw className="mr-2 h-4 w-4" />
+              Try again
             </Button>
           )}
           <Button asChild>
-            <Link to="/dashboard"><LayoutDashboard className="mr-2 h-4 w-4" />Go to Dashboard</Link>
+            <Link to="/dashboard">
+              <LayoutDashboard className="mr-2 h-4 w-4" />
+              Go to Dashboard
+            </Link>
           </Button>
         </div>
       </div>

@@ -18,7 +18,11 @@ function Page() {
       description="Review the Maker-completed case."
       icon={ShieldCheck}
       message="The Checker review screen will appear here."
-      crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } }, { label: "Checker Review" }]}
+      crumbs={[
+        { label: "Cases", link: { to: "/cases" } },
+        { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } },
+        { label: "Checker Review" },
+      ]}
     />
   );
 }

@@ -25,8 +25,27 @@ export const caseStageSchema = z.enum([
 ]);
 
 export const createCaseSchema = z.object({
-  bankName: z.string().min(1, "Bank name is required"),
-  propertyAddress: z.string().min(1, "Property address is required"),
+  customerId: z.string().min(1, "Customer is required"),
+  requestNumber: z
+    .string()
+    .min(1, "Request number is required")
+    .trim()
+    .max(100, "Request number must be 100 characters or less"),
+  bankId: z.string().min(1, "Bank is required"),
+  branchId: z.string().min(1, "Branch is required"),
+  assignedEngineerId: z.string().min(1, "Site engineer is required"),
+});
+
+export const updateCaseSchema = z.object({
+  customerId: z.string().min(1, "Customer is required"),
+  requestNumber: z
+    .string()
+    .min(1, "Request number is required")
+    .trim()
+    .max(100, "Request number must be 100 characters or less"),
+  bankId: z.string().min(1, "Bank is required"),
+  branchId: z.string().min(1, "Branch is required"),
+  assignedEngineerId: z.string().min(1, "Site engineer is required"),
 });
 
 export const assignEngineerSchema = z.object({
@@ -35,4 +54,5 @@ export const assignEngineerSchema = z.object({
 });
 
 export type CreateCaseInput = z.infer<typeof createCaseSchema>;
+export type UpdateCaseInput = z.infer<typeof updateCaseSchema>;
 export type AssignEngineerInput = z.infer<typeof assignEngineerSchema>;

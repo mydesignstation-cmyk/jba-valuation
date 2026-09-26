@@ -18,7 +18,11 @@ function Page() {
       description="Site inspection details for this case."
       icon={MapPin}
       message="The field visit form will appear here."
-      crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } }, { label: "Field Visit" }]}
+      crumbs={[
+        { label: "Cases", link: { to: "/cases" } },
+        { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } },
+        { label: "Field Visit" },
+      ]}
     />
   );
 }

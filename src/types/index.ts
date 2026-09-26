@@ -3,13 +3,7 @@
  * Aligned with docs/domain-foundation.md.
  */
 
-export type Role =
-  | "SUPER_ADMIN"
-  | "ADMIN"
-  | "SITE_ENGINEER"
-  | "MAKER"
-  | "CHECKER"
-  | "UPLOADER";
+export type Role = "SUPER_ADMIN" | "ADMIN" | "SITE_ENGINEER" | "MAKER" | "CHECKER" | "UPLOADER";
 
 export type CaseStage =
   | "CREATED"
@@ -30,13 +24,41 @@ export interface User {
   role: Role;
 }
 
+export interface Customer {
+  id: string;
+  name: string;
+  contact: string;
+  email?: string;
+  address: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Bank {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface Branch {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface ValuationCase {
   id: string;
+  /** Internally generated, e.g. VAL-2026-0001. */
   caseNumber: string;
-  bankName: string;
-  propertyAddress: string;
+  /** Manually entered by Admin: external bank/customer request reference. */
+  requestNumber: string;
+  customerId: string;
+  bankId: string;
+  branchId: string;
+  assignedEngineerId: string;
   stage: CaseStage;
-  assignedEngineerId?: string;
   createdById: string;
   createdAt: string;
   updatedAt: string;

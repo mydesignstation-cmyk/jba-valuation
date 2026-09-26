@@ -10,7 +10,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const [open, setOpen] = useState(() =>
     typeof window === "undefined" ? true : window.localStorage.getItem(KEY) !== "false",
   );
-  useEffect(() => { window.localStorage.setItem(KEY, String(open)); }, [open]);
+  useEffect(() => {
+    window.localStorage.setItem(KEY, String(open));
+  }, [open]);
 
   return (
     <SidebarProvider open={open} onOpenChange={setOpen}>
@@ -18,7 +20,9 @@ export function AppLayout({ children }: { children: ReactNode }) {
         <AppSidebar />
         <SidebarInset className="min-w-0">
           <AppTopbar />
-          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">{children}</main>
+          <main className="mx-auto w-full max-w-7xl flex-1 px-4 py-6 sm:px-6 lg:px-8">
+            {children}
+          </main>
         </SidebarInset>
       </div>
     </SidebarProvider>

@@ -3,8 +3,20 @@ import type { LucideIcon } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { PageHeader, type Crumb } from "./PageHeader";
 
-export function PlaceholderPage({ title, description, icon: Icon, crumbs, message, actions }: {
-  title: string; description: string; icon: LucideIcon; crumbs: Crumb[]; message: string; actions?: ReactNode;
+export function PlaceholderPage({
+  title,
+  description,
+  icon: Icon,
+  crumbs,
+  message,
+  actions,
+}: {
+  title: string;
+  description: string;
+  icon: LucideIcon;
+  crumbs: Crumb[];
+  message: string;
+  actions?: ReactNode;
 }) {
   return (
     <div className="space-y-6">
@@ -15,7 +27,9 @@ export function PlaceholderPage({ title, description, icon: Icon, crumbs, messag
             <Icon className="h-6 w-6" />
           </div>
           <p className="font-medium">{message}</p>
-          <p className="max-w-sm text-sm text-muted-foreground">This screen is a placeholder and will be built in a later step.</p>
+          <p className="max-w-sm text-sm text-muted-foreground">
+            This screen is a placeholder and will be built in a later step.
+          </p>
         </CardContent>
       </Card>
     </div>

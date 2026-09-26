@@ -18,7 +18,11 @@ function Page() {
       description="Review and edit the submitted field visit."
       icon={PenLine}
       message="The Maker review screen will appear here."
-      crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } }, { label: "Maker Review" }]}
+      crumbs={[
+        { label: "Cases", link: { to: "/cases" } },
+        { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } },
+        { label: "Maker Review" },
+      ]}
     />
   );
 }

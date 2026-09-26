@@ -1,24 +1,295 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { FileText } from "lucide-react";
-import { PlaceholderPage } from "@/components/app/PlaceholderPage";
+import { createFileRoute, Link } from "@tanstack/react-router";
+import {
+  ArrowLeft,
+  CalendarClock,
+  FileText,
+  GitBranch,
+  Landmark,
+  Mail,
+  MapPin,
+  Phone,
+  User as UserIcon,
+  UserCog,
+} from "lucide-react";
+import type { ReactNode } from "react";
+import { useQuery } from "@tanstack/react-query";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Label } from "@/components/ui/label";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Separator } from "@/components/ui/separator";
+import { PageHeader } from "@/components/app/PageHeader";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
+import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
+import { api_getCase } from "@/data/case.functions";
+import { api_getCustomer } from "@/data/customer.functions";
+import { api_getBank } from "@/data/bank.functions";
+import { api_getBranch } from "@/data/branch.functions";
+import { getSiteEngineer } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
-  head: () => pageMeta("Case Detail", "Case information, documents and history."),
+  head: () => pageMeta("Case Detail", "Case information, customer, assignment and history."),
   beforeLoad: requirePermission("cases.detail"),
   component: Page,
 });
 
+/** A single labelled field with an optional leading icon. */
+function Field({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value?: string | undefined;
+  icon?: ReactNode;
+}) {
+  return (
+    <div className="space-y-1">
+      <Label className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </Label>
+      <p className="text-sm font-medium break-words">
+        {value ? value : <span className="text-muted-foreground">—</span>}
+      </p>
+    </div>
+  );
+}
+
+/** One item in the top overview strip. */
+function OverviewItem({ label, value }: { label: string; value: ReactNode }) {
+  return (
+    <div className="min-w-0 space-y-1">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <div className="truncate text-sm font-semibold">{value}</div>
+    </div>
+  );
+}
+
+function DetailSkeleton() {
+  return (
+    <div className="space-y-6">
+      <div className="space-y-3">
+        <Skeleton className="h-4 w-40" />
+        <Skeleton className="h-8 w-64" />
+      </div>
+      <Skeleton className="h-24 w-full" />
+      <div className="grid gap-6 md:grid-cols-2">
+        <Skeleton className="h-56 w-full" />
+        <Skeleton className="h-56 w-full" />
+      </div>
+    </div>
+  );
+}
+
 function Page() {
   const { caseId } = Route.useParams();
+
+  const {
+    data: valuationCase,
+    isLoading,
+    isError,
+    error,
+  } = useQuery({
+    queryKey: ["cases", caseId],
+    queryFn: () => api_getCase(caseId),
+    enabled: !!caseId,
+  });
+
+  const { data: customer } = useQuery({
+    queryKey: ["customers", valuationCase?.customerId],
+    queryFn: () => api_getCustomer(valuationCase!.customerId),
+    enabled: !!valuationCase?.customerId,
+  });
+  const { data: bank } = useQuery({
+    queryKey: ["banks", valuationCase?.bankId],
+    queryFn: () => api_getBank(valuationCase!.bankId),
+    enabled: !!valuationCase?.bankId,
+  });
+  const { data: branch } = useQuery({
+    queryKey: ["branches", valuationCase?.branchId],
+    queryFn: () => api_getBranch(valuationCase!.branchId),
+    enabled: !!valuationCase?.branchId,
+  });
+  const { data: engineer } = useQuery({
+    queryKey: ["site-engineers", valuationCase?.assignedEngineerId],
+    queryFn: () => getSiteEngineer(valuationCase!.assignedEngineerId),
+    enabled: !!valuationCase?.assignedEngineerId,
+  });
+
+  if (isLoading) {
+    return <DetailSkeleton />;
+  }
+
+  if (isError || !valuationCase) {
+    const errorMessage = isError ? (error as Error).message : "Case not found";
+    return (
+      <div className="space-y-6">
+        <PageHeader
+          title="Case"
+          description={errorMessage}
+          crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: "Not Found" }]}
+        />
+        <Button asChild>
+          <Link to="/cases">
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Back to Cases
+          </Link>
+        </Button>
+      </div>
+    );
+  }
+
+  // Fall back to the stored id if a related record was removed, so nothing reads blank.
+  const customerName = customer?.name ?? valuationCase.customerId;
+  const bankName = bank?.name ?? valuationCase.bankId;
+  const branchName = branch?.name ?? valuationCase.branchId;
+  const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
+
   return (
-    <PlaceholderPage
-      title="Case Detail"
-      description="Case information, documents and history."
-      icon={FileText}
-      message="Case details will appear here."
-      crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: caseId }]}
-    />
+    <div className="space-y-6">
+      <PageHeader
+        title={valuationCase.caseNumber}
+        description={`Request ${valuationCase.requestNumber}`}
+        crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: valuationCase.caseNumber }]}
+        actions={
+          <>
+            <Badge variant={stageBadgeVariant[valuationCase.stage]} className="text-sm">
+              {stageLabels[valuationCase.stage]}
+            </Badge>
+            <Button asChild variant="outline">
+              <Link to="/cases">
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Cases
+              </Link>
+            </Button>
+          </>
+        }
+      />
+
+      {/* Overview strip — the essentials at a glance */}
+      <Card>
+        <CardContent className="grid grid-cols-2 gap-4 py-5 sm:grid-cols-3 lg:grid-cols-5">
+          <OverviewItem label="Case Number" value={valuationCase.caseNumber} />
+          <OverviewItem label="Request Number" value={valuationCase.requestNumber} />
+          <OverviewItem label="Customer" value={customerName} />
+          <OverviewItem
+            label="Stage"
+            value={
+              <Badge variant={stageBadgeVariant[valuationCase.stage]}>
+                {stageLabels[valuationCase.stage]}
+              </Badge>
+            }
+          />
+          <OverviewItem
+            label="Created"
+            value={new Date(valuationCase.createdAt).toLocaleDateString()}
+          />
+        </CardContent>
+      </Card>
+
+      <div className="grid gap-6 md:grid-cols-2">
+        {/* Case Information */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <FileText className="h-4 w-4" />
+              Case Information
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Case Number" value={valuationCase.caseNumber} />
+            <Field label="Request Number" value={valuationCase.requestNumber} />
+            <Field label="Stage" value={stageLabels[valuationCase.stage]} />
+            <Field label="Case ID" value={valuationCase.id} />
+          </CardContent>
+        </Card>
+
+        {/* Assignment */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserCog className="h-4 w-4" />
+              Assignment
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field label="Bank" value={bankName} icon={<Landmark className="h-3.5 w-3.5" />} />
+            <Field label="Branch" value={branchName} icon={<GitBranch className="h-3.5 w-3.5" />} />
+            <Field
+              label="Assigned Site Engineer"
+              value={engineerName}
+              icon={<UserCog className="h-3.5 w-3.5" />}
+            />
+            {engineer?.email && (
+              <Field
+                label="Engineer Email"
+                value={engineer.email}
+                icon={<Mail className="h-3.5 w-3.5" />}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Customer & Property */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <UserIcon className="h-4 w-4" />
+              Customer &amp; Property
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+              <Field
+                label="Customer Name"
+                value={customer?.name}
+                icon={<UserIcon className="h-3.5 w-3.5" />}
+              />
+              <Field
+                label="Contact"
+                value={customer?.contact}
+                icon={<Phone className="h-3.5 w-3.5" />}
+              />
+              <Field
+                label="Email"
+                value={customer?.email}
+                icon={<Mail className="h-3.5 w-3.5" />}
+              />
+            </div>
+            <Separator />
+            <Field
+              label="Property Address"
+              value={customer?.address}
+              icon={<MapPin className="h-3.5 w-3.5" />}
+            />
+          </CardContent>
+        </Card>
+
+        {/* Timestamps */}
+        <Card className="md:col-span-2">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <CalendarClock className="h-4 w-4" />
+              Timestamps
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <Field
+              label="Created"
+              value={new Date(valuationCase.createdAt).toLocaleString()}
+              icon={<CalendarClock className="h-3.5 w-3.5" />}
+            />
+            <Field
+              label="Last Updated"
+              value={new Date(valuationCase.updatedAt).toLocaleString()}
+              icon={<CalendarClock className="h-3.5 w-3.5" />}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

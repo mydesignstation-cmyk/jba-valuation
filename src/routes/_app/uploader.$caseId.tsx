@@ -18,7 +18,11 @@ function Page() {
       description="Perform the final upload for this case."
       icon={UploadCloud}
       message="The Uploader screen will appear here."
-      crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } }, { label: "Uploader" }]}
+      crumbs={[
+        { label: "Cases", link: { to: "/cases" } },
+        { label: caseId, link: { to: "/cases/$caseId", params: { caseId: caseId } } },
+        { label: "Uploader" },
+      ]}
     />
   );
 }

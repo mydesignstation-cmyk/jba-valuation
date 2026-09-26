@@ -1,14 +1,25 @@
 import { Link, useRouterState } from "@tanstack/react-router";
 import { Building2, X } from "lucide-react";
 import {
-  Sidebar, SidebarContent, SidebarFooter, SidebarGroup, SidebarGroupContent, SidebarGroupLabel,
-  SidebarHeader, SidebarMenu, SidebarMenuBadge, SidebarMenuButton, SidebarMenuItem, SidebarRail, useSidebar,
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuBadge,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { navigation } from "@/config/navigation";
 import { can } from "@/lib/permissions";
-import { initials, mockNotificationCount, roleLabels, useCurrentUser } from "@/lib/mock-auth";
+import { initials, notificationCount, roleLabels, useCurrentUser } from "@/lib/auth-client";
 
 export function AppSidebar() {
   const user = useCurrentUser();
@@ -32,7 +43,12 @@ export function AppSidebar() {
             <p className="truncate text-xs text-muted-foreground">Valuation Operations</p>
           </div>
           {isMobile && (
-            <Button variant="ghost" size="icon" aria-label="Close menu" onClick={() => setOpenMobile(false)}>
+            <Button
+              variant="ghost"
+              size="icon"
+              aria-label="Close menu"
+              onClick={() => setOpenMobile(false)}
+            >
               <X className="h-5 w-5" />
             </Button>
           )}
@@ -41,7 +57,6 @@ export function AppSidebar() {
       <SidebarContent>
         {groups.map((group) => (
           <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
                 {group.items.map((item) => (
@@ -57,9 +72,9 @@ export function AppSidebar() {
                         <span>{item.title}</span>
                       </Link>
                     </SidebarMenuButton>
-                    {item.badge === "notifications" && mockNotificationCount > 0 && (
+                    {item.badge === "notifications" && notificationCount > 0 && (
                       <SidebarMenuBadge className="rounded-full bg-primary text-primary-foreground">
-                        {mockNotificationCount}
+                        {notificationCount}
                       </SidebarMenuBadge>
                     )}
                   </SidebarMenuItem>
@@ -73,7 +88,9 @@ export function AppSidebar() {
         <SidebarFooter className="border-t border-sidebar-border">
           <div className="flex items-center gap-2 px-1 py-1">
             <Avatar className="h-8 w-8 shrink-0">
-              <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">{initials(user.name)}</AvatarFallback>
+              <AvatarFallback className="bg-primary/10 text-xs font-medium text-primary">
+                {initials(user.name)}
+              </AvatarFallback>
             </Avatar>
             <div className="min-w-0 group-data-[collapsible=icon]:hidden">
               <p className="truncate text-sm font-medium">{user.name}</p>
