@@ -31,6 +31,8 @@ import { useState } from "react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { SearchInput } from "@/components/app/SearchInput";
 import { requirePermission } from "@/lib/route-guard";
+import { can } from "@/lib/permissions";
+import { useCurrentUser } from "@/lib/auth-client";
 import { pageMeta } from "@/lib/page-meta";
 import type { Bank } from "@/types";
 
@@ -45,6 +47,8 @@ type SortDirection = "asc" | "desc";
 
 function Page() {
   const queryClient = useQueryClient();
+  const user = useCurrentUser();
+  const canDelete = can(user?.role, "banks.delete");
   const [search, setSearch] = useState("");
   const [sortField, setSortField] = useState<SortField>("createdAt");
   const [sortDirection, setSortDirection] = useState<SortDirection>("desc");
@@ -96,6 +100,10 @@ function Page() {
 
   const handleDelete = async () => {
     if (!bankToDelete) return;
+    if (!canDelete) {
+      toast.error("You do not have permission to delete banks");
+      return;
+    }
     try {
       const result = await api_deleteBank(bankToDelete.id);
       if (result) {
@@ -219,16 +227,18 @@ function Page() {
                               <PenLine className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setBankToDelete(bank);
-                                setDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
+                            {canDelete && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setBankToDelete(bank);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

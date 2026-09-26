@@ -36,9 +36,10 @@ import { FormModal } from "@/components/app/FormModal";
 import { ConfirmDialog } from "@/components/app/ConfirmDialog";
 import { CaseForm, type CaseFormValues } from "@/components/case/CaseForm";
 import { requirePermission } from "@/lib/route-guard";
+import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels } from "@/lib/case-format";
-import { getCurrentUser } from "@/lib/auth-client";
+import { getCurrentUser, useCurrentUser } from "@/lib/auth-client";
 import type { ValuationCase } from "@/types";
 
 export const Route = createFileRoute("/_app/cases/")({
@@ -49,6 +50,8 @@ export const Route = createFileRoute("/_app/cases/")({
 
 function Page() {
   const queryClient = useQueryClient();
+  const user = useCurrentUser();
+  const canDelete = can(user?.role, "cases.delete");
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingCase, setEditingCase] = useState<ValuationCase | null>(null);
@@ -124,6 +127,10 @@ function Page() {
 
   const handleDelete = async () => {
     if (!caseToDelete) return;
+    if (!canDelete) {
+      toast.error("You do not have permission to delete cases");
+      return;
+    }
     try {
       const result = await api_deleteCase(caseToDelete.id);
       if (result) {
@@ -258,16 +265,18 @@ function Page() {
                               <PenLine className="mr-2 h-4 w-4" />
                               Edit
                             </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={() => {
-                                setCaseToDelete(c);
-                                setDeleteDialogOpen(true);
-                              }}
-                              className="text-destructive focus:text-destructive"
-                            >
-                              <Trash2 className="mr-2 h-4 w-4" />
-                              Delete
-                            </DropdownMenuItem>
+                            {canDelete && (
+                              <DropdownMenuItem
+                                onClick={() => {
+                                  setCaseToDelete(c);
+                                  setDeleteDialogOpen(true);
+                                }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <Trash2 className="mr-2 h-4 w-4" />
+                                Delete
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </TableCell>

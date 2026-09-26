@@ -8,6 +8,7 @@ import { getDb } from "@/db";
 import { customers, banks, branches, cases } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import type { Customer, Bank, Branch, ValuationCase, User } from "@/types";
+import { requireServerUser } from "@/server/auth.server";
 
 // ============================================================================
 // USERS (Neon Auth)
@@ -238,6 +239,7 @@ export async function api_updateCustomer(
 }
 
 export async function api_deleteCustomer(id: string): Promise<boolean> {
+  await requireServerUser("SUPER_ADMIN");
   try {
     await getDb().delete(customers).where(eq(customers.id, id));
     return true;
@@ -355,6 +357,7 @@ export async function api_updateBank(id: string, name: string): Promise<Bank | u
 }
 
 export async function api_deleteBank(id: string): Promise<boolean> {
+  await requireServerUser("SUPER_ADMIN");
   try {
     await getDb().delete(banks).where(eq(banks.id, id));
     return true;
@@ -472,6 +475,7 @@ export async function api_updateBranch(id: string, name: string): Promise<Branch
 }
 
 export async function api_deleteBranch(id: string): Promise<boolean> {
+  await requireServerUser("SUPER_ADMIN");
   try {
     await getDb().delete(branches).where(eq(branches.id, id));
     return true;
@@ -669,6 +673,7 @@ export async function api_updateCase(
 }
 
 export async function api_deleteCase(id: string): Promise<boolean> {
+  await requireServerUser("SUPER_ADMIN");
   try {
     await getDb().delete(cases).where(eq(cases.id, id));
     return true;
@@ -678,5 +683,44 @@ export async function api_deleteCase(id: string): Promise<boolean> {
       return false;
     }
     throw new Error("Failed to delete case from database");
+  }
+}
+
+/**
+ * List the cases assigned to the currently authenticated Site Engineer.
+ *
+ * The engineer's identity is resolved SERVER-SIDE from the session cookie
+ * (see requireServerUser), never from a client-supplied argument. This is the
+ * security boundary: a SITE_ENGINEER can only ever receive cases where
+ * assigned_engineer_id equals their own authenticated user id, and cannot pass
+ * another engineer's id to view someone else's cases. Only SITE_ENGINEER
+ * sessions are permitted here.
+ */
+export async function api_listMyCases(): Promise<ValuationCase[]> {
+  const user = await requireServerUser("SITE_ENGINEER");
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(cases)
+      .where(eq(cases.assigned_engineer_id, user.id))
+      .orderBy(cases.created_at);
+
+    return rows.map((row) => ({
+      id: row.id,
+      caseNumber: row.case_number,
+      requestNumber: row.request_number,
+      customerId: row.customer_id,
+      bankId: row.bank_id,
+      branchId: row.branch_id,
+      assignedEngineerId: row.assigned_engineer_id || "",
+      stage: row.stage as any,
+      createdById: row.created_by_id || "",
+      createdAt: row.created_at.toISOString(),
+      updatedAt: row.updated_at.toISOString(),
+    }));
+  } catch (error) {
+    console.error("Failed to list my cases:", error);
+    throw new Error("Failed to load your cases from database");
   }
 }
