@@ -1,0 +1,26 @@
+BACKUP MANIFEST
+===============
+
+Created:     2026-09-26 18:31
+Source:      dangling git stash commit 52ce3c0 ("WIP on main: 0808884")
+Reason:      This stash held the real, working in-progress UI + foundation that
+             was dropped when commit 0211a20 was assembled from a mismatched
+             snapshot (new components kept, old stub types/schema committed).
+             It was recovered into main (commit 5d67e97). This is a plain-file
+             copy of the key recovered files so the snapshot never lives only
+             inside a git dangling object again.
+
+Files in this backup (as they were in stash 52ce3c0):
+  src/routes/_app/banks.index.tsx      - real Bank CRUD page (data-driven)
+  src/routes/_app/branches.index.tsx   - real Branch CRUD page (data-driven)
+  src/routes/_app/cases.index.tsx      - real Cases list page (data-driven)
+  src/schemas/case.schema.ts           - full create/update case schema
+  src/types/index.ts                   - full domain types (Bank/Branch/Customer,
+                                         requestNumber/customerId/assignedEngineerId)
+  STASH_52ce3c0_filelist.txt           - full 45-file list from the stash
+
+Recovered into: commit 5d67e97 on main (pushed to origin).
+Checkpoint tag before recovery: checkpoint-before-restore-2da (-> 0211a20)
+
+To restore any file: copy it back to the listed path, then run
+`npx tsc --noEmit` and `npm run build` before committing.
