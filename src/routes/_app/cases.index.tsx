@@ -1,4 +1,4 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Plus, Search, MoreHorizontal, Eye, PenLine, Trash2 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -52,6 +52,7 @@ function Page() {
   const queryClient = useQueryClient();
   const user = useCurrentUser();
   const canDelete = can(user?.role, "cases.delete");
+  const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editingCase, setEditingCase] = useState<ValuationCase | null>(null);
@@ -233,7 +234,7 @@ function Page() {
                     <TableRow
                       key={c.id}
                       className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => openEdit(c)}
+                      onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
                     >
                       <TableCell className="font-medium">{c.caseNumber}</TableCell>
                       <TableCell>{c.requestNumber}</TableCell>

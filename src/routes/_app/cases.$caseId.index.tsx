@@ -2,8 +2,12 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   CalendarClock,
+  CheckCircle2,
+  ClipboardCheck,
+  ClipboardList,
   FileText,
   GitBranch,
+  History,
   Landmark,
   Mail,
   MapPin,
@@ -11,7 +15,7 @@ import {
   User as UserIcon,
   UserCog,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import type { ComponentType, ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
@@ -19,7 +23,9 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app/PageHeader";
+import { CasePipeline } from "@/components/case/CasePipeline";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
@@ -64,6 +70,36 @@ function OverviewItem({ label, value }: { label: string; value: ReactNode }) {
     <div className="min-w-0 space-y-1">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
       <div className="truncate text-sm font-semibold">{value}</div>
+    </div>
+  );
+}
+
+/**
+ * Consistent empty state for workflow artifacts that don't have backing data
+ * yet (maker/checker notes, field-visit form, history). Keeps unbuilt areas
+ * looking intentional rather than broken.
+ */
+function EmptyState({
+  icon: Icon,
+  title,
+  message,
+  action,
+}: {
+  icon: ComponentType<{ className?: string }>;
+  title: string;
+  message: string;
+  action?: ReactNode;
+}) {
+  return (
+    <div className="flex flex-col items-center justify-center gap-3 rounded-lg border border-dashed px-4 py-12 text-center">
+      <div className="grid h-11 w-11 place-items-center rounded-full bg-muted text-muted-foreground">
+        <Icon className="h-5 w-5" />
+      </div>
+      <div className="space-y-1">
+        <p className="text-sm font-medium">{title}</p>
+        <p className="mx-auto max-w-sm text-sm text-muted-foreground">{message}</p>
+      </div>
+      {action}
     </div>
   );
 }
@@ -190,6 +226,9 @@ function Page() {
         </CardContent>
       </Card>
 
+      {/* Pipeline tracker — where the case sits in the workflow at a glance */}
+      <CasePipeline stage={valuationCase.stage} />
+
       <div className="grid gap-6 md:grid-cols-2">
         {/* Case Information */}
         <Card>
@@ -290,6 +329,70 @@ function Page() {
           </CardContent>
         </Card>
       </div>
+
+      {/* Workflow artifacts — field visit, notes and activity.
+          Read-only for now; each tab has a clean slot for data landing later. */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <ClipboardList className="h-4 w-4" />
+            Workflow
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="field-visit">
+            <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-cols-4">
+              <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
+              <TabsTrigger value="maker">Maker Notes</TabsTrigger>
+              <TabsTrigger value="checker">Checker Notes</TabsTrigger>
+              <TabsTrigger value="history">History</TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="field-visit" className="mt-4">
+              <EmptyState
+                icon={MapPin}
+                title="No field visit submitted yet"
+                message="Once the site engineer submits the field visit, the inspection details and report PDF will appear here."
+                action={
+                  <Button asChild variant="outline" size="sm">
+                    <Link
+                      to="/cases/$caseId/field-visit"
+                      params={{ caseId: valuationCase.id }}
+                    >
+                      <MapPin className="mr-2 h-4 w-4" />
+                      Open field visit
+                    </Link>
+                  </Button>
+                }
+              />
+            </TabsContent>
+
+            <TabsContent value="maker" className="mt-4">
+              <EmptyState
+                icon={ClipboardCheck}
+                title="No maker notes yet"
+                message="Notes recorded by the maker while preparing the valuation will show here."
+              />
+            </TabsContent>
+
+            <TabsContent value="checker" className="mt-4">
+              <EmptyState
+                icon={CheckCircle2}
+                title="No checker notes yet"
+                message="Review notes and approvals from the checker will show here."
+              />
+            </TabsContent>
+
+            <TabsContent value="history" className="mt-4">
+              <EmptyState
+                icon={History}
+                title="No activity recorded yet"
+                message="A timeline of stage changes and actions on this case will appear here."
+              />
+            </TabsContent>
+          </Tabs>
+        </CardContent>
+      </Card>
     </div>
   );
 }
