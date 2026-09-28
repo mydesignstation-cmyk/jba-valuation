@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "@tanstack/react-router";
-import { Bell, ChevronDown, LogOut, UserCircle } from "lucide-react";
+import { ChevronDown, LogOut, UserCircle } from "lucide-react";
 import { SidebarTrigger } from "@/components/ui/sidebar";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -11,14 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import {
-  initials,
-  notificationCount,
-  roleLabels,
-  signOut,
-  useCurrentUser,
-} from "@/lib/auth-client";
+import { initials, roleLabels, signOut, useCurrentUser } from "@/lib/auth-client";
 
 export function AppTopbar() {
   const user = useCurrentUser();
@@ -35,27 +28,8 @@ export function AppTopbar() {
       <SidebarTrigger className="h-10 w-10 md:h-8 md:w-8" />
       <div className="min-w-0 flex-1" />
 
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <Button
-            asChild
-            variant="ghost"
-            size="icon"
-            className="relative h-10 w-10"
-            aria-label="Notifications"
-          >
-            <Link to="/notifications">
-              <Bell className="h-5 w-5" />
-              {notificationCount > 0 && (
-                <span className="absolute right-1.5 top-1.5 grid h-4 min-w-4 place-items-center rounded-full bg-destructive px-1 text-[10px] font-semibold text-destructive-foreground">
-                  {notificationCount}
-                </span>
-              )}
-            </Link>
-          </Button>
-        </TooltipTrigger>
-        <TooltipContent>Notifications</TooltipContent>
-      </Tooltip>
+      {/* Notification bell hidden in the header per product decision. The
+          notifications route still exists and remains reachable directly. */}
 
       <DropdownMenu>
         <DropdownMenuTrigger asChild>

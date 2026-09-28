@@ -81,9 +81,13 @@ export function getCaseMilestones(stage: CaseStage): CaseMilestone[] {
   const position = STAGE_POSITION[stage];
   return MILESTONE_DEFS.map((def, index) => {
     let status: MilestoneStatus;
-    if (position >= index + 1 || (def.key === "COMPLETED" && stage === "COMPLETED")) {
+    // A milestone is done once its own work is finished. Whole-number
+    // positions mean that milestone's work is pending/in progress (current);
+    // half-step positions (…_SUBMITTED / …_COMPLETED) mean it is done and the
+    // case is waiting to hand off to the next milestone.
+    if (position >= index + 0.5 || (def.key === "COMPLETED" && stage === "COMPLETED")) {
       status = "done";
-    } else if (position >= index) {
+    } else if (position >= index - 0.5) {
       status = "current";
     } else {
       status = "upcoming";

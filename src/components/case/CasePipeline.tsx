@@ -29,14 +29,20 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   <span
                     className={cn(
                       "h-0.5 flex-1",
-                      index === 0 ? "opacity-0" : done || current ? "bg-primary" : "bg-border",
+                      index === 0
+                        ? "opacity-0"
+                        : done
+                          ? "bg-green-600"
+                          : current
+                            ? "bg-primary"
+                            : "bg-border",
                     )}
                     aria-hidden
                   />
                   <span
                     className={cn(
                       "grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 text-sm font-semibold transition-colors",
-                      done && "border-primary bg-primary text-primary-foreground",
+                      done && "border-green-600 bg-green-600 text-white",
                       current && "border-primary bg-primary/10 text-primary ring-4 ring-primary/15",
                       !done && !current && "border-border bg-muted text-muted-foreground",
                     )}
@@ -47,7 +53,7 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   <span
                     className={cn(
                       "h-0.5 flex-1",
-                      isLast ? "opacity-0" : done ? "bg-primary" : "bg-border",
+                      isLast ? "opacity-0" : done ? "bg-green-600" : "bg-border",
                     )}
                     aria-hidden
                   />
@@ -56,7 +62,11 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      current ? "text-primary" : done ? "text-foreground" : "text-muted-foreground",
+                      current
+                        ? "text-primary"
+                        : done
+                          ? "text-green-700"
+                          : "text-muted-foreground",
                     )}
                   >
                     {m.label}
@@ -80,7 +90,7 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   <span
                     className={cn(
                       "grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 text-sm font-semibold transition-colors",
-                      done && "border-primary bg-primary text-primary-foreground",
+                      done && "border-green-600 bg-green-600 text-white",
                       current && "border-primary bg-primary/10 text-primary ring-4 ring-primary/15",
                       !done && !current && "border-border bg-muted text-muted-foreground",
                     )}
@@ -89,7 +99,7 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   </span>
                   {!isLast && (
                     <span
-                      className={cn("my-1 w-0.5 flex-1", done ? "bg-primary" : "bg-border")}
+                      className={cn("my-1 w-0.5 flex-1", done ? "bg-green-600" : "bg-border")}
                       aria-hidden
                     />
                   )}
@@ -98,7 +108,11 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      current ? "text-primary" : done ? "text-foreground" : "text-muted-foreground",
+                      current
+                        ? "text-primary"
+                        : done
+                          ? "text-green-700"
+                          : "text-muted-foreground",
                     )}
                   >
                     {m.label}
