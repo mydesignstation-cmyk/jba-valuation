@@ -20,9 +20,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { SearchInput } from "@/components/app/SearchInput";
+import { CaseListCard } from "@/components/app/CaseListCard";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, isEngineerCasePending } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, isEngineerCasePending } from "@/lib/case-format";
 import type { ValuationCase } from "@/types";
 
 export const Route = createFileRoute("/_app/my-cases")({
@@ -113,40 +114,60 @@ function Page() {
       );
     }
     return (
-      <div className="rounded-md border">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Case Number</TableHead>
-              <TableHead>Request Number</TableHead>
-              <TableHead>Customer</TableHead>
-              <TableHead>Bank</TableHead>
-              <TableHead>Branch</TableHead>
-              <TableHead>Stage</TableHead>
-              <TableHead>Created</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {rows.map((c) => (
-              <TableRow
-                key={c.id}
-                className="cursor-pointer hover:bg-muted/50"
-                onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
-              >
-                <TableCell className="font-medium">{c.caseNumber}</TableCell>
-                <TableCell>{c.requestNumber}</TableCell>
-                <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
-                <TableCell>
-                  <Badge variant="secondary">{stageLabels[c.stage]}</Badge>
-                </TableCell>
-                <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+      <>
+        {/* Mobile: compact card list */}
+        <div className="flex flex-col gap-2 md:hidden">
+          {rows.map((c) => (
+            <CaseListCard
+              key={c.id}
+              caseNumber={c.caseNumber}
+              requestNumber={c.requestNumber}
+              customerName={customerName.get(c.customerId) ?? "—"}
+              bankName={bankName.get(c.bankId) ?? "—"}
+              branchName={branchName.get(c.branchId) ?? "—"}
+              stage={c.stage}
+              createdAt={c.createdAt}
+              onOpen={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
+            />
+          ))}
+        </div>
+
+        {/* Desktop: full table */}
+        <div className="hidden rounded-md border md:block">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Case Number</TableHead>
+                <TableHead>Request Number</TableHead>
+                <TableHead>Customer</TableHead>
+                <TableHead>Bank</TableHead>
+                <TableHead>Branch</TableHead>
+                <TableHead>Stage</TableHead>
+                <TableHead>Created</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
+            </TableHeader>
+            <TableBody>
+              {rows.map((c) => (
+                <TableRow
+                  key={c.id}
+                  className="cursor-pointer hover:bg-muted/50"
+                  onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
+                >
+                  <TableCell className="font-medium">{c.caseNumber}</TableCell>
+                  <TableCell>{c.requestNumber}</TableCell>
+                  <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
+                  <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
+                  <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
+                  <TableCell>
+                    <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                  </TableCell>
+                  <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </>
     );
   }
 

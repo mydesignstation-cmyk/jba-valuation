@@ -35,10 +35,11 @@ import { SearchInput } from "@/components/app/SearchInput";
 import { FormModal } from "@/components/app/FormModal";
 import { ConfirmDialog } from "@/components/app/ConfirmDialog";
 import { CaseForm, type CaseFormValues } from "@/components/case/CaseForm";
+import { CaseListCard } from "@/components/app/CaseListCard";
 import { requirePermission } from "@/lib/route-guard";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
 import { getCurrentUser, useCurrentUser } from "@/lib/auth-client";
 import type { ValuationCase } from "@/types";
 
@@ -147,6 +148,46 @@ function Page() {
     }
   };
 
+  // Shared row-actions dropdown, used by both the desktop table and the
+  // mobile card list so View / Edit / Delete stay consistent everywhere.
+  const renderActions = (c: ValuationCase) => (
+    <div onClick={(e) => e.stopPropagation()}>
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="ghost" className="h-8 w-8 p-0">
+            <span className="sr-only">Open menu</span>
+            <MoreHorizontal className="h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            {/* @ts-expect-error - route path type inference issue with template literals */}
+            <Link to={`/cases/${c.id}`} className="block w-full">
+              <Eye className="mr-2 h-4 w-4" />
+              View
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => openEdit(c)}>
+            <PenLine className="mr-2 h-4 w-4" />
+            Edit
+          </DropdownMenuItem>
+          {canDelete && (
+            <DropdownMenuItem
+              onClick={() => {
+                setCaseToDelete(c);
+                setDeleteDialogOpen(true);
+              }}
+              className="text-destructive focus:text-destructive"
+            >
+              <Trash2 className="mr-2 h-4 w-4" />
+              Delete
+            </DropdownMenuItem>
+          )}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
+
   const filteredCases = useMemo(() => {
     const term = search.toLowerCase();
     return cases
@@ -214,78 +255,66 @@ function Page() {
               )}
             </div>
           ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Case Number</TableHead>
-                    <TableHead>Request Number</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Bank</TableHead>
-                    <TableHead>Branch</TableHead>
-                    <TableHead>Site Engineer</TableHead>
-                    <TableHead>Stage</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right w-[80px]">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCases.map((c) => (
-                    <TableRow
-                      key={c.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
-                    >
-                      <TableCell className="font-medium">{c.caseNumber}</TableCell>
-                      <TableCell>{c.requestNumber}</TableCell>
-                      <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                      <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                      <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
-                      <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{stageLabels[c.stage]}</Badge>
-                      </TableCell>
-                      <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
-                      <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" className="h-8 w-8 p-0">
-                              <span className="sr-only">Open menu</span>
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem asChild>
-                              {/* @ts-expect-error - route path type inference issue with template literals */}
-                              <Link to={`/cases/${c.id}`} className="block w-full">
-                                <Eye className="mr-2 h-4 w-4" />
-                                View
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => openEdit(c)}>
-                              <PenLine className="mr-2 h-4 w-4" />
-                              Edit
-                            </DropdownMenuItem>
-                            {canDelete && (
-                              <DropdownMenuItem
-                                onClick={() => {
-                                  setCaseToDelete(c);
-                                  setDeleteDialogOpen(true);
-                                }}
-                                className="text-destructive focus:text-destructive"
-                              >
-                                <Trash2 className="mr-2 h-4 w-4" />
-                                Delete
-                              </DropdownMenuItem>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </TableCell>
+            <>
+              {/* Mobile: compact card list */}
+              <div className="flex flex-col gap-2 md:hidden">
+                {filteredCases.map((c) => (
+                  <CaseListCard
+                    key={c.id}
+                    caseNumber={c.caseNumber}
+                    requestNumber={c.requestNumber}
+                    customerName={customerName.get(c.customerId) ?? "—"}
+                    bankName={bankName.get(c.bankId) ?? "—"}
+                    branchName={branchName.get(c.branchId) ?? "—"}
+                    engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
+                    stage={c.stage}
+                    createdAt={c.createdAt}
+                    onOpen={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
+                    actions={renderActions(c)}
+                  />
+                ))}
+              </div>
+
+              {/* Desktop: full table */}
+              <div className="hidden rounded-md border md:block">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Case Number</TableHead>
+                      <TableHead>Request Number</TableHead>
+                      <TableHead>Customer</TableHead>
+                      <TableHead>Bank</TableHead>
+                      <TableHead>Branch</TableHead>
+                      <TableHead>Site Engineer</TableHead>
+                      <TableHead>Stage</TableHead>
+                      <TableHead>Created</TableHead>
+                      <TableHead className="text-right w-[80px]">Actions</TableHead>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredCases.map((c) => (
+                      <TableRow
+                        key={c.id}
+                        className="cursor-pointer hover:bg-muted/50"
+                        onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
+                      >
+                        <TableCell className="font-medium">{c.caseNumber}</TableCell>
+                        <TableCell>{c.requestNumber}</TableCell>
+                        <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
+                        <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
+                        <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
+                        <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
+                        <TableCell>
+                          <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                        </TableCell>
+                        <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell className="text-right">{renderActions(c)}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </div>
+            </>
           )}
         </CardContent>
       </Card>
