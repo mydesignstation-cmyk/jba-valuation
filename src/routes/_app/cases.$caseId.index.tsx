@@ -11,6 +11,7 @@ import {
   Landmark,
   Mail,
   MapPin,
+  PenLine,
   Phone,
   User as UserIcon,
   UserCheck,
@@ -33,7 +34,7 @@ import { requirePermission } from "@/lib/route-guard";
 import { getSessionToken, useCurrentUser, roleLabels } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, isMakerCasePending } from "@/lib/case-format";
 import { api_getCase, api_assignMaker } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
@@ -401,6 +402,33 @@ function Page() {
         </Card>
       )}
 
+      {/* Primary CTA for the assigned Maker: open the review screen where the
+          submitted field visit can be edited. Only shown once a visit exists
+          and while the case is still with the Maker (MAKER_ASSIGNED/PENDING). */}
+      {isMaker && fieldVisit && isMakerCasePending(valuationCase.stage) && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-primary/15 p-2">
+                <PenLine className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold">Field Visit ready for review</p>
+                <p className="text-sm text-muted-foreground">
+                  Review and, if needed, correct the submitted inspection details.
+                </p>
+              </div>
+            </div>
+            <Button asChild className="w-full sm:w-auto">
+              <Link to="/maker/$caseId" params={{ caseId: valuationCase.id }}>
+                <PenLine className="mr-2 h-4 w-4" />
+                Open Maker Review
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Two tabs for every role: the full case detail (Case Overview) and the
           submitted inspection (Field Visit). Tabs are inline-width, not
           stretched across the page. */}
@@ -583,6 +611,7 @@ function Page() {
                 <SubmittedFieldVisit
                   visit={fieldVisit}
                   engineerName={engineerName}
+                  updatedByName={makerName}
                   autoFill={{
                     caseNumber: valuationCase.caseNumber,
                     requestNumber: valuationCase.requestNumber,

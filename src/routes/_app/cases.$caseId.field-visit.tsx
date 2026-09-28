@@ -61,7 +61,11 @@ import {
   structureTypeOptions,
   approachRoadOptions,
 } from "@/schemas/fieldVisit.schema";
-import { api_getMyFieldVisit, api_submitFieldVisit } from "@/data/fieldVisit.functions";
+import {
+  api_getMyFieldVisit,
+  api_submitFieldVisit,
+  api_updateFieldVisit,
+} from "@/data/fieldVisit.functions";
 import { api_getCase } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
@@ -78,7 +82,7 @@ export const Route = createFileRoute("/_app/cases/$caseId/field-visit")({
 // Case-derived, auto-filled data
 // ---------------------------------------------------------------------------
 
-interface AutoFill {
+export interface AutoFill {
   caseNumber: string;
   requestNumber: string;
   bankName: string;
@@ -87,7 +91,7 @@ interface AutoFill {
 }
 
 /** Load the read-only, case-derived values shown across the wizard. */
-function useAutoFill(caseId: string) {
+export function useAutoFill(caseId: string) {
   const { data: valuationCase } = useQuery({
     queryKey: ["cases", caseId],
     queryFn: () => api_getCase(caseId),
@@ -423,84 +427,154 @@ function GpsPanel({
 // The wizard
 // ---------------------------------------------------------------------------
 
-function FieldVisitWizard({
+/**
+ * Seed the wizard form from an existing (submitted) Field Visit for edit mode.
+ * Maps the domain FieldVisit back onto the string-based form shape the schema
+ * expects. GPS is carried through unchanged (the Maker cannot edit it, but the
+ * schema still requires the values to be present and valid).
+ */
+function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
+  const num = (v: number | undefined) => (v != null ? String(v) : "");
+  return {
+    personMet: visit.personMet ?? "",
+    personPhone: visit.personPhone ?? "",
+    relationship: visit.relationship,
+    gpsLatitude: visit.gpsLatitude != null ? Number(visit.gpsLatitude) : undefined,
+    gpsLongitude: visit.gpsLongitude != null ? Number(visit.gpsLongitude) : undefined,
+    landmark: visit.landmark ?? "",
+    propertyType: visit.propertyType,
+    localityType: visit.localityType,
+    occupancyStatus: visit.occupancyStatus,
+    structureType: visit.structureType,
+    occupancyLevel: visit.occupancyLevel ?? "",
+    floorsInBuilding: num(visit.floorsInBuilding),
+    locatedOnFloor: visit.locatedOnFloor ?? "",
+    flatsOnFloor: num(visit.flatsOnFloor),
+    wingsInBuilding: num(visit.wingsInBuilding),
+    liftsStaircases: num(visit.liftsStaircases),
+    yearOfConstruction: num(visit.yearOfConstruction),
+    constructionStage: visit.constructionStage ?? "",
+    workDescription: visit.workDescription ?? "",
+    boundaryEast: visit.boundaryEast ?? "",
+    boundaryWest: visit.boundaryWest ?? "",
+    boundaryNorth: visit.boundaryNorth ?? "",
+    boundarySouth: visit.boundarySouth ?? "",
+    approachRoadCondition: visit.approachRoadCondition,
+    areaSqFt: visit.areaSqFt ?? "",
+    ratePerSqFt: visit.ratePerSqFt ?? "",
+    negativePoints: visit.negativePoints ?? "",
+    agentOpinion: visit.agentOpinion ?? "",
+    finalRemarks: visit.finalRemarks ?? "",
+  } as unknown as FieldVisitFormValues;
+}
+
+const EMPTY_FORM_VALUES = {
+  personMet: "",
+  personPhone: "",
+  relationship: undefined,
+  gpsLatitude: undefined,
+  gpsLongitude: undefined,
+  landmark: "",
+  propertyType: undefined,
+  localityType: undefined,
+  occupancyStatus: undefined,
+  structureType: undefined,
+  occupancyLevel: "",
+  floorsInBuilding: "",
+  locatedOnFloor: "",
+  flatsOnFloor: "",
+  wingsInBuilding: "",
+  liftsStaircases: "",
+  yearOfConstruction: "",
+  constructionStage: "",
+  workDescription: "",
+  boundaryEast: "",
+  boundaryWest: "",
+  boundaryNorth: "",
+  boundarySouth: "",
+  approachRoadCondition: undefined,
+  areaSqFt: "",
+  ratePerSqFt: "",
+  negativePoints: "",
+  agentOpinion: "",
+  finalRemarks: "",
+} as unknown as FieldVisitFormValues;
+
+export function FieldVisitWizard({
   caseId,
   autoFill,
   engineerName,
   onSubmitted,
+  mode = "create",
+  initialVisit,
 }: {
   caseId: string;
   autoFill: AutoFill | null;
   engineerName: string;
   onSubmitted: (visit: FieldVisit) => void;
+  /** "create" = site engineer's first submission; "edit" = Maker correction. */
+  mode?: "create" | "edit";
+  /** The existing visit to seed the form with when mode === "edit". */
+  initialVisit?: FieldVisit | undefined;
 }) {
+  const isEdit = mode === "edit";
   const [stepIndex, setStepIndex] = useState(0);
-  const gps = useGeolocation({ autoCapture: true });
+  // In edit mode GPS is fixed (from the original on-site capture), so we never
+  // auto-request geolocation — we reuse the stored coordinates instead.
+  const gps = useGeolocation({ autoCapture: !isEdit });
 
   const form = useForm<FieldVisitFormValues>({
     resolver: zodResolver(fieldVisitFormSchema),
     mode: "onTouched",
-    defaultValues: {
-      personMet: "",
-      personPhone: "",
-      relationship: undefined,
-      gpsLatitude: undefined,
-      gpsLongitude: undefined,
-      landmark: "",
-      propertyType: undefined,
-      localityType: undefined,
-      occupancyStatus: undefined,
-      structureType: undefined,
-      occupancyLevel: "",
-      floorsInBuilding: "",
-      locatedOnFloor: "",
-      flatsOnFloor: "",
-      wingsInBuilding: "",
-      liftsStaircases: "",
-      yearOfConstruction: "",
-      constructionStage: "",
-      workDescription: "",
-      boundaryEast: "",
-      boundaryWest: "",
-      boundaryNorth: "",
-      boundarySouth: "",
-      approachRoadCondition: undefined,
-      areaSqFt: "",
-      ratePerSqFt: "",
-      negativePoints: "",
-      agentOpinion: "",
-      finalRemarks: "",
-    } as unknown as FieldVisitFormValues,
+    defaultValues:
+      isEdit && initialVisit ? visitToFormValues(initialVisit) : EMPTY_FORM_VALUES,
   });
 
-  // Keep the form's GPS values in sync with the latest capture.
-  const gpsLat = gps.coords?.latitude;
-  const gpsLng = gps.coords?.longitude;
-  if (gpsLat != null && form.getValues("gpsLatitude") !== gpsLat) {
-    form.setValue("gpsLatitude", gpsLat, { shouldValidate: true });
-  }
-  if (gpsLng != null && form.getValues("gpsLongitude") !== gpsLng) {
-    form.setValue("gpsLongitude", gpsLng, { shouldValidate: true });
+  // GPS handling differs by mode:
+  //  - create: track the live capture and mirror it into the form;
+  //  - edit: keep the fixed stored coordinates already seeded above.
+  const storedLat = initialVisit?.gpsLatitude != null ? Number(initialVisit.gpsLatitude) : undefined;
+  const storedLng =
+    initialVisit?.gpsLongitude != null ? Number(initialVisit.gpsLongitude) : undefined;
+  const gpsLat = isEdit ? storedLat : gps.coords?.latitude;
+  const gpsLng = isEdit ? storedLng : gps.coords?.longitude;
+  if (!isEdit) {
+    // Keep the form's GPS values in sync with the latest capture.
+    if (gpsLat != null && form.getValues("gpsLatitude") !== gpsLat) {
+      form.setValue("gpsLatitude", gpsLat, { shouldValidate: true });
+    }
+    if (gpsLng != null && form.getValues("gpsLongitude") !== gpsLng) {
+      form.setValue("gpsLongitude", gpsLng, { shouldValidate: true });
+    }
   }
 
   const submit = useMutation({
     mutationFn: async (values: FieldVisitFormValues) => {
       const token = await getSessionToken();
       if (!token) throw new Error("Not authenticated");
-      return api_submitFieldVisit(token, caseId, values);
+      return isEdit
+        ? api_updateFieldVisit(token, caseId, values)
+        : api_submitFieldVisit(token, caseId, values);
     },
     onSuccess: (visit) => {
-      toast.success("Field visit report submitted");
+      toast.success(isEdit ? "Field visit updated" : "Field visit report submitted");
       onSubmitted(visit);
     },
     onError: (error) => {
-      toast.error((error as Error).message || "Failed to submit field visit");
+      toast.error(
+        (error as Error).message ||
+          (isEdit ? "Failed to update field visit" : "Failed to submit field visit"),
+      );
     },
   });
 
   const isReview = stepIndex === STEPS.length - 1;
   const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100);
-  const gpsReady = gps.status === "granted" && gpsLat != null && gpsLng != null;
+  // In edit mode GPS is fixed and always considered ready (it was validated at
+  // submission and cannot be changed here). In create mode it must be live.
+  const gpsReady = isEdit
+    ? gpsLat != null && gpsLng != null
+    : gps.status === "granted" && gpsLat != null && gpsLng != null;
 
   const goNext = async () => {
     const fields = STEP_FIELDS[stepIndex] ?? [];
@@ -597,11 +671,29 @@ function FieldVisitWizard({
             {stepIndex === 0 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                  <ReadOnlyField label="Date of Visit" value={new Date().toLocaleDateString()} />
+                  <ReadOnlyField
+                    label="Date of Visit"
+                    value={
+                      isEdit
+                        ? (initialVisit?.visitDate ?? "—")
+                        : new Date().toLocaleDateString()
+                    }
+                  />
                   <ReadOnlyField label="Engineer Name" value={engineerName} />
                   <div />
                 </div>
-                <GpsPanel gps={gps} latitude={gpsLat} longitude={gpsLng} />
+                {isEdit ? (
+                  <ReadOnlyField
+                    label="GPS Location (captured on site — not editable)"
+                    value={
+                      gpsLat != null && gpsLng != null
+                        ? `${gpsLat}, ${gpsLng}`
+                        : "—"
+                    }
+                  />
+                ) : (
+                  <GpsPanel gps={gps} latitude={gpsLat} longitude={gpsLng} />
+                )}
                 <Separator />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <TextField
@@ -820,10 +912,10 @@ function FieldVisitWizard({
                   />
                   <span className="text-sm">
                     {gpsReady
-                      ? `GPS confirmed: ${gpsLat!.toFixed(6)}, ${gpsLng!.toFixed(6)}`
+                      ? `GPS ${isEdit ? "(on-site capture, not editable)" : "confirmed"}: ${gpsLat!.toFixed(6)}, ${gpsLng!.toFixed(6)}`
                       : "GPS is not captured. Return to Step 1 to capture it before submitting."}
                   </span>
-                  {!gpsReady && (
+                  {!gpsReady && !isEdit && (
                     <Button
                       type="button"
                       variant="outline"
@@ -921,7 +1013,13 @@ function FieldVisitWizard({
                   disabled={submit.isPending || !gpsReady}
                   className="w-full sm:w-auto"
                 >
-                  {submit.isPending ? "Submitting..." : "Submit Field Visit Report"}
+                  {submit.isPending
+                    ? isEdit
+                      ? "Saving..."
+                      : "Submitting..."
+                    : isEdit
+                      ? "Save Changes"
+                      : "Submit Field Visit Report"}
                 </Button>
               ) : (
                 <Button

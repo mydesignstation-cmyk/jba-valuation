@@ -180,6 +180,15 @@ export const fieldVisits = pgTable(
     final_remarks: text("final_remarks"),
 
     status: varchar("status", { length: 50 }).notNull().default("DRAFT"),
+
+    // Edit attribution: who last edited this visit and when. `engineer_id`
+    // (original submitter), `created_at`, and `submitted_at` remain the
+    // immutable original-creation record. `updated_by_id` is the Neon Auth
+    // UUID of the Maker/admin who last edited; nullable so rows that were only
+    // ever submitted (never edited) carry no updater. The timestamp is the
+    // existing `updated_at`, bumped on every write.
+    updated_by_id: uuid("updated_by_id"),
+
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
     submitted_at: timestamp("submitted_at", { withTimezone: true }),

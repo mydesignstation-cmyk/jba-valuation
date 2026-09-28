@@ -126,14 +126,32 @@ export function SubmittedFieldVisit({
   visit,
   autoFill,
   engineerName,
+  updatedByName,
+  headerAction,
 }: {
   visit: FieldVisit;
   autoFill: FieldVisitAutoFill | null;
-  engineerName?: string;
+  /** Name of the site engineer who originally submitted the visit. */
+  engineerName?: string | undefined;
+  /**
+   * Name of the Maker/admin who last edited the visit (for the audit line).
+   * When set — and the visit was actually edited after submission — a
+   * "Last updated by … on …" line is shown beneath the submission line.
+   */
+  updatedByName?: string | undefined;
+  /** Optional action rendered in the header (e.g. an "Edit" button). */
+  headerAction?: ReactNode | undefined;
 }) {
   const gpsText =
     visit.gpsLatitude && visit.gpsLongitude ? `${visit.gpsLatitude}, ${visit.gpsLongitude}` : "—";
   const submittedOn = visit.submittedAt ? new Date(visit.submittedAt).toLocaleString() : null;
+  // Show the edit-audit line only when the visit was genuinely edited after
+  // submission: an updater is recorded and the edit time differs from the
+  // submission time (submission also stamps updated_at).
+  const wasEdited =
+    !!visit.updatedById &&
+    (!visit.submittedAt || new Date(visit.updatedAt) > new Date(visit.submittedAt));
+  const updatedOn = wasEdited ? new Date(visit.updatedAt).toLocaleString() : null;
 
   return (
     <div>
@@ -151,12 +169,20 @@ export function SubmittedFieldVisit({
                 <span className="font-medium text-foreground">{engineerName || "—"}</span>
                 {submittedOn ? ` on ${submittedOn}` : ""}
               </p>
+              {updatedOn && (
+                <p className="text-sm text-muted-foreground">
+                  Last updated by{" "}
+                  <span className="font-medium text-foreground">{updatedByName || "—"}</span>
+                  {` on ${updatedOn}`}
+                </p>
+              )}
             </div>
           </div>
           <div className="flex flex-col items-start gap-2 sm:items-end">
             <Badge variant="secondary" className="w-fit">
               Read-only
             </Badge>
+            {headerAction}
             <DownloadFieldVisitPdfButton visit={visit} />
           </div>
         </CardContent>

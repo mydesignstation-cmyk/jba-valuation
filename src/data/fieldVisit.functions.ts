@@ -14,6 +14,7 @@ import {
   api_getMyFieldVisit as db_getMyFieldVisit,
   api_getCaseFieldVisit as db_getCaseFieldVisit,
   api_submitFieldVisit as db_submitFieldVisit,
+  api_updateFieldVisit as db_updateFieldVisit,
   api_getFieldVisitPdf as db_getFieldVisitPdf,
   type FieldVisitPdfResult,
 } from "@/server/api.server";
@@ -40,6 +41,10 @@ const getCaseFieldVisitFn = createServerFn({ method: "GET" })
 const submitFieldVisitFn = createServerFn({ method: "POST" })
   .validator((input: SubmitFieldVisitInput) => input)
   .handler(({ data }) => db_submitFieldVisit(data.token, data.caseId, data.data));
+
+const updateFieldVisitFn = createServerFn({ method: "POST" })
+  .validator((input: SubmitFieldVisitInput) => input)
+  .handler(({ data }) => db_updateFieldVisit(data.token, data.caseId, data.data));
 
 const getFieldVisitPdfFn = createServerFn({ method: "GET" })
   .validator((input: GetFieldVisitPdfInput) => input)
@@ -77,6 +82,22 @@ export function api_submitFieldVisit(
   data: FieldVisitFormValues,
 ): Promise<FieldVisit> {
   return submitFieldVisitFn({ data: { token, caseId, data } });
+}
+
+/**
+ * Edit an already-submitted Field Visit as the assigned Maker.
+ * Pass the Neon Auth session token; the server verifies it, checks the caller
+ * is the case's assigned Maker and the case is at a Maker-editable stage, then
+ * re-validates the payload with the same schema used at submission. Original
+ * creation attribution (engineer + submitted-at) and GPS are preserved; the
+ * editing Maker and edit time are recorded.
+ */
+export function api_updateFieldVisit(
+  token: string,
+  caseId: string,
+  data: FieldVisitFormValues,
+): Promise<FieldVisit> {
+  return updateFieldVisitFn({ data: { token, caseId, data } });
 }
 
 /**

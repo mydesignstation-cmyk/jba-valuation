@@ -135,6 +135,13 @@ export interface FieldVisit {
   createdAt: string;
   updatedAt: string;
   submittedAt?: string;
+  /**
+   * Neon Auth UUID of the Maker/admin who last edited this visit after
+   * submission. Absent when the visit has only ever been submitted (never
+   * edited). `engineerId`/`createdAt`/`submittedAt` remain the immutable
+   * original-creation record; `updatedAt` is the edit timestamp.
+   */
+  updatedById?: string;
 }
 
 export interface CaseHistoryEntry {

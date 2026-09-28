@@ -1,0 +1,1 @@
+ALTER TABLE "field_visits" ADD COLUMN "updated_by_id" uuid;

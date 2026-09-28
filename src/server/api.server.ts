@@ -948,6 +948,7 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
     updatedAt: row.updated_at.toISOString(),
   };
   if (row.submitted_at) visit.submittedAt = row.submitted_at.toISOString();
+  if (row.updated_by_id) visit.updatedById = row.updated_by_id;
 
   // Expanded report fields — only surface those that are populated so a
   // basic-version row (all new columns null) maps back to just the originals.
@@ -1206,6 +1207,171 @@ export async function api_submitFieldVisit(
     }
     console.error("Failed to submit field visit:", error);
     throw new Error("Failed to submit field visit to database");
+  }
+}
+
+/**
+ * Stages during which the assigned Maker may edit a submitted Field Visit.
+ * Editing is a review-time correction, not a workflow advance, so it is only
+ * permitted while the case sits with the Maker. Once the case moves on
+ * (checker/uploader/completed) the visit is frozen again.
+ */
+const MAKER_EDITABLE_STAGES = ["MAKER_ASSIGNED", "MAKER_PENDING"] as const;
+
+/**
+ * Authorize a Maker to act on a Case's Field Visit and return the verified
+ * maker id. Enforced entirely from the trusted Neon Auth role + the DB row,
+ * never from anything the client asserts:
+ *   - caller must be a MAKER (requireServerUser rejects everyone else);
+ *   - the case must exist;
+ *   - the case's assigned_maker_id must equal the authenticated maker's id;
+ *   - the case must be at a Maker-editable stage.
+ * Mirrors requireOwnedCase (the site-engineer guard) but for the Maker side.
+ */
+async function requireMakerCase(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<{ makerId: string }> {
+  const user = await requireServerUser(token, "MAKER");
+
+  const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const row = rows[0];
+  if (!row) {
+    throw new Error("Case not found");
+  }
+  if (row.assigned_maker_id !== user.id) {
+    // Do not leak whether the case exists for someone else.
+    throw new Error("Forbidden");
+  }
+  if (!(MAKER_EDITABLE_STAGES as readonly string[]).includes(row.stage)) {
+    throw new Error("This case is not in a stage where the field visit can be edited");
+  }
+  return { makerId: user.id };
+}
+
+/**
+ * Edit an already-submitted Field Visit as the assigned Maker.
+ *
+ * This is deliberately separate from api_submitFieldVisit: submission is the
+ * site engineer's one-time create; this is the Maker's review-time correction.
+ * It re-validates the full payload with the SAME Zod schema the engineer used,
+ * so every rule (required fields, ranges, cross-field checks) is respected.
+ *
+ * What it changes: all STEP 1–7 report fields plus the derived legacy columns,
+ * `updated_at`, and `updated_by_id` (the editing Maker). What it deliberately
+ * NEVER touches: `engineer_id`, `created_at`, `submitted_at`, `status`, the
+ * device-captured `visit_date`, and the GPS coordinates — GPS is the site
+ * engineer's on-site capture and is not editable from the desk.
+ */
+export async function api_updateFieldVisit(
+  token: string | null | undefined,
+  caseId: string,
+  input: unknown,
+): Promise<FieldVisit> {
+  const { makerId } = await requireMakerCase(token, caseId);
+
+  // Re-validate on the server with the same schema as submission.
+  const data = fieldVisitFormSchema.parse(input);
+
+  // The visit must already exist and be submitted; there is nothing to edit
+  // otherwise (a Maker never creates a visit, only corrects a submitted one).
+  const existingRows = await getDb()
+    .select()
+    .from(fieldVisits)
+    .where(eq(fieldVisits.case_id, caseId))
+    .limit(1);
+  const existing = existingRows[0];
+  if (!existing) {
+    throw new Error("No field visit exists for this case");
+  }
+  if (existing.status !== "SUBMITTED") {
+    throw new Error("Field visit has not been submitted yet");
+  }
+
+  try {
+    const now = new Date();
+
+    // Re-derive the legacy NOT NULL columns from the edited report the same
+    // way submission does, so those columns stay consistent with the fields
+    // the Maker just changed. `year_of_construction` drives the derived age.
+    const legacyFloor = data.locatedOnFloor;
+    const legacyBuilding = data.landmark.slice(0, 255);
+    const legacyAge =
+      data.yearOfConstruction && Number(data.yearOfConstruction) > 0
+        ? String(Math.max(0, now.getFullYear() - Number(data.yearOfConstruction)))
+        : "0";
+    const legacySqFeet = data.areaSqFt;
+
+    const rows = await getDb()
+      .update(fieldVisits)
+      .set({
+        // Preserved original columns (derived from the expanded fields).
+        floor: legacyFloor,
+        building: legacyBuilding,
+        age_of_building: legacyAge,
+        sq_feet: legacySqFeet,
+
+        // STEP 1 (GPS intentionally NOT updated — on-site capture is fixed).
+        person_met: data.personMet,
+        person_phone: data.personPhone,
+        relationship: data.relationship,
+
+        // STEP 2
+        landmark: data.landmark,
+        property_type: data.propertyType,
+        locality_type: data.localityType,
+        occupancy_status: data.occupancyStatus,
+
+        // STEP 3
+        structure_type: data.structureType,
+        occupancy_level: data.occupancyLevel,
+        floors_in_building: Number(data.floorsInBuilding),
+        located_on_floor: data.locatedOnFloor,
+        flats_on_floor: Number(data.flatsOnFloor),
+        wings_in_building: Number(data.wingsInBuilding),
+        lifts_staircases: Number(data.liftsStaircases),
+
+        // STEP 4
+        year_of_construction: Number(data.yearOfConstruction),
+        construction_stage: data.constructionStage,
+        work_description: data.workDescription ? data.workDescription : null,
+
+        // STEP 5
+        boundary_east: data.boundaryEast,
+        boundary_west: data.boundaryWest,
+        boundary_north: data.boundaryNorth,
+        boundary_south: data.boundarySouth,
+
+        // STEP 6
+        approach_road_condition: data.approachRoadCondition,
+        area_sqft: data.areaSqFt,
+        rate_per_sqft: data.ratePerSqFt,
+        negative_points: data.negativePoints ? data.negativePoints : null,
+        agent_opinion: data.agentOpinion ? data.agentOpinion : null,
+
+        // STEP 7
+        final_remarks: data.finalRemarks ? data.finalRemarks : null,
+
+        // Edit attribution — who edited and when. Original creation columns
+        // (engineer_id, created_at, submitted_at, status) are left untouched.
+        updated_at: now,
+        updated_by_id: makerId,
+      })
+      .where(eq(fieldVisits.case_id, caseId))
+      .returning();
+
+    const row = rows[0];
+    if (!row) throw new Error("Failed to retrieve updated field visit");
+
+    // Keep the case's last-updated time in sync with the edit. Stage is left
+    // as-is — editing the visit is not a workflow transition.
+    await getDb().update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
+
+    return mapFieldVisitRow(row);
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to update field visit:", error);
+    throw new Error("Failed to update field visit in database");
   }
 }
 
