@@ -1,7 +1,7 @@
 import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { getCaseMilestones, stageLabels, type CaseMilestoneKey } from "@/lib/case-format";
+import { getCaseMilestones, type CaseMilestoneKey } from "@/lib/case-format";
 import type { CaseStage } from "@/types";
 
 /**
@@ -52,7 +52,8 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
                     className={cn(
                       "grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 text-sm font-semibold transition-colors",
                       done && "border-green-600 bg-green-600 text-white",
-                      current && "border-primary bg-primary/10 text-primary ring-4 ring-primary/15",
+                      current &&
+                        "border-primary bg-primary/10 text-primary ring-4 ring-primary/15 animate-pulse",
                       !done && !current && "border-border bg-muted text-muted-foreground",
                     )}
                   >
@@ -80,18 +81,11 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
                   >
                     {m.label}
                   </p>
-                  {/* When a person is known for this milestone, show their name
-                      as the primary caption with the role as subtext. Otherwise
-                      fall back to just the role. */}
-                  {people?.[m.key] ? (
-                    <>
-                      <p className="text-xs font-medium text-foreground break-words">
-                        {people[m.key]}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{m.role}</p>
-                    </>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">{m.role}</p>
+                  {/* Name only (role is redundant with the milestone label). */}
+                  {people?.[m.key] && (
+                    <p className="text-xs font-medium text-foreground break-words">
+                      {people[m.key]}
+                    </p>
                   )}
                 </div>
               </li>
@@ -112,7 +106,8 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
                     className={cn(
                       "grid h-9 w-9 shrink-0 place-items-center rounded-full border-2 text-sm font-semibold transition-colors",
                       done && "border-green-600 bg-green-600 text-white",
-                      current && "border-primary bg-primary/10 text-primary ring-4 ring-primary/15",
+                      current &&
+                        "border-primary bg-primary/10 text-primary ring-4 ring-primary/15 animate-pulse",
                       !done && !current && "border-border bg-muted text-muted-foreground",
                     )}
                   >
@@ -138,15 +133,11 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
                   >
                     {m.label}
                   </p>
-                  {people?.[m.key] ? (
-                    <>
-                      <p className="text-xs font-medium text-foreground break-words">
-                        {people[m.key]}
-                      </p>
-                      <p className="text-xs text-muted-foreground">{m.role}</p>
-                    </>
-                  ) : (
-                    <p className="text-xs text-muted-foreground">{m.role}</p>
+                  {/* Name only (role is redundant with the milestone label). */}
+                  {people?.[m.key] && (
+                    <p className="text-xs font-medium text-foreground break-words">
+                      {people[m.key]}
+                    </p>
                   )}
                 </div>
               </li>
@@ -154,9 +145,6 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
           })}
         </ol>
 
-        <p className="mt-4 text-center text-xs text-muted-foreground sm:mt-6">
-          Current stage: <span className="font-medium text-foreground">{stageLabels[stage]}</span>
-        </p>
       </CardContent>
     </Card>
   );

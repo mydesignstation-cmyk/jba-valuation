@@ -68,7 +68,19 @@ export function isUploaderCasePending(stage: CaseStage): boolean {
  * human-readable milestones, so the workflow reads as a clean tick-by-tick
  * flow (Field Visit → Maker → Checker → Uploader → Completed).
  */
-export type CaseMilestoneKey = "FIELD_VISIT" | "MAKER" | "CHECKER" | "UPLOADER" | "COMPLETED";
+/**
+ * Six pipeline milestones matching the real workflow. The Checker appears
+ * twice: once when they assign a Maker (CHECKER_ASSIGN, step 2) and again when
+ * they review the Maker's work and submit to the Uploader (CHECKER_REVIEW,
+ * step 4). Both render as "Checker".
+ */
+export type CaseMilestoneKey =
+  | "FIELD_VISIT"
+  | "CHECKER_ASSIGN"
+  | "MAKER"
+  | "CHECKER_REVIEW"
+  | "UPLOADER"
+  | "COMPLETED";
 
 export type MilestoneStatus = "done" | "current" | "upcoming";
 
@@ -83,8 +95,9 @@ export interface CaseMilestone {
 /** Milestone definitions in pipeline order. */
 const MILESTONE_DEFS: { key: CaseMilestoneKey; label: string; role: string }[] = [
   { key: "FIELD_VISIT", label: "Field Visit", role: "Site Engineer" },
+  { key: "CHECKER_ASSIGN", label: "Checker", role: "Checker" },
   { key: "MAKER", label: "Maker", role: "Maker" },
-  { key: "CHECKER", label: "Checker", role: "Checker" },
+  { key: "CHECKER_REVIEW", label: "Checker", role: "Checker" },
   { key: "UPLOADER", label: "Uploader", role: "Uploader" },
   { key: "COMPLETED", label: "Completed", role: "Done" },
 ];
@@ -98,23 +111,28 @@ const MILESTONE_DEFS: { key: CaseMilestoneKey; label: string; role: string }[] =
 const STAGE_POSITION: Record<CaseStage, number> = {
   CREATED: -1,
   ASSIGNED: -0.5,
+  // Field Visit (index 0) is current while the visit is pending.
   FIELD_VISIT_PENDING: 0,
-  // Field visit is submitted but no Maker assigned yet: keep the Field Visit
-  // milestone current and do NOT light up the Maker milestone. Advancing the
-  // pipeline is the Checker's Maker-assignment action, not submission.
-  FIELD_VISIT_SUBMITTED: 0,
-  // Checker has assigned a Maker: Field Visit is done, Maker is now current.
-  MAKER_ASSIGNED: 1,
-  MAKER_PENDING: 1,
-  MAKER_COMPLETED: 1.5,
-  CHECKER_PENDING: 2,
-  CHECKER_COMPLETED: 2.5,
-  UPLOADER_PENDING: 3,
-  COMPLETED: 4,
+  // Field visit submitted but no Maker assigned yet: Field Visit is done and
+  // the case now waits on the Checker to assign a Maker, so the first Checker
+  // milestone (CHECKER_ASSIGN, index 1) becomes current.
+  FIELD_VISIT_SUBMITTED: 1,
+  // Checker assigned a Maker: CHECKER_ASSIGN done, Maker (index 2) current.
+  MAKER_ASSIGNED: 2,
+  MAKER_PENDING: 2,
+  // Maker done, waiting to hand off to the Checker's review.
+  MAKER_COMPLETED: 2.5,
+  // Checker review (CHECKER_REVIEW, index 3) is current.
+  CHECKER_PENDING: 3,
+  CHECKER_COMPLETED: 3.5,
+  // Uploader (index 4) is current while awaiting the final upload.
+  UPLOADER_PENDING: 4,
+  // Completed (index 5).
+  COMPLETED: 5,
 };
 
 /**
- * Resolve the five pipeline milestones for a given stage, each tagged with
+ * Resolve the six pipeline milestones for a given stage, each tagged with
  * whether it is done, current, or upcoming. Drives the pipeline stepper UI.
  */
 export function getCaseMilestones(stage: CaseStage): CaseMilestone[] {

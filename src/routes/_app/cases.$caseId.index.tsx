@@ -43,7 +43,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app/PageHeader";
 import { CasePipeline, type PipelinePeople } from "@/components/case/CasePipeline";
 import { requirePermission } from "@/lib/route-guard";
-import { getSessionToken, useCurrentUser, roleLabels } from "@/lib/auth-client";
+import { getSessionToken, useCurrentUser } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant, isMakerCasePending } from "@/lib/case-format";
@@ -323,10 +323,6 @@ function Page() {
   const assignedByName =
     assignedBy?.name ??
     (valuationCase.assignedByCheckerId ? valuationCase.assignedByCheckerId : undefined);
-  // Role-aware label so it reads "Assigned By (Checker)" or "(Admin)" etc.
-  const assignedByLabel = assignedBy?.role
-    ? `Assigned By (${roleLabels[assignedBy.role]})`
-    : "Assigned By";
 
   // Checked By / Uploaded By names for the pipeline. Fall back to the raw id
   // only if the user can't be resolved (deleted acct). These now surface under
@@ -344,10 +340,14 @@ function Page() {
   // Checker → who checked it; Uploader → who uploaded it. COMPLETED has no
   // person. Only include a name when we actually have one (undefined falls back
   // to showing the role alone in the pipeline).
+  // The Checker appears twice: CHECKER_ASSIGN is whoever assigned the Maker
+  // (Checker or admin), CHECKER_REVIEW is whoever checked and submitted to the
+  // Uploader.
   const pipelinePeople: PipelinePeople = {
     FIELD_VISIT: engineer?.name ?? undefined,
+    CHECKER_ASSIGN: hasMaker ? assignedByName : undefined,
     MAKER: hasMaker ? makerName : undefined,
-    CHECKER: hasCheckedBy ? checkedByName : undefined,
+    CHECKER_REVIEW: hasCheckedBy ? checkedByName : undefined,
     UPLOADER: hasUploadedBy ? uploadedByName : undefined,
   };
 
@@ -697,10 +697,10 @@ function Page() {
 
           {/* Assignment and Customer & Property sit side-by-side on desktop. */}
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Case Details — the non-people case attributes. The workflow
-                people (Site Engineer / Maker / Checker / Uploader) now live in
-                the pipeline tracker above, so this card carries only Bank,
-                Branch, who assigned the Maker, and the timestamps. */}
+            {/* Case Details — the non-people case attributes. Every workflow
+                person, including who assigned the Maker, now lives in the
+                pipeline tracker above, so this card carries only Bank, Branch,
+                and the timestamps. */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
@@ -720,17 +720,6 @@ function Page() {
                     value={branchName}
                     icon={<GitBranch className="h-3.5 w-3.5" />}
                   />
-                  {/* Who assigned the Maker (Checker/Admin/Super Admin). Not a
-                      pipeline step of its own, so it stays in this card. Only
-                      shown once assigned; blank on cases assigned before this
-                      was tracked. */}
-                  {hasMaker && assignedByName && (
-                    <Field
-                      label={assignedByLabel}
-                      value={assignedByName}
-                      icon={<UserCog className="h-3.5 w-3.5" />}
-                    />
-                  )}
                 </div>
                 <Separator />
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
