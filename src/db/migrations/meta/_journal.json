@@ -15,6 +15,13 @@
       "when": 1790578096418,
       "tag": "0001_messy_alex_wilder",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790582650348,
+      "tag": "0002_vengeful_doomsday",
+      "breakpoints": true
     }
   ]
 }

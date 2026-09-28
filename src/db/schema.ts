@@ -1,4 +1,15 @@
-import { pgTable, text, timestamp, uuid, varchar, index, foreignKey } from "drizzle-orm/pg-core";
+import {
+  pgTable,
+  text,
+  timestamp,
+  uuid,
+  varchar,
+  index,
+  foreignKey,
+  numeric,
+  date,
+  integer,
+} from "drizzle-orm/pg-core";
 import { relations } from "drizzle-orm";
 
 // Customers table
@@ -100,10 +111,65 @@ export const fieldVisits = pgTable(
     id: uuid("id").primaryKey().defaultRandom(),
     case_id: uuid("case_id").notNull().unique(),
     engineer_id: uuid("engineer_id").notNull(),
+    // --- Original first-version fields (kept for the existing working flow) ---
     floor: varchar("floor", { length: 255 }).notNull(),
     building: varchar("building", { length: 255 }).notNull(),
     age_of_building: varchar("age_of_building", { length: 255 }).notNull(),
     sq_feet: varchar("sq_feet", { length: 255 }).notNull(),
+
+    // --- Expanded Field Visit Report fields ---
+    // All new columns are NULLABLE so this migration is safe against any
+    // Field Visit rows created by the basic version. Required-ness for NEW
+    // submissions is enforced at the application/server layer (Zod), not by
+    // NOT NULL constraints (which would break the migration on existing rows).
+
+    // Device-captured (auto). GPS is compulsory for NEW submissions (enforced
+    // server-side); stored as high-precision numeric so values round-trip.
+    visit_date: date("visit_date"),
+    gps_latitude: numeric("gps_latitude", { precision: 10, scale: 7 }),
+    gps_longitude: numeric("gps_longitude", { precision: 10, scale: 7 }),
+
+    // STEP 1 — Visit details
+    person_met: varchar("person_met", { length: 255 }),
+    person_phone: varchar("person_phone", { length: 50 }),
+    relationship: varchar("relationship", { length: 50 }),
+
+    // STEP 2 — Property details
+    landmark: text("landmark"),
+    property_type: varchar("property_type", { length: 50 }),
+    locality_type: varchar("locality_type", { length: 50 }),
+    occupancy_status: varchar("occupancy_status", { length: 50 }),
+
+    // STEP 3 — Building information
+    structure_type: varchar("structure_type", { length: 50 }),
+    occupancy_level: numeric("occupancy_level", { precision: 5, scale: 2 }),
+    floors_in_building: integer("floors_in_building"),
+    located_on_floor: varchar("located_on_floor", { length: 100 }),
+    flats_on_floor: integer("flats_on_floor"),
+    wings_in_building: integer("wings_in_building"),
+    lifts_staircases: integer("lifts_staircases"),
+
+    // STEP 4 — Construction details
+    year_of_construction: integer("year_of_construction"),
+    construction_stage: numeric("construction_stage", { precision: 5, scale: 2 }),
+    work_description: text("work_description"),
+
+    // STEP 5 — Property boundaries
+    boundary_east: text("boundary_east"),
+    boundary_west: text("boundary_west"),
+    boundary_north: text("boundary_north"),
+    boundary_south: text("boundary_south"),
+
+    // STEP 6 — Assessment details
+    approach_road_condition: varchar("approach_road_condition", { length: 50 }),
+    area_sqft: numeric("area_sqft", { precision: 12, scale: 2 }),
+    rate_per_sqft: numeric("rate_per_sqft", { precision: 12, scale: 2 }),
+    negative_points: text("negative_points"),
+    agent_opinion: text("agent_opinion"),
+
+    // STEP 7 — Final remarks
+    final_remarks: text("final_remarks"),
+
     status: varchar("status", { length: 50 }).notNull().default("DRAFT"),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

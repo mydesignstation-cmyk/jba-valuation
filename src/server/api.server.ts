@@ -704,9 +704,49 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
     createdAt: row.created_at.toISOString(),
     updatedAt: row.updated_at.toISOString(),
   };
-  if (row.submitted_at) {
-    visit.submittedAt = row.submitted_at.toISOString();
-  }
+  if (row.submitted_at) visit.submittedAt = row.submitted_at.toISOString();
+
+  // Expanded report fields — only surface those that are populated so a
+  // basic-version row (all new columns null) maps back to just the originals.
+  if (row.visit_date != null) visit.visitDate = row.visit_date;
+  if (row.gps_latitude != null) visit.gpsLatitude = row.gps_latitude;
+  if (row.gps_longitude != null) visit.gpsLongitude = row.gps_longitude;
+
+  if (row.person_met != null) visit.personMet = row.person_met;
+  if (row.person_phone != null) visit.personPhone = row.person_phone;
+  if (row.relationship != null) visit.relationship = row.relationship;
+
+  if (row.landmark != null) visit.landmark = row.landmark;
+  if (row.property_type != null) visit.propertyType = row.property_type;
+  if (row.locality_type != null) visit.localityType = row.locality_type;
+  if (row.occupancy_status != null) visit.occupancyStatus = row.occupancy_status;
+
+  if (row.structure_type != null) visit.structureType = row.structure_type;
+  if (row.occupancy_level != null) visit.occupancyLevel = row.occupancy_level;
+  if (row.floors_in_building != null) visit.floorsInBuilding = row.floors_in_building;
+  if (row.located_on_floor != null) visit.locatedOnFloor = row.located_on_floor;
+  if (row.flats_on_floor != null) visit.flatsOnFloor = row.flats_on_floor;
+  if (row.wings_in_building != null) visit.wingsInBuilding = row.wings_in_building;
+  if (row.lifts_staircases != null) visit.liftsStaircases = row.lifts_staircases;
+
+  if (row.year_of_construction != null) visit.yearOfConstruction = row.year_of_construction;
+  if (row.construction_stage != null) visit.constructionStage = row.construction_stage;
+  if (row.work_description != null) visit.workDescription = row.work_description;
+
+  if (row.boundary_east != null) visit.boundaryEast = row.boundary_east;
+  if (row.boundary_west != null) visit.boundaryWest = row.boundary_west;
+  if (row.boundary_north != null) visit.boundaryNorth = row.boundary_north;
+  if (row.boundary_south != null) visit.boundarySouth = row.boundary_south;
+
+  if (row.approach_road_condition != null)
+    visit.approachRoadCondition = row.approach_road_condition;
+  if (row.area_sqft != null) visit.areaSqFt = row.area_sqft;
+  if (row.rate_per_sqft != null) visit.ratePerSqFt = row.rate_per_sqft;
+  if (row.negative_points != null) visit.negativePoints = row.negative_points;
+  if (row.agent_opinion != null) visit.agentOpinion = row.agent_opinion;
+
+  if (row.final_remarks != null) visit.finalRemarks = row.final_remarks;
+
   return visit;
 }
 
@@ -770,9 +810,7 @@ export async function api_getMyFieldVisit(
  * boundary. The read is keyed only on case_id (UNIQUE), so a case has at most
  * one visit. Returns undefined when no Field Visit exists yet.
  */
-export async function api_getCaseFieldVisit(
-  caseId: string,
-): Promise<FieldVisit | undefined> {
+export async function api_getCaseFieldVisit(caseId: string): Promise<FieldVisit | undefined> {
   try {
     const rows = await getDb()
       .select()
@@ -820,15 +858,80 @@ export async function api_submitFieldVisit(
 
   try {
     const now = new Date();
+
+    // Date of visit is device/server time, not client-supplied. Store as a
+    // YYYY-MM-DD date string for the `date` column.
+    const visitDate = now.toISOString().slice(0, 10);
+
+    // Populate the original NOT NULL columns from the expanded report so the
+    // existing schema and any consumers of those fields keep working. These
+    // are derived, never asked of the engineer twice.
+    const legacyFloor = data.locatedOnFloor;
+    const legacyBuilding = data.landmark.slice(0, 255);
+    const legacyAge =
+      data.yearOfConstruction && Number(data.yearOfConstruction) > 0
+        ? String(Math.max(0, now.getFullYear() - Number(data.yearOfConstruction)))
+        : "0";
+    const legacySqFeet = data.areaSqFt;
+
     const rows = await getDb()
       .insert(fieldVisits)
       .values({
         case_id: caseId,
         engineer_id: engineerId,
-        floor: data.floor,
-        building: data.building,
-        age_of_building: data.ageOfBuilding,
-        sq_feet: data.sqFeet,
+
+        // Preserved original columns (derived from the expanded fields).
+        floor: legacyFloor,
+        building: legacyBuilding,
+        age_of_building: legacyAge,
+        sq_feet: legacySqFeet,
+
+        // Device-captured (server-trusted date; client-captured GPS).
+        visit_date: visitDate,
+        gps_latitude: String(data.gpsLatitude),
+        gps_longitude: String(data.gpsLongitude),
+
+        // STEP 1
+        person_met: data.personMet,
+        person_phone: data.personPhone,
+        relationship: data.relationship,
+
+        // STEP 2
+        landmark: data.landmark,
+        property_type: data.propertyType,
+        locality_type: data.localityType,
+        occupancy_status: data.occupancyStatus,
+
+        // STEP 3
+        structure_type: data.structureType,
+        occupancy_level: data.occupancyLevel,
+        floors_in_building: Number(data.floorsInBuilding),
+        located_on_floor: data.locatedOnFloor,
+        flats_on_floor: Number(data.flatsOnFloor),
+        wings_in_building: Number(data.wingsInBuilding),
+        lifts_staircases: Number(data.liftsStaircases),
+
+        // STEP 4
+        year_of_construction: Number(data.yearOfConstruction),
+        construction_stage: data.constructionStage,
+        work_description: data.workDescription ? data.workDescription : null,
+
+        // STEP 5
+        boundary_east: data.boundaryEast,
+        boundary_west: data.boundaryWest,
+        boundary_north: data.boundaryNorth,
+        boundary_south: data.boundarySouth,
+
+        // STEP 6
+        approach_road_condition: data.approachRoadCondition,
+        area_sqft: data.areaSqFt,
+        rate_per_sqft: data.ratePerSqFt,
+        negative_points: data.negativePoints ? data.negativePoints : null,
+        agent_opinion: data.agentOpinion ? data.agentOpinion : null,
+
+        // STEP 7
+        final_remarks: data.finalRemarks ? data.finalRemarks : null,
+
         status: "SUBMITTED",
         created_at: now,
         updated_at: now,
@@ -845,12 +948,7 @@ export async function api_submitFieldVisit(
     await getDb()
       .update(cases)
       .set({ stage: "FIELD_VISIT_SUBMITTED", updated_at: now })
-      .where(
-        and(
-          eq(cases.id, caseId),
-          inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"]),
-        ),
-      );
+      .where(and(eq(cases.id, caseId), inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"])));
 
     return mapFieldVisitRow(row);
   } catch (error) {

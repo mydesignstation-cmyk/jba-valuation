@@ -65,6 +65,16 @@ function Field({
   );
 }
 
+/** A titled group of fields within the read-only Field Visit report. */
+function FieldVisitSection({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </div>
+  );
+}
+
 /** One item in the top overview strip. */
 function OverviewItem({ label, value }: { label: string; value: ReactNode }) {
   return (
@@ -391,12 +401,76 @@ function Page() {
                       . This field visit is read-only.
                     </span>
                   </div>
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <Field label="Floor" value={fieldVisit.floor} />
-                    <Field label="Building" value={fieldVisit.building} />
-                    <Field label="Age of Building" value={fieldVisit.ageOfBuilding} />
-                    <Field label="Sq. Feet" value={fieldVisit.sqFeet} />
-                  </div>
+                  <FieldVisitSection title="Visit Details">
+                    <Field label="Date of Visit" value={fieldVisit.visitDate} />
+                    <Field
+                      label="GPS Location"
+                      value={
+                        fieldVisit.gpsLatitude && fieldVisit.gpsLongitude
+                          ? `${fieldVisit.gpsLatitude}, ${fieldVisit.gpsLongitude}`
+                          : undefined
+                      }
+                    />
+                    <Field label="Person Met" value={fieldVisit.personMet} />
+                    <Field label="Phone" value={fieldVisit.personPhone} />
+                    <Field label="Relationship" value={fieldVisit.relationship} />
+                  </FieldVisitSection>
+
+                  <FieldVisitSection title="Property">
+                    <Field label="Bank" value={bankName} />
+                    <Field label="Customer" value={customerName} />
+                    <Field label="Address" value={customer?.address} />
+                    <Field label="Landmark" value={fieldVisit.landmark} />
+                    <Field label="Property Type" value={fieldVisit.propertyType} />
+                    <Field label="Locality" value={fieldVisit.localityType} />
+                    <Field label="Occupancy" value={fieldVisit.occupancyStatus} />
+                  </FieldVisitSection>
+
+                  <FieldVisitSection title="Building">
+                    <Field label="Structure" value={fieldVisit.structureType} />
+                    <Field label="Occupancy Level (%)" value={fieldVisit.occupancyLevel} />
+                    <Field
+                      label="Floors in Building"
+                      value={fieldVisit.floorsInBuilding?.toString()}
+                    />
+                    <Field label="Located on Floor" value={fieldVisit.locatedOnFloor} />
+                    <Field label="Flats on Floor" value={fieldVisit.flatsOnFloor?.toString()} />
+                    <Field label="Wings" value={fieldVisit.wingsInBuilding?.toString()} />
+                    <Field
+                      label="Lifts/Staircases"
+                      value={fieldVisit.liftsStaircases?.toString()}
+                    />
+                  </FieldVisitSection>
+
+                  <FieldVisitSection title="Construction">
+                    <Field
+                      label="Year of Construction"
+                      value={fieldVisit.yearOfConstruction?.toString()}
+                    />
+                    <Field label="Construction Stage (%)" value={fieldVisit.constructionStage} />
+                    <Field label="Work Description" value={fieldVisit.workDescription} />
+                  </FieldVisitSection>
+
+                  <FieldVisitSection title="Boundaries">
+                    <Field label="East" value={fieldVisit.boundaryEast} />
+                    <Field label="West" value={fieldVisit.boundaryWest} />
+                    <Field label="North" value={fieldVisit.boundaryNorth} />
+                    <Field label="South" value={fieldVisit.boundarySouth} />
+                  </FieldVisitSection>
+
+                  <FieldVisitSection title="Assessment">
+                    <Field label="Approach Road" value={fieldVisit.approachRoadCondition} />
+                    <Field label="Area (Sq. Ft.)" value={fieldVisit.areaSqFt} />
+                    <Field label="Rate per Sq. Ft." value={fieldVisit.ratePerSqFt} />
+                    <Field label="Negative Points" value={fieldVisit.negativePoints} />
+                    <Field label="Agent Opinion" value={fieldVisit.agentOpinion} />
+                  </FieldVisitSection>
+
+                  {fieldVisit.finalRemarks && (
+                    <FieldVisitSection title="Final Remarks">
+                      <Field label="Remarks" value={fieldVisit.finalRemarks} />
+                    </FieldVisitSection>
+                  )}
                 </div>
               ) : (
                 <EmptyState

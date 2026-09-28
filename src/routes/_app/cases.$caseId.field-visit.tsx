@@ -1,6 +1,19 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { ArrowLeft, CheckCircle2, MapPin } from "lucide-react";
-import { useForm } from "react-hook-form";
+import {
+  ArrowLeft,
+  ArrowRight,
+  Building2,
+  CheckCircle2,
+  ClipboardCheck,
+  Compass,
+  Hammer,
+  Home,
+  MapPin,
+  RefreshCw,
+  User as UserIcon,
+} from "lucide-react";
+import { useMemo, useState } from "react";
+import { useForm, type Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -10,16 +23,38 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Progress } from "@/components/ui/progress";
+import { Separator } from "@/components/ui/separator";
+import { Textarea } from "@/components/ui/textarea";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { FormActions } from "@/components/app/FormActions";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { PageHeader } from "@/components/app/PageHeader";
 import { requirePermission } from "@/lib/route-guard";
 import { useCurrentUser, getSessionToken } from "@/lib/auth-client";
+import { useGeolocation } from "@/lib/use-geolocation";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
-import { fieldVisitFormSchema, type FieldVisitFormValues } from "@/schemas/fieldVisit.schema";
+import {
+  fieldVisitFormSchema,
+  type FieldVisitFormValues,
+  relationshipOptions,
+  propertyTypeOptions,
+  localityTypeOptions,
+  occupancyStatusOptions,
+  structureTypeOptions,
+  approachRoadOptions,
+} from "@/schemas/fieldVisit.schema";
 import { api_getMyFieldVisit, api_submitFieldVisit } from "@/data/fieldVisit.functions";
+import { api_getCase } from "@/data/case.functions";
+import { api_getCustomer } from "@/data/customer.functions";
+import { api_getBank } from "@/data/bank.functions";
 import type { FieldVisit } from "@/types";
 
 export const Route = createFileRoute("/_app/cases/$caseId/field-visit")({
@@ -28,35 +63,321 @@ export const Route = createFileRoute("/_app/cases/$caseId/field-visit")({
   component: Page,
 });
 
-/** A single labelled read-only value for the submitted view. */
+// ---------------------------------------------------------------------------
+// Case-derived, auto-filled data
+// ---------------------------------------------------------------------------
+
+interface AutoFill {
+  caseNumber: string;
+  requestNumber: string;
+  bankName: string;
+  customerName: string;
+  address: string;
+}
+
+/** Load the read-only, case-derived values shown across the wizard. */
+function useAutoFill(caseId: string) {
+  const { data: valuationCase } = useQuery({
+    queryKey: ["cases", caseId],
+    queryFn: () => api_getCase(caseId),
+    enabled: !!caseId,
+  });
+  const { data: customer } = useQuery({
+    queryKey: ["customers", valuationCase?.customerId],
+    queryFn: () => api_getCustomer(valuationCase!.customerId),
+    enabled: !!valuationCase?.customerId,
+  });
+  const { data: bank } = useQuery({
+    queryKey: ["banks", valuationCase?.bankId],
+    queryFn: () => api_getBank(valuationCase!.bankId),
+    enabled: !!valuationCase?.bankId,
+  });
+
+  const autoFill: AutoFill | null = valuationCase
+    ? {
+        caseNumber: valuationCase.caseNumber,
+        requestNumber: valuationCase.requestNumber,
+        bankName: bank?.name ?? valuationCase.bankId,
+        customerName: customer?.name ?? valuationCase.customerId,
+        address: customer?.address ?? "—",
+      }
+    : null;
+
+  return autoFill;
+}
+
+// ---------------------------------------------------------------------------
+// Small presentational helpers
+// ---------------------------------------------------------------------------
+
 function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <div className="space-y-1">
       <Label className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {label}
       </Label>
-      <p className="text-sm font-medium break-words">{value}</p>
+      <p className="text-sm font-medium break-words">{value || "—"}</p>
     </div>
   );
 }
 
-/** The four-field entry form, shown only when no Field Visit exists yet. */
-function FieldVisitForm({
+/** The 7 wizard steps, in order. Index 6 (Review) collects nothing new. */
+const STEPS = [
+  { key: "visit", label: "Visit", icon: UserIcon },
+  { key: "property", label: "Property", icon: Home },
+  { key: "building", label: "Building", icon: Building2 },
+  { key: "construction", label: "Construction", icon: Hammer },
+  { key: "boundaries", label: "Boundaries", icon: Compass },
+  { key: "assessment", label: "Assessment", icon: MapPin },
+  { key: "review", label: "Review", icon: ClipboardCheck },
+] as const;
+
+/** Which form fields belong to (and must validate before leaving) each step. */
+const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
+  ["personMet", "personPhone", "relationship", "gpsLatitude", "gpsLongitude"],
+  ["landmark", "propertyType", "localityType", "occupancyStatus"],
+  [
+    "structureType",
+    "occupancyLevel",
+    "floorsInBuilding",
+    "locatedOnFloor",
+    "flatsOnFloor",
+    "wingsInBuilding",
+    "liftsStaircases",
+  ],
+  ["yearOfConstruction", "constructionStage", "workDescription"],
+  ["boundaryEast", "boundaryWest", "boundaryNorth", "boundarySouth"],
+  ["approachRoadCondition", "areaSqFt", "ratePerSqFt", "negativePoints", "agentOpinion"],
+  [], // Review
+];
+
+// ---------------------------------------------------------------------------
+// Reusable field renderers (kept local; consistent labels + validation msgs)
+// ---------------------------------------------------------------------------
+
+type FormType = ReturnType<typeof useForm<FieldVisitFormValues>>;
+
+function TextField({
+  form,
+  name,
+  label,
+  placeholder,
+  type = "text",
+}: {
+  form: FormType;
+  name: Path<FieldVisitFormValues>;
+  label: string;
+  placeholder?: string;
+  type?: string;
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <Input
+            {...field}
+            value={(field.value as string | number | undefined) ?? ""}
+            type={type}
+            inputMode={type === "number" ? "decimal" : undefined}
+            placeholder={placeholder}
+          />
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function TextAreaField({
+  form,
+  name,
+  label,
+  placeholder,
+}: {
+  form: FormType;
+  name: Path<FieldVisitFormValues>;
+  label: string;
+  placeholder?: string;
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <Textarea
+            {...field}
+            value={(field.value as string | undefined) ?? ""}
+            placeholder={placeholder}
+          />
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+function SelectField({
+  form,
+  name,
+  label,
+  options,
+  placeholder,
+}: {
+  form: FormType;
+  name: Path<FieldVisitFormValues>;
+  label: string;
+  options: readonly string[];
+  placeholder?: string;
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <Select value={(field.value as string | undefined) ?? ""} onValueChange={field.onChange}>
+            <SelectTrigger>
+              <SelectValue placeholder={placeholder ?? `Select ${label.toLowerCase()}`} />
+            </SelectTrigger>
+            <SelectContent>
+              {options.map((opt) => (
+                <SelectItem key={opt} value={opt}>
+                  {opt}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
+// ---------------------------------------------------------------------------
+// GPS panel
+// ---------------------------------------------------------------------------
+
+function GpsPanel({
+  gps,
+  latitude,
+  longitude,
+}: {
+  gps: ReturnType<typeof useGeolocation>;
+  latitude: number | undefined;
+  longitude: number | undefined;
+}) {
+  const captured = latitude != null && longitude != null;
+  return (
+    <div className="rounded-md border p-4">
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-2">
+          <MapPin className={`h-4 w-4 ${captured ? "text-green-600" : "text-muted-foreground"}`} />
+          <span className="text-sm font-medium">
+            GPS Location <span className="text-destructive">*</span>
+          </span>
+        </div>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => void gps.capture()}
+          disabled={gps.isCapturing}
+        >
+          <RefreshCw className={`mr-2 h-3.5 w-3.5 ${gps.isCapturing ? "animate-spin" : ""}`} />
+          {captured ? "Recapture" : "Capture GPS"}
+        </Button>
+      </div>
+
+      {captured ? (
+        <div className="mt-3 grid grid-cols-2 gap-4">
+          <ReadOnlyField label="Latitude" value={latitude!.toFixed(6)} />
+          <ReadOnlyField label="Longitude" value={longitude!.toFixed(6)} />
+        </div>
+      ) : (
+        <p
+          className={`mt-2 text-sm ${
+            gps.status === "denied" || gps.status === "error" || gps.status === "unavailable"
+              ? "text-destructive"
+              : "text-muted-foreground"
+          }`}
+        >
+          {gps.message || "GPS is required. Tap “Capture GPS” to record your location."}
+        </p>
+      )}
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// The wizard
+// ---------------------------------------------------------------------------
+
+function FieldVisitWizard({
   caseId,
+  autoFill,
+  engineerName,
   onSubmitted,
 }: {
   caseId: string;
+  autoFill: AutoFill | null;
+  engineerName: string;
   onSubmitted: (visit: FieldVisit) => void;
 }) {
+  const [stepIndex, setStepIndex] = useState(0);
+  const gps = useGeolocation({ autoCapture: true });
+
   const form = useForm<FieldVisitFormValues>({
     resolver: zodResolver(fieldVisitFormSchema),
+    mode: "onTouched",
     defaultValues: {
-      floor: "",
-      building: "",
-      ageOfBuilding: "",
-      sqFeet: "",
-    },
+      personMet: "",
+      personPhone: "",
+      relationship: undefined,
+      gpsLatitude: undefined,
+      gpsLongitude: undefined,
+      landmark: "",
+      propertyType: undefined,
+      localityType: undefined,
+      occupancyStatus: undefined,
+      structureType: undefined,
+      occupancyLevel: "",
+      floorsInBuilding: "",
+      locatedOnFloor: "",
+      flatsOnFloor: "",
+      wingsInBuilding: "",
+      liftsStaircases: "",
+      yearOfConstruction: "",
+      constructionStage: "",
+      workDescription: "",
+      boundaryEast: "",
+      boundaryWest: "",
+      boundaryNorth: "",
+      boundarySouth: "",
+      approachRoadCondition: undefined,
+      areaSqFt: "",
+      ratePerSqFt: "",
+      negativePoints: "",
+      agentOpinion: "",
+      finalRemarks: "",
+    } as unknown as FieldVisitFormValues,
   });
+
+  // Keep the form's GPS values in sync with the latest capture.
+  const gpsLat = gps.coords?.latitude;
+  const gpsLng = gps.coords?.longitude;
+  if (gpsLat != null && form.getValues("gpsLatitude") !== gpsLat) {
+    form.setValue("gpsLatitude", gpsLat, { shouldValidate: true });
+  }
+  if (gpsLng != null && form.getValues("gpsLongitude") !== gpsLng) {
+    form.setValue("gpsLongitude", gpsLng, { shouldValidate: true });
+  }
 
   const submit = useMutation({
     mutationFn: async (values: FieldVisitFormValues) => {
@@ -65,7 +386,7 @@ function FieldVisitForm({
       return api_submitFieldVisit(token, caseId, values);
     },
     onSuccess: (visit) => {
-      toast.success("Field visit submitted");
+      toast.success("Field visit report submitted");
       onSubmitted(visit);
     },
     onError: (error) => {
@@ -73,67 +394,426 @@ function FieldVisitForm({
     },
   });
 
+  const isReview = stepIndex === STEPS.length - 1;
+  const progress = Math.round(((stepIndex + 1) / STEPS.length) * 100);
+  const gpsReady = gps.status === "granted" && gpsLat != null && gpsLng != null;
+
+  const goNext = async () => {
+    const fields = STEP_FIELDS[stepIndex] ?? [];
+    const valid = await form.trigger(fields);
+    if (!valid) return;
+    // Step 1 additionally requires a live GPS capture.
+    if (stepIndex === 0 && !gpsReady) {
+      toast.error("GPS location is required before continuing.");
+      return;
+    }
+    setStepIndex((i) => Math.min(i + 1, STEPS.length - 1));
+  };
+
+  const goBack = () => setStepIndex((i) => Math.max(i - 1, 0));
+
+  const onFinalSubmit = () => {
+    if (!gpsReady) {
+      toast.error("GPS location is required to submit.");
+      setStepIndex(0);
+      return;
+    }
+    void form.handleSubmit(
+      (values) => submit.mutate(values),
+      () => {
+        toast.error("Please complete all required fields before submitting.");
+      },
+    )();
+  };
+
+  const v = form.watch();
+
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="space-y-4">
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-4 w-4" />
-          Field Visit Form
+          Field Visit Report
         </CardTitle>
+
+        {/* Stepper + progress */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between text-xs">
+            <span className="font-medium">
+              Step {stepIndex + 1} of {STEPS.length}: {STEPS[stepIndex]!.label}
+            </span>
+            <span className="text-muted-foreground">{progress}%</span>
+          </div>
+          <Progress value={progress} />
+          <div className="flex flex-wrap gap-1.5">
+            {STEPS.map((s, i) => {
+              const Icon = s.icon;
+              const state = i < stepIndex ? "done" : i === stepIndex ? "current" : "upcoming";
+              return (
+                <div
+                  key={s.key}
+                  className={`flex items-center gap-1 rounded-full border px-2.5 py-1 text-xs ${
+                    state === "current"
+                      ? "border-primary bg-primary/10 text-primary"
+                      : state === "done"
+                        ? "border-green-600/40 bg-green-600/10 text-green-700"
+                        : "text-muted-foreground"
+                  }`}
+                >
+                  {state === "done" ? (
+                    <CheckCircle2 className="h-3 w-3" />
+                  ) : (
+                    <Icon className="h-3 w-3" />
+                  )}
+                  <span className="hidden sm:inline">{s.label}</span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
       </CardHeader>
-      <CardContent className="px-0 pb-0">
+
+      <CardContent>
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit((values) => submit.mutate(values))}
-            className="flex flex-col"
-          >
-            <div className="grid grid-cols-1 gap-6 px-6 pb-4 sm:grid-cols-2">
-              <FormField
-                control={form.control}
-                name="floor"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Floor</FormLabel>
-                    <Input {...field} placeholder="e.g. 3rd floor" />
-                    <FormMessage />
-                  </FormItem>
+          <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+            {/* STEP 1 — Visit details */}
+            {stepIndex === 0 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <ReadOnlyField label="Date of Visit" value={new Date().toLocaleDateString()} />
+                  <ReadOnlyField label="Engineer Name" value={engineerName} />
+                  <div />
+                </div>
+                <GpsPanel gps={gps} latitude={gpsLat} longitude={gpsLng} />
+                <Separator />
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <TextField
+                    form={form}
+                    name="personMet"
+                    label="Name of Person Met"
+                    placeholder="e.g. Rajesh Kumar"
+                  />
+                  <TextField
+                    form={form}
+                    name="personPhone"
+                    label="Phone Number"
+                    placeholder="e.g. 9876543210"
+                  />
+                  <SelectField
+                    form={form}
+                    name="relationship"
+                    label="Relationship with Property"
+                    options={relationshipOptions}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* STEP 2 — Property details */}
+            {stepIndex === 1 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <ReadOnlyField label="Bank Name" value={autoFill?.bankName ?? "—"} />
+                  <ReadOnlyField label="Customer Name" value={autoFill?.customerName ?? "—"} />
+                  <ReadOnlyField label="Complete Address" value={autoFill?.address ?? "—"} />
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <TextField
+                    form={form}
+                    name="landmark"
+                    label="Landmark"
+                    placeholder="e.g. Near City Hospital"
+                  />
+                  <SelectField
+                    form={form}
+                    name="propertyType"
+                    label="Type of Property"
+                    options={propertyTypeOptions}
+                  />
+                  <SelectField
+                    form={form}
+                    name="localityType"
+                    label="Type of Locality"
+                    options={localityTypeOptions}
+                  />
+                  <SelectField
+                    form={form}
+                    name="occupancyStatus"
+                    label="Occupancy Status"
+                    options={occupancyStatusOptions}
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* STEP 3 — Building information */}
+            {stepIndex === 2 && (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <SelectField
+                  form={form}
+                  name="structureType"
+                  label="Type of Structure"
+                  options={structureTypeOptions}
+                />
+                <TextField
+                  form={form}
+                  name="occupancyLevel"
+                  label="Occupancy Level (%)"
+                  type="number"
+                  placeholder="0 - 100"
+                />
+                <TextField
+                  form={form}
+                  name="floorsInBuilding"
+                  label="No. of Floors in Building"
+                  type="number"
+                  placeholder="e.g. 12"
+                />
+                <TextField
+                  form={form}
+                  name="locatedOnFloor"
+                  label="Located on Floor No."
+                  placeholder="e.g. 3rd"
+                />
+                <TextField
+                  form={form}
+                  name="flatsOnFloor"
+                  label="No. of Flats on the Floor"
+                  type="number"
+                  placeholder="e.g. 4"
+                />
+                <TextField
+                  form={form}
+                  name="wingsInBuilding"
+                  label="No. of Wings in Building"
+                  type="number"
+                  placeholder="e.g. 2"
+                />
+                <TextField
+                  form={form}
+                  name="liftsStaircases"
+                  label="No. of Lifts/Staircases"
+                  type="number"
+                  placeholder="e.g. 2"
+                />
+              </div>
+            )}
+
+            {/* STEP 4 — Construction details */}
+            {stepIndex === 3 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <TextField
+                    form={form}
+                    name="yearOfConstruction"
+                    label="Year of Construction"
+                    type="number"
+                    placeholder="e.g. 2015"
+                  />
+                  <TextField
+                    form={form}
+                    name="constructionStage"
+                    label="Construction Stage (%)"
+                    type="number"
+                    placeholder="0 - 100"
+                  />
+                </div>
+                {v.occupancyStatus !== "Under Construction" && (
+                  <p className="text-xs text-muted-foreground">
+                    Occupancy status is “{v.occupancyStatus ?? "—"}”. For a completed property the
+                    construction stage is typically 100%.
+                  </p>
                 )}
-              />
-              <FormField
-                control={form.control}
-                name="building"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Building</FormLabel>
-                    <Input {...field} placeholder="e.g. Block A" />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="ageOfBuilding"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Age of Building</FormLabel>
-                    <Input {...field} placeholder="e.g. 12 years" />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-              <FormField
-                control={form.control}
-                name="sqFeet"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Sq. Feet</FormLabel>
-                    <Input {...field} placeholder="e.g. 1450" />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                <TextAreaField
+                  form={form}
+                  name="workDescription"
+                  label="Description of Work (optional)"
+                  placeholder="Any notes about the construction/work in progress"
+                />
+              </div>
+            )}
+
+            {/* STEP 5 — Property boundaries */}
+            {stepIndex === 4 && (
+              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                <TextField form={form} name="boundaryEast" label="Boundary — East" />
+                <TextField form={form} name="boundaryWest" label="Boundary — West" />
+                <TextField form={form} name="boundaryNorth" label="Boundary — North" />
+                <TextField form={form} name="boundarySouth" label="Boundary — South" />
+              </div>
+            )}
+
+            {/* STEP 6 — Assessment details */}
+            {stepIndex === 5 && (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <SelectField
+                    form={form}
+                    name="approachRoadCondition"
+                    label="Condition of Approach Road"
+                    options={approachRoadOptions}
+                  />
+                  <TextField
+                    form={form}
+                    name="areaSqFt"
+                    label="Area of Property (Sq. Ft.)"
+                    type="number"
+                    placeholder="e.g. 1450"
+                  />
+                  <TextField
+                    form={form}
+                    name="ratePerSqFt"
+                    label="Rate per Sq. Ft."
+                    type="number"
+                    placeholder="e.g. 5200"
+                  />
+                </div>
+                <TextAreaField
+                  form={form}
+                  name="negativePoints"
+                  label="Any Negative Points (optional)"
+                  placeholder="e.g. Low-lying area, drainage issues"
+                />
+                <TextAreaField
+                  form={form}
+                  name="agentOpinion"
+                  label="Agent Opinion (optional)"
+                  placeholder="Local agent's view on the property/value"
+                />
+              </div>
+            )}
+
+            {/* STEP 7 — Review */}
+            {isReview && (
+              <div className="space-y-6">
+                <div
+                  className={`flex items-center gap-2 rounded-md border px-3 py-2 ${
+                    gpsReady
+                      ? "border-green-600/40 bg-green-600/10"
+                      : "border-destructive/40 bg-destructive/10"
+                  }`}
+                >
+                  <MapPin
+                    className={`h-4 w-4 ${gpsReady ? "text-green-600" : "text-destructive"}`}
+                  />
+                  <span className="text-sm">
+                    {gpsReady
+                      ? `GPS confirmed: ${gpsLat!.toFixed(6)}, ${gpsLng!.toFixed(6)}`
+                      : "GPS is not captured. Return to Step 1 to capture it before submitting."}
+                  </span>
+                  {!gpsReady && (
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="ml-auto"
+                      onClick={() => setStepIndex(0)}
+                    >
+                      Fix
+                    </Button>
+                  )}
+                </div>
+
+                <ReviewSection title="Case (auto-filled)">
+                  <ReadOnlyField label="Case Number" value={autoFill?.caseNumber ?? "—"} />
+                  <ReadOnlyField label="Request Number" value={autoFill?.requestNumber ?? "—"} />
+                  <ReadOnlyField label="Bank" value={autoFill?.bankName ?? "—"} />
+                  <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
+                  <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
+                  <ReadOnlyField label="Engineer" value={engineerName} />
+                  <ReadOnlyField label="Date of Visit" value={new Date().toLocaleDateString()} />
+                </ReviewSection>
+
+                <ReviewSection title="Visit Details">
+                  <ReadOnlyField label="Person Met" value={v.personMet} />
+                  <ReadOnlyField label="Phone" value={v.personPhone} />
+                  <ReadOnlyField label="Relationship" value={v.relationship ?? ""} />
+                </ReviewSection>
+
+                <ReviewSection title="Property">
+                  <ReadOnlyField label="Landmark" value={v.landmark} />
+                  <ReadOnlyField label="Property Type" value={v.propertyType ?? ""} />
+                  <ReadOnlyField label="Locality" value={v.localityType ?? ""} />
+                  <ReadOnlyField label="Occupancy" value={v.occupancyStatus ?? ""} />
+                </ReviewSection>
+
+                <ReviewSection title="Building">
+                  <ReadOnlyField label="Structure" value={v.structureType ?? ""} />
+                  <ReadOnlyField label="Occupancy Level (%)" value={v.occupancyLevel} />
+                  <ReadOnlyField label="Floors in Building" value={v.floorsInBuilding} />
+                  <ReadOnlyField label="Located on Floor" value={v.locatedOnFloor} />
+                  <ReadOnlyField label="Flats on Floor" value={v.flatsOnFloor} />
+                  <ReadOnlyField label="Wings" value={v.wingsInBuilding} />
+                  <ReadOnlyField label="Lifts/Staircases" value={v.liftsStaircases} />
+                </ReviewSection>
+
+                <ReviewSection title="Construction">
+                  <ReadOnlyField label="Year of Construction" value={v.yearOfConstruction} />
+                  <ReadOnlyField label="Construction Stage (%)" value={v.constructionStage} />
+                  <ReadOnlyField label="Work Description" value={v.workDescription ?? ""} />
+                </ReviewSection>
+
+                <ReviewSection title="Boundaries">
+                  <ReadOnlyField label="East" value={v.boundaryEast} />
+                  <ReadOnlyField label="West" value={v.boundaryWest} />
+                  <ReadOnlyField label="North" value={v.boundaryNorth} />
+                  <ReadOnlyField label="South" value={v.boundarySouth} />
+                </ReviewSection>
+
+                <ReviewSection title="Assessment">
+                  <ReadOnlyField label="Approach Road" value={v.approachRoadCondition ?? ""} />
+                  <ReadOnlyField label="Area (Sq. Ft.)" value={v.areaSqFt} />
+                  <ReadOnlyField label="Rate per Sq. Ft." value={v.ratePerSqFt} />
+                  <ReadOnlyField label="Negative Points" value={v.negativePoints ?? ""} />
+                  <ReadOnlyField label="Agent Opinion" value={v.agentOpinion ?? ""} />
+                </ReviewSection>
+
+                <div className="space-y-2">
+                  <TextAreaField
+                    form={form}
+                    name="finalRemarks"
+                    label="Final Remarks (optional)"
+                    placeholder="Any closing remarks about the visit"
+                  />
+                </div>
+              </div>
+            )}
+
+            {/* Navigation */}
+            <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-between">
+              <Button
+                type="button"
+                variant="outline"
+                onClick={goBack}
+                disabled={stepIndex === 0 || submit.isPending}
+                className="w-full sm:w-auto"
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back
+              </Button>
+
+              {isReview ? (
+                <Button
+                  type="button"
+                  onClick={onFinalSubmit}
+                  disabled={submit.isPending || !gpsReady}
+                  className="w-full sm:w-auto"
+                >
+                  {submit.isPending ? "Submitting..." : "Submit Field Visit Report"}
+                </Button>
+              ) : (
+                <Button
+                  type="button"
+                  onClick={goNext}
+                  disabled={submit.isPending}
+                  className="w-full sm:w-auto"
+                >
+                  Save &amp; Continue
+                  <ArrowRight className="ml-2 h-4 w-4" />
+                </Button>
+              )}
             </div>
-            <FormActions submitText="Submit Field Visit" isSubmitting={submit.isPending} />
           </form>
         </Form>
       </CardContent>
@@ -141,14 +821,34 @@ function FieldVisitForm({
   );
 }
 
-/** Read-only view once a Field Visit has been submitted. */
-function SubmittedFieldVisit({ visit }: { visit: FieldVisit }) {
+function ReviewSection({ title, children }: { title: string; children: React.ReactNode }) {
+  return (
+    <div className="space-y-3">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
+// Submitted (read-only) view
+// ---------------------------------------------------------------------------
+
+function SubmittedFieldVisit({
+  visit,
+  autoFill,
+}: {
+  visit: FieldVisit;
+  autoFill: AutoFill | null;
+}) {
+  const gpsText =
+    visit.gpsLatitude && visit.gpsLongitude ? `${visit.gpsLatitude}, ${visit.gpsLongitude}` : "—";
   return (
     <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <MapPin className="h-4 w-4" />
-          Field Visit
+          Field Visit Report
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
@@ -157,30 +857,98 @@ function SubmittedFieldVisit({ visit }: { visit: FieldVisit }) {
           <span className="text-sm">
             Submitted
             {visit.submittedAt ? ` on ${new Date(visit.submittedAt).toLocaleString()}` : ""}. This
-            field visit is read-only.
+            report is read-only.
           </span>
         </div>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-          <ReadOnlyField label="Floor" value={visit.floor} />
-          <ReadOnlyField label="Building" value={visit.building} />
-          <ReadOnlyField label="Age of Building" value={visit.ageOfBuilding} />
-          <ReadOnlyField label="Sq. Feet" value={visit.sqFeet} />
-        </div>
+
+        <ReviewSection title="Case">
+          <ReadOnlyField label="Case Number" value={autoFill?.caseNumber ?? "—"} />
+          <ReadOnlyField label="Request Number" value={autoFill?.requestNumber ?? "—"} />
+          <ReadOnlyField label="Bank" value={autoFill?.bankName ?? "—"} />
+          <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
+          <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
+          <ReadOnlyField label="Date of Visit" value={visit.visitDate ?? "—"} />
+          <ReadOnlyField label="GPS Location" value={gpsText} />
+        </ReviewSection>
+
+        <ReviewSection title="Visit Details">
+          <ReadOnlyField label="Person Met" value={visit.personMet ?? "—"} />
+          <ReadOnlyField label="Phone" value={visit.personPhone ?? "—"} />
+          <ReadOnlyField label="Relationship" value={visit.relationship ?? "—"} />
+        </ReviewSection>
+
+        <ReviewSection title="Property">
+          <ReadOnlyField label="Landmark" value={visit.landmark ?? "—"} />
+          <ReadOnlyField label="Property Type" value={visit.propertyType ?? "—"} />
+          <ReadOnlyField label="Locality" value={visit.localityType ?? "—"} />
+          <ReadOnlyField label="Occupancy" value={visit.occupancyStatus ?? "—"} />
+        </ReviewSection>
+
+        <ReviewSection title="Building">
+          <ReadOnlyField label="Structure" value={visit.structureType ?? "—"} />
+          <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
+          <ReadOnlyField
+            label="Floors in Building"
+            value={visit.floorsInBuilding?.toString() ?? "—"}
+          />
+          <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
+          <ReadOnlyField label="Flats on Floor" value={visit.flatsOnFloor?.toString() ?? "—"} />
+          <ReadOnlyField label="Wings" value={visit.wingsInBuilding?.toString() ?? "—"} />
+          <ReadOnlyField
+            label="Lifts/Staircases"
+            value={visit.liftsStaircases?.toString() ?? "—"}
+          />
+        </ReviewSection>
+
+        <ReviewSection title="Construction">
+          <ReadOnlyField
+            label="Year of Construction"
+            value={visit.yearOfConstruction?.toString() ?? "—"}
+          />
+          <ReadOnlyField label="Construction Stage (%)" value={visit.constructionStage ?? "—"} />
+          <ReadOnlyField label="Work Description" value={visit.workDescription ?? "—"} />
+        </ReviewSection>
+
+        <ReviewSection title="Boundaries">
+          <ReadOnlyField label="East" value={visit.boundaryEast ?? "—"} />
+          <ReadOnlyField label="West" value={visit.boundaryWest ?? "—"} />
+          <ReadOnlyField label="North" value={visit.boundaryNorth ?? "—"} />
+          <ReadOnlyField label="South" value={visit.boundarySouth ?? "—"} />
+        </ReviewSection>
+
+        <ReviewSection title="Assessment">
+          <ReadOnlyField label="Approach Road" value={visit.approachRoadCondition ?? "—"} />
+          <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
+          <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
+          <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
+          <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
+        </ReviewSection>
+
+        {visit.finalRemarks && (
+          <ReviewSection title="Final Remarks">
+            <ReadOnlyField label="Remarks" value={visit.finalRemarks} />
+          </ReviewSection>
+        )}
       </CardContent>
     </Card>
   );
 }
 
+// ---------------------------------------------------------------------------
+// Page
+// ---------------------------------------------------------------------------
+
 function Page() {
   const { caseId } = Route.useParams();
   const queryClient = useQueryClient();
 
-  // Site Engineers cannot view the admin-only /cases list; point them at their
-  // own "My Cases" instead so the breadcrumb doesn't lead to a 403.
   const currentUser = useCurrentUser();
   const listsAllCases = can(currentUser?.role, "cases.view");
   const backTo = listsAllCases ? "/cases" : "/my-cases";
   const backLabel = listsAllCases ? "Cases" : "My Cases";
+  const engineerName = currentUser?.name ?? "—";
+
+  const autoFill = useAutoFill(caseId);
 
   const {
     data: fieldVisit,
@@ -192,43 +960,39 @@ function Page() {
     queryFn: async () => {
       const token = await getSessionToken();
       if (!token) throw new Error("Not authenticated");
-      // Server resolves undefined -> null so react-query treats it as loaded.
       const visit = await api_getMyFieldVisit(token, caseId);
       return visit ?? null;
     },
     enabled: !!caseId,
-    // A submitted field visit is permanent and read-only, so always confirm the
-    // current state against the server when this page mounts/regains focus.
-    // This prevents a stale cache from ever showing an editable form for a case
-    // that has already been submitted (which would let it be re-entered).
     staleTime: 0,
     refetchOnMount: "always",
     refetchOnWindowFocus: true,
   });
 
-  // Any existing field visit locks the page to read-only. This first version
-  // only ever writes SUBMITTED rows, and the unique constraint means a case can
-  // never have more than one, so if a visit exists it must not be re-entered.
-  const hasVisit = !!fieldVisit;
-
-  const header = (
-    <PageHeader
-      title="Field Visit"
-      description="Site inspection details for this case."
-      crumbs={[
-        { label: backLabel, link: { to: backTo } },
-        { label: caseId, link: { to: "/cases/$caseId", params: { caseId } } },
-        { label: "Field Visit" },
-      ]}
-      actions={
-        <Button asChild variant="outline">
-          <Link to="/cases/$caseId" params={{ caseId }}>
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Case
-          </Link>
-        </Button>
-      }
-    />
+  const header = useMemo(
+    () => (
+      <PageHeader
+        title="Field Visit"
+        description="Site inspection details for this case."
+        crumbs={[
+          { label: backLabel, link: { to: backTo } },
+          { label: caseId, link: { to: "/cases/$caseId", params: { caseId } } },
+          { label: "Field Visit" },
+        ]}
+        actions={
+          <>
+            {fieldVisit?.status === "SUBMITTED" && <Badge variant="secondary">Submitted</Badge>}
+            <Button asChild variant="outline">
+              <Link to="/cases/$caseId" params={{ caseId }}>
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to Case
+              </Link>
+            </Button>
+          </>
+        }
+      />
+    ),
+    [backLabel, backTo, caseId, fieldVisit?.status],
   );
 
   if (isLoading) {
@@ -261,36 +1025,18 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title="Field Visit"
-        description="Site inspection details for this case."
-        crumbs={[
-          { label: backLabel, link: { to: backTo } },
-          { label: caseId, link: { to: "/cases/$caseId", params: { caseId } } },
-          { label: "Field Visit" },
-        ]}
-        actions={
-          <>
-            {fieldVisit?.status === "SUBMITTED" && <Badge variant="secondary">Submitted</Badge>}
-            <Button asChild variant="outline">
-              <Link to="/cases/$caseId" params={{ caseId }}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Case
-              </Link>
-            </Button>
-          </>
-        }
-      />
-
-      {hasVisit && fieldVisit ? (
-        <SubmittedFieldVisit visit={fieldVisit} />
+      {header}
+      {fieldVisit ? (
+        <SubmittedFieldVisit visit={fieldVisit} autoFill={autoFill} />
       ) : (
-        <FieldVisitForm
+        <FieldVisitWizard
           caseId={caseId}
+          autoFill={autoFill}
+          engineerName={engineerName}
           onSubmitted={(visit) => {
-            // Reflect the new submission immediately and refresh case state.
             queryClient.setQueryData(["field-visit", caseId], visit);
             queryClient.invalidateQueries({ queryKey: ["field-visit", caseId] });
+            queryClient.invalidateQueries({ queryKey: ["case-field-visit", caseId] });
             queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
             queryClient.invalidateQueries({ queryKey: ["my-cases"] });
           }}

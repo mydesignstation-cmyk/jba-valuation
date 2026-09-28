@@ -71,10 +71,60 @@ export interface FieldVisit {
   caseId: string;
   /** Neon Auth UUID of the site engineer who owns this visit. */
   engineerId: string;
+
+  // Original first-version fields (retained for the existing working flow).
   floor: string;
   building: string;
   ageOfBuilding: string;
   sqFeet: string;
+
+  // Device-captured (auto). Present on expanded reports; optional because
+  // rows created by the basic version won't have them.
+  visitDate?: string;
+  gpsLatitude?: string;
+  gpsLongitude?: string;
+
+  // STEP 1 — Visit details
+  personMet?: string;
+  personPhone?: string;
+  relationship?: string;
+
+  // STEP 2 — Property details
+  landmark?: string;
+  propertyType?: string;
+  localityType?: string;
+  occupancyStatus?: string;
+
+  // STEP 3 — Building information
+  structureType?: string;
+  occupancyLevel?: string;
+  floorsInBuilding?: number;
+  locatedOnFloor?: string;
+  flatsOnFloor?: number;
+  wingsInBuilding?: number;
+  liftsStaircases?: number;
+
+  // STEP 4 — Construction details
+  yearOfConstruction?: number;
+  constructionStage?: string;
+  workDescription?: string;
+
+  // STEP 5 — Property boundaries
+  boundaryEast?: string;
+  boundaryWest?: string;
+  boundaryNorth?: string;
+  boundarySouth?: string;
+
+  // STEP 6 — Assessment details
+  approachRoadCondition?: string;
+  areaSqFt?: string;
+  ratePerSqFt?: string;
+  negativePoints?: string;
+  agentOpinion?: string;
+
+  // STEP 7 — Final remarks
+  finalRemarks?: string;
+
   status: FieldVisitStatus;
   createdAt: string;
   updatedAt: string;
