@@ -246,7 +246,7 @@ function Page() {
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Case Information */}
-        <Card>
+        <Card className="hidden">
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <FileText className="h-4 w-4" />

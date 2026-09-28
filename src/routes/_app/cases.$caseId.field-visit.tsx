@@ -197,7 +197,19 @@ function Page() {
       return visit ?? null;
     },
     enabled: !!caseId,
+    // A submitted field visit is permanent and read-only, so always confirm the
+    // current state against the server when this page mounts/regains focus.
+    // This prevents a stale cache from ever showing an editable form for a case
+    // that has already been submitted (which would let it be re-entered).
+    staleTime: 0,
+    refetchOnMount: "always",
+    refetchOnWindowFocus: true,
   });
+
+  // Any existing field visit locks the page to read-only. This first version
+  // only ever writes SUBMITTED rows, and the unique constraint means a case can
+  // never have more than one, so if a visit exists it must not be re-entered.
+  const hasVisit = !!fieldVisit;
 
   const header = (
     <PageHeader
@@ -270,7 +282,7 @@ function Page() {
         }
       />
 
-      {fieldVisit ? (
+      {hasVisit && fieldVisit ? (
         <SubmittedFieldVisit visit={fieldVisit} />
       ) : (
         <FieldVisitForm
