@@ -64,6 +64,23 @@ export interface ValuationCase {
   updatedAt: string;
 }
 
+export type FieldVisitStatus = "DRAFT" | "SUBMITTED";
+
+export interface FieldVisit {
+  id: string;
+  caseId: string;
+  /** Neon Auth UUID of the site engineer who owns this visit. */
+  engineerId: string;
+  floor: string;
+  building: string;
+  ageOfBuilding: string;
+  sqFeet: string;
+  status: FieldVisitStatus;
+  createdAt: string;
+  updatedAt: string;
+  submittedAt?: string;
+}
+
 export interface CaseHistoryEntry {
   id: string;
   caseId: string;

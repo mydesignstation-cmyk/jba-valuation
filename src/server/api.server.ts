@@ -5,10 +5,11 @@
  */
 
 import { getDb } from "@/db";
-import { customers, banks, branches, cases } from "@/db/schema";
+import { customers, banks, branches, cases, fieldVisits } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
-import type { Customer, Bank, Branch, ValuationCase, User } from "@/types";
+import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit } from "@/types";
 import { requireServerUser } from "@/server/auth.server";
+import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
 
 // ============================================================================
 // USERS (Neon Auth)
@@ -82,10 +83,7 @@ export async function api_getSiteEngineer(id: string): Promise<User | undefined>
 
 export async function api_listCustomers(): Promise<Customer[]> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(customers)
-      .orderBy(customers.created_at);
+    const rows = await getDb().select().from(customers).orderBy(customers.created_at);
 
     return rows.map((row) => {
       const customer: Customer = {
@@ -109,11 +107,7 @@ export async function api_listCustomers(): Promise<Customer[]> {
 
 export async function api_getCustomer(id: string): Promise<Customer | undefined> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(customers)
-      .where(eq(customers.id, id))
-      .limit(1);
+    const rows = await getDb().select().from(customers).where(eq(customers.id, id)).limit(1);
 
     if (!rows || rows.length === 0) {
       return undefined;
@@ -185,11 +179,7 @@ export async function api_updateCustomer(
   data: Partial<Customer>,
 ): Promise<Customer | undefined> {
   try {
-    const existing = await getDb()
-      .select()
-      .from(customers)
-      .where(eq(customers.id, id))
-      .limit(1);
+    const existing = await getDb().select().from(customers).where(eq(customers.id, id)).limit(1);
 
     if (!existing || existing.length === 0) {
       return undefined;
@@ -258,10 +248,7 @@ export async function api_deleteCustomer(id: string): Promise<boolean> {
 
 export async function api_listBanks(): Promise<Bank[]> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(banks)
-      .orderBy(banks.created_at);
+    const rows = await getDb().select().from(banks).orderBy(banks.created_at);
 
     return rows.map((row) => ({
       id: row.id,
@@ -277,11 +264,7 @@ export async function api_listBanks(): Promise<Bank[]> {
 
 export async function api_getBank(id: string): Promise<Bank | undefined> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(banks)
-      .where(eq(banks.id, id))
-      .limit(1);
+    const rows = await getDb().select().from(banks).where(eq(banks.id, id)).limit(1);
 
     if (!rows || rows.length === 0) return undefined;
     const row = rows[0];
@@ -325,11 +308,7 @@ export async function api_createBank(name: string): Promise<Bank> {
 
 export async function api_updateBank(id: string, name: string): Promise<Bank | undefined> {
   try {
-    const existing = await getDb()
-      .select()
-      .from(banks)
-      .where(eq(banks.id, id))
-      .limit(1);
+    const existing = await getDb().select().from(banks).where(eq(banks.id, id)).limit(1);
 
     if (!existing || existing.length === 0) return undefined;
 
@@ -376,10 +355,7 @@ export async function api_deleteBank(id: string): Promise<boolean> {
 
 export async function api_listBranches(): Promise<Branch[]> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(branches)
-      .orderBy(branches.created_at);
+    const rows = await getDb().select().from(branches).orderBy(branches.created_at);
 
     return rows.map((row) => ({
       id: row.id,
@@ -395,11 +371,7 @@ export async function api_listBranches(): Promise<Branch[]> {
 
 export async function api_getBranch(id: string): Promise<Branch | undefined> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(branches)
-      .where(eq(branches.id, id))
-      .limit(1);
+    const rows = await getDb().select().from(branches).where(eq(branches.id, id)).limit(1);
 
     if (!rows || rows.length === 0) return undefined;
     const row = rows[0];
@@ -443,11 +415,7 @@ export async function api_createBranch(name: string): Promise<Branch> {
 
 export async function api_updateBranch(id: string, name: string): Promise<Branch | undefined> {
   try {
-    const existing = await getDb()
-      .select()
-      .from(branches)
-      .where(eq(branches.id, id))
-      .limit(1);
+    const existing = await getDb().select().from(branches).where(eq(branches.id, id)).limit(1);
 
     if (!existing || existing.length === 0) return undefined;
 
@@ -494,10 +462,7 @@ export async function api_deleteBranch(id: string): Promise<boolean> {
 
 export async function api_listCases(): Promise<ValuationCase[]> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(cases)
-      .orderBy(cases.created_at);
+    const rows = await getDb().select().from(cases).orderBy(cases.created_at);
 
     return rows.map((row) => ({
       id: row.id,
@@ -520,11 +485,7 @@ export async function api_listCases(): Promise<ValuationCase[]> {
 
 export async function api_getCase(id: string): Promise<ValuationCase | undefined> {
   try {
-    const rows = await getDb()
-      .select()
-      .from(cases)
-      .where(eq(cases.id, id))
-      .limit(1);
+    const rows = await getDb().select().from(cases).where(eq(cases.id, id)).limit(1);
 
     if (!rows || rows.length === 0) return undefined;
     const row = rows[0];
@@ -624,11 +585,7 @@ export async function api_updateCase(
   },
 ): Promise<ValuationCase | undefined> {
   try {
-    const existing = await getDb()
-      .select()
-      .from(cases)
-      .where(eq(cases.id, id))
-      .limit(1);
+    const existing = await getDb().select().from(cases).where(eq(cases.id, id)).limit(1);
 
     if (!existing || existing.length === 0) return undefined;
 
@@ -643,11 +600,7 @@ export async function api_updateCase(
       updateData.assigned_engineer_id = data.assignedEngineerId;
     if (data.stage !== undefined) updateData.stage = data.stage;
 
-    const rows = await getDb()
-      .update(cases)
-      .set(updateData)
-      .where(eq(cases.id, id))
-      .returning();
+    const rows = await getDb().update(cases).set(updateData).where(eq(cases.id, id)).returning();
 
     if (!rows || rows.length === 0) return undefined;
     const row = rows[0];
@@ -721,5 +674,145 @@ export async function api_listMyCases(token: string | null | undefined): Promise
   } catch (error) {
     console.error("Failed to list my cases:", error);
     throw new Error("Failed to load your cases from database");
+  }
+}
+
+// ============================================================================
+// FIELD VISITS
+// ============================================================================
+//
+// Security model (mirrors api_listMyCases): the caller passes a Neon Auth
+// session TOKEN, never a user id. requireServerUser verifies the token against
+// Neon Auth's JWKS and derives the engineer id from the verified `sub` claim.
+// Before any Field Visit read/write we re-load the Case and assert that its
+// assigned_engineer_id equals the authenticated engineer's id, so an engineer
+// can only ever touch a Field Visit for a Case assigned to them.
+
+function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
+  const visit: FieldVisit = {
+    id: row.id,
+    caseId: row.case_id,
+    engineerId: row.engineer_id,
+    floor: row.floor,
+    building: row.building,
+    ageOfBuilding: row.age_of_building,
+    sqFeet: row.sq_feet,
+    status: row.status === "SUBMITTED" ? "SUBMITTED" : "DRAFT",
+    createdAt: row.created_at.toISOString(),
+    updatedAt: row.updated_at.toISOString(),
+  };
+  if (row.submitted_at) {
+    visit.submittedAt = row.submitted_at.toISOString();
+  }
+  return visit;
+}
+
+/**
+ * Load the Case and confirm it is assigned to the authenticated engineer.
+ * Throws "Not authenticated" / "Forbidden" (via requireServerUser) or
+ * "Forbidden" when the case is not owned by the caller. Returns the verified
+ * engineer's id for use as the trusted engineer_id.
+ */
+async function requireOwnedCase(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<{ engineerId: string }> {
+  const user = await requireServerUser(token, "SITE_ENGINEER");
+
+  const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const row = rows[0];
+  if (!row) {
+    throw new Error("Case not found");
+  }
+  if (row.assigned_engineer_id !== user.id) {
+    // Do not leak whether the case exists for someone else.
+    throw new Error("Forbidden");
+  }
+  return { engineerId: user.id };
+}
+
+/**
+ * Read the Field Visit for a Case the authenticated engineer owns.
+ * Returns undefined when no Field Visit has been created yet.
+ */
+export async function api_getMyFieldVisit(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<FieldVisit | undefined> {
+  await requireOwnedCase(token, caseId);
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(fieldVisits)
+      .where(eq(fieldVisits.case_id, caseId))
+      .limit(1);
+
+    const row = rows[0];
+    if (!row) return undefined;
+    return mapFieldVisitRow(row);
+  } catch (error) {
+    console.error("Failed to get field visit:", error);
+    throw new Error("Failed to load field visit from database");
+  }
+}
+
+/**
+ * Submit the Field Visit for a Case the authenticated engineer owns.
+ *
+ * Creates the Field Visit as SUBMITTED (this first version has no separate
+ * draft-save step; submission is the single write). The UNIQUE constraint on
+ * case_id plus an explicit pre-check prevent duplicate Field Visits: once a
+ * Field Visit exists for the Case, it is treated as submitted/read-only and
+ * re-submission is rejected.
+ */
+export async function api_submitFieldVisit(
+  token: string | null | undefined,
+  caseId: string,
+  input: unknown,
+): Promise<FieldVisit> {
+  const { engineerId } = await requireOwnedCase(token, caseId);
+
+  // Re-validate on the server: the browser is never the only gatekeeper.
+  const data = fieldVisitFormSchema.parse(input);
+
+  // Reject a second submission for the same Case (idempotency / no duplicates).
+  const existing = await getDb()
+    .select()
+    .from(fieldVisits)
+    .where(eq(fieldVisits.case_id, caseId))
+    .limit(1);
+  if (existing[0]) {
+    throw new Error("A field visit has already been submitted for this case");
+  }
+
+  try {
+    const now = new Date();
+    const rows = await getDb()
+      .insert(fieldVisits)
+      .values({
+        case_id: caseId,
+        engineer_id: engineerId,
+        floor: data.floor,
+        building: data.building,
+        age_of_building: data.ageOfBuilding,
+        sq_feet: data.sqFeet,
+        status: "SUBMITTED",
+        created_at: now,
+        updated_at: now,
+        submitted_at: now,
+      })
+      .returning();
+
+    const row = rows[0];
+    if (!row) throw new Error("Failed to retrieve created field visit");
+    return mapFieldVisitRow(row);
+  } catch (error) {
+    // A race that slips past the pre-check still hits the UNIQUE constraint.
+    if (error instanceof Error && error.message.includes("field_visits_case_id")) {
+      throw new Error("A field visit has already been submitted for this case");
+    }
+    console.error("Failed to submit field visit:", error);
+    throw new Error("Failed to submit field visit to database");
   }
 }

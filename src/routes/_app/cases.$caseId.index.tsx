@@ -345,71 +345,92 @@ function Page() {
         </Card>
       </div>
 
+      {/* Field Visit entry — Site Engineers submit the inspection here.
+          The Field Visit page itself enforces per-case ownership server-side. */}
+      {isSiteEngineer && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <MapPin className="h-4 w-4" />
+              Field Visit
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+            <p className="text-sm text-muted-foreground">
+              Record the site inspection details for this case.
+            </p>
+            <Button asChild>
+              <Link to="/cases/$caseId/field-visit" params={{ caseId: valuationCase.id }}>
+                <MapPin className="mr-2 h-4 w-4" />
+                Field Visit
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Workflow artifacts — field visit, notes and activity.
           Read-only for now; each tab has a clean slot for data landing later.
           Hidden for Site Engineers, who don't work the maker/checker flow. */}
       {!isSiteEngineer && (
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <ClipboardList className="h-4 w-4" />
-            Workflow
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Tabs defaultValue="field-visit">
-            <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-cols-4">
-              <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
-              <TabsTrigger value="maker">Maker Notes</TabsTrigger>
-              <TabsTrigger value="checker">Checker Notes</TabsTrigger>
-              <TabsTrigger value="history">History</TabsTrigger>
-            </TabsList>
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <ClipboardList className="h-4 w-4" />
+              Workflow
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <Tabs defaultValue="field-visit">
+              <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-cols-4">
+                <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
+                <TabsTrigger value="maker">Maker Notes</TabsTrigger>
+                <TabsTrigger value="checker">Checker Notes</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
+              </TabsList>
 
-            <TabsContent value="field-visit" className="mt-4">
-              <EmptyState
-                icon={MapPin}
-                title="No field visit submitted yet"
-                message="Once the site engineer submits the field visit, the inspection details and report PDF will appear here."
-                action={
-                  <Button asChild variant="outline" size="sm">
-                    <Link
-                      to="/cases/$caseId/field-visit"
-                      params={{ caseId: valuationCase.id }}
-                    >
-                      <MapPin className="mr-2 h-4 w-4" />
-                      Open field visit
-                    </Link>
-                  </Button>
-                }
-              />
-            </TabsContent>
+              <TabsContent value="field-visit" className="mt-4">
+                <EmptyState
+                  icon={MapPin}
+                  title="No field visit submitted yet"
+                  message="Once the site engineer submits the field visit, the inspection details and report PDF will appear here."
+                  action={
+                    <Button asChild variant="outline" size="sm">
+                      <Link to="/cases/$caseId/field-visit" params={{ caseId: valuationCase.id }}>
+                        <MapPin className="mr-2 h-4 w-4" />
+                        Open field visit
+                      </Link>
+                    </Button>
+                  }
+                />
+              </TabsContent>
 
-            <TabsContent value="maker" className="mt-4">
-              <EmptyState
-                icon={ClipboardCheck}
-                title="No maker notes yet"
-                message="Notes recorded by the maker while preparing the valuation will show here."
-              />
-            </TabsContent>
+              <TabsContent value="maker" className="mt-4">
+                <EmptyState
+                  icon={ClipboardCheck}
+                  title="No maker notes yet"
+                  message="Notes recorded by the maker while preparing the valuation will show here."
+                />
+              </TabsContent>
 
-            <TabsContent value="checker" className="mt-4">
-              <EmptyState
-                icon={CheckCircle2}
-                title="No checker notes yet"
-                message="Review notes and approvals from the checker will show here."
-              />
-            </TabsContent>
+              <TabsContent value="checker" className="mt-4">
+                <EmptyState
+                  icon={CheckCircle2}
+                  title="No checker notes yet"
+                  message="Review notes and approvals from the checker will show here."
+                />
+              </TabsContent>
 
-            <TabsContent value="history" className="mt-4">
-              <EmptyState
-                icon={History}
-                title="No activity recorded yet"
-                message="A timeline of stage changes and actions on this case will appear here."
-              />
-            </TabsContent>
-          </Tabs>
-        </CardContent>
-      </Card>
+              <TabsContent value="history" className="mt-4">
+                <EmptyState
+                  icon={History}
+                  title="No activity recorded yet"
+                  message="A timeline of stage changes and actions on this case will appear here."
+                />
+              </TabsContent>
+            </Tabs>
+          </CardContent>
+        </Card>
       )}
     </div>
   );
