@@ -10,6 +10,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit } from "@/types";
 import { requireServerUser } from "@/server/auth.server";
 import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
+import { buildFieldVisitPdf } from "@/server/fieldVisitPdf.server";
 
 // ============================================================================
 // USERS (Neon Auth)
@@ -963,5 +964,88 @@ export async function api_submitFieldVisit(
     }
     console.error("Failed to submit field visit:", error);
     throw new Error("Failed to submit field visit to database");
+  }
+}
+
+/**
+ * Result of an on-demand Field Visit PDF generation.
+ * `base64` is the PDF bytes base64-encoded for JSON transport back to the
+ * client (the existing createServerFn layer is JSON-only). Nothing is stored.
+ */
+export interface FieldVisitPdfResult {
+  filename: string;
+  base64: string;
+}
+
+/**
+ * Generate a Field Visit PDF on demand from the LATEST saved data in Neon.
+ *
+ * This performs a fresh read every call (field visit + case + customer + bank),
+ * so a re-download after any edit reflects the current values. It does not
+ * store the PDF, snapshot the visit, or write anything. Authorization mirrors
+ * api_getCaseFieldVisit: no token/role check here — the case-detail and
+ * field-visit routes guard access, and this is exposed for every role allowed
+ * to view a submitted Field Visit.
+ *
+ * Throws when the case has no Field Visit or the visit is not yet SUBMITTED,
+ * so the PDF is only ever produced for a submitted visit.
+ */
+export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPdfResult> {
+  try {
+    // Latest Field Visit for the case (case_id is UNIQUE).
+    const visitRows = await getDb()
+      .select()
+      .from(fieldVisits)
+      .where(eq(fieldVisits.case_id, caseId))
+      .limit(1);
+    const visitRow = visitRows[0];
+    if (!visitRow) {
+      throw new Error("No field visit exists for this case");
+    }
+    const visit = mapFieldVisitRow(visitRow);
+    if (visit.status !== "SUBMITTED") {
+      throw new Error("Field visit has not been submitted yet");
+    }
+
+    // Case-derived header values, read fresh alongside the visit.
+    const caseRows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+    const caseRow = caseRows[0];
+    if (!caseRow) {
+      throw new Error("Case not found");
+    }
+
+    const [customerRows, bankRows] = await Promise.all([
+      getDb().select().from(customers).where(eq(customers.id, caseRow.customer_id)).limit(1),
+      getDb().select().from(banks).where(eq(banks.id, caseRow.bank_id)).limit(1),
+    ]);
+    const customerRow = customerRows[0];
+    const bankRow = bankRows[0];
+
+    const bytes = await buildFieldVisitPdf(visit, {
+      caseNumber: caseRow.case_number,
+      requestNumber: caseRow.request_number,
+      bankName: bankRow?.name ?? "",
+      customerName: customerRow?.name ?? "",
+      address: customerRow?.address ?? "",
+    });
+
+    // Base64-encode for JSON transport (createServerFn is JSON-only).
+    const base64 = Buffer.from(bytes).toString("base64");
+
+    // Filesystem-safe filename derived from the case number.
+    const safeCaseNumber = (caseRow.case_number || "field-visit").replace(/[^\w.-]+/g, "_");
+    return { filename: `field-visit-${safeCaseNumber}.pdf`, base64 };
+  } catch (error) {
+    console.error("Failed to generate field visit PDF:", error);
+    // Preserve the specific "not submitted / not found" messages for the UI.
+    if (
+      error instanceof Error &&
+      (error.message.includes("field visit") ||
+        error.message.includes("Field visit") ||
+        error.message.includes("Case not found"))
+    ) {
+      throw error;
+    }
+    throw new Error("Failed to generate field visit PDF");
   }
 }

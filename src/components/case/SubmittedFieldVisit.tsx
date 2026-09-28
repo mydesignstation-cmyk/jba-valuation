@@ -3,17 +3,23 @@ import {
   CheckCircle2,
   ClipboardCheck,
   Compass,
+  Download,
   Hammer,
   Home,
   Landmark as LandmarkIcon,
+  Loader2,
   Route as RouteIcon,
   User as UserIcon,
 } from "lucide-react";
-import type { ComponentType, ReactNode } from "react";
+import { useState, type ComponentType, type ReactNode } from "react";
+import { toast } from "sonner";
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
+import { api_getFieldVisitPdf } from "@/data/fieldVisit.functions";
+import { downloadBase64File } from "@/lib/download";
 import type { FieldVisit } from "@/types";
 
 type IconType = ComponentType<{ className?: string }>;
@@ -50,19 +56,64 @@ function SectionCard({
   children: ReactNode;
 }) {
   return (
-    <Card>
+    <Card className="mb-4 break-inside-avoid shadow-sm transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
-          <Icon className="h-4 w-4 text-primary" />
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" />
+          </span>
           {title}
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 2xl:grid-cols-5">
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
           {children}
         </div>
       </CardContent>
     </Card>
+  );
+}
+
+/**
+ * "Download Field Visit PDF" action. Generates the PDF on demand from the
+ * latest saved data in Neon (server-side) and downloads it to the device.
+ * Only rendered/enabled for a SUBMITTED visit; nothing is stored client- or
+ * server-side.
+ */
+function DownloadFieldVisitPdfButton({ visit }: { visit: FieldVisit }) {
+  const [isGenerating, setIsGenerating] = useState(false);
+  const isSubmitted = visit.status === "SUBMITTED";
+
+  const handleDownload = async () => {
+    if (!isSubmitted || isGenerating) return;
+    setIsGenerating(true);
+    try {
+      const { filename, base64 } = await api_getFieldVisitPdf(visit.caseId);
+      downloadBase64File(base64, filename, "application/pdf");
+      toast.success("Field Visit PDF downloaded");
+    } catch (error) {
+      toast.error((error as Error).message || "Failed to generate Field Visit PDF");
+    } finally {
+      setIsGenerating(false);
+    }
+  };
+
+  return (
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      className="w-fit"
+      disabled={!isSubmitted || isGenerating}
+      onClick={handleDownload}
+    >
+      {isGenerating ? (
+        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+      ) : (
+        <Download className="mr-2 h-4 w-4" />
+      )}
+      {isGenerating ? "Generating…" : "Download Field Visit PDF"}
+    </Button>
   );
 }
 
@@ -85,9 +136,9 @@ export function SubmittedFieldVisit({
   const submittedOn = visit.submittedAt ? new Date(visit.submittedAt).toLocaleString() : null;
 
   return (
-    <div className="space-y-4">
+    <div>
       {/* Header banner — clearly shows who submitted and when */}
-      <Card className="border-green-600/30 bg-green-600/5">
+      <Card className="mb-4 border-green-600/30 bg-green-600/5 shadow-sm">
         <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-start gap-3">
             <div className="mt-0.5 rounded-full bg-green-600/15 p-2">
@@ -102,12 +153,19 @@ export function SubmittedFieldVisit({
               </p>
             </div>
           </div>
-          <Badge variant="secondary" className="w-fit">
-            Read-only
-          </Badge>
+          <div className="flex flex-col items-start gap-2 sm:items-end">
+            <Badge variant="secondary" className="w-fit">
+              Read-only
+            </Badge>
+            <DownloadFieldVisitPdfButton visit={visit} />
+          </div>
         </CardContent>
       </Card>
 
+      {/* Masonry layout: cards flow into 1/2/3 columns and pack tightly by
+          height, so short cards sit beneath short cards with no ragged gaps.
+          Per-card spacing is handled by `mb-4` + `break-inside-avoid`. */}
+      <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
       <SectionCard title="Case & Location" icon={LandmarkIcon}>
         <ReadOnlyField label="Case Number" value={autoFill?.caseNumber ?? "—"} />
         <ReadOnlyField label="Request Number" value={autoFill?.requestNumber ?? "—"} />
@@ -173,6 +231,7 @@ export function SubmittedFieldVisit({
           <ReadOnlyField label="Remarks" value={visit.finalRemarks} />
         </SectionCard>
       )}
+      </div>
     </div>
   );
 }

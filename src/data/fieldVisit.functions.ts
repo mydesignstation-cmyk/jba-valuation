@@ -14,12 +14,15 @@ import {
   api_getMyFieldVisit as db_getMyFieldVisit,
   api_getCaseFieldVisit as db_getCaseFieldVisit,
   api_submitFieldVisit as db_submitFieldVisit,
+  api_getFieldVisitPdf as db_getFieldVisitPdf,
+  type FieldVisitPdfResult,
 } from "@/server/api.server";
 import type { FieldVisit } from "@/types";
 import type { FieldVisitFormValues } from "@/schemas/fieldVisit.schema";
 
 type GetFieldVisitInput = { token: string; caseId: string };
 type GetCaseFieldVisitInput = { caseId: string };
+type GetFieldVisitPdfInput = { caseId: string };
 type SubmitFieldVisitInput = {
   token: string;
   caseId: string;
@@ -37,6 +40,10 @@ const getCaseFieldVisitFn = createServerFn({ method: "GET" })
 const submitFieldVisitFn = createServerFn({ method: "POST" })
   .validator((input: SubmitFieldVisitInput) => input)
   .handler(({ data }) => db_submitFieldVisit(data.token, data.caseId, data.data));
+
+const getFieldVisitPdfFn = createServerFn({ method: "GET" })
+  .validator((input: GetFieldVisitPdfInput) => input)
+  .handler(({ data }) => db_getFieldVisitPdf(data.caseId));
 
 /**
  * Read the current engineer's Field Visit for a Case they own.
@@ -70,4 +77,17 @@ export function api_submitFieldVisit(
   data: FieldVisitFormValues,
 ): Promise<FieldVisit> {
   return submitFieldVisitFn({ data: { token, caseId, data } });
+}
+
+/**
+ * Generate the Field Visit PDF for a Case on demand, from the LATEST saved
+ * data in Neon. Available to any role allowed to view the case detail page
+ * (authorization is enforced by the route guard, matching api_getCaseFieldVisit).
+ *
+ * Resolves to `{ filename, base64 }`; the client decodes the base64 to a Blob
+ * and triggers a download. Rejects when the Field Visit is missing or not yet
+ * submitted. Nothing is stored — re-calling after an edit reflects the change.
+ */
+export function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPdfResult> {
+  return getFieldVisitPdfFn({ data: { caseId } });
 }

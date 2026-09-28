@@ -209,45 +209,35 @@ function Page() {
 
   return (
     <div className="space-y-6">
-      <PageHeader
-        title={valuationCase.caseNumber}
-        description={`Request ${valuationCase.requestNumber}`}
-        crumbs={[{ label: backLabel, link: { to: backTo } }, { label: valuationCase.caseNumber }]}
-        actions={
-          <>
+      {/* Header: back button sits immediately before the case number title so
+          it's easy to return to the list. Request number is intentionally not
+          shown here — it lives in the overview strip inside the tab. */}
+      <div className="space-y-3">
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex min-w-0 items-center gap-3">
+            <Button
+              asChild
+              variant="outline"
+              size="icon"
+              className="h-9 w-9 shrink-0"
+              aria-label={backAction}
+              title={backAction}
+            >
+              <Link to={backTo}>
+                <ArrowLeft className="h-4 w-4" />
+              </Link>
+            </Button>
+            <h1 className="truncate text-2xl font-semibold tracking-tight sm:text-3xl">
+              {valuationCase.caseNumber}
+            </h1>
+          </div>
+          <div className="flex shrink-0 items-center gap-2">
             <Badge variant={stageBadgeVariant[valuationCase.stage]} className="text-sm">
               {stageLabels[valuationCase.stage]}
             </Badge>
-            <Button asChild variant="outline">
-              <Link to={backTo}>
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                {backAction}
-              </Link>
-            </Button>
-          </>
-        }
-      />
-
-      {/* Overview strip — the essentials at a glance */}
-      <Card>
-        <CardContent className="grid grid-cols-2 gap-4 py-5 sm:grid-cols-3 lg:grid-cols-5">
-          <OverviewItem label="Case Number" value={valuationCase.caseNumber} />
-          <OverviewItem label="Request Number" value={valuationCase.requestNumber} />
-          <OverviewItem label="Customer" value={customerName} />
-          <OverviewItem
-            label="Stage"
-            value={
-              <Badge variant={stageBadgeVariant[valuationCase.stage]}>
-                {stageLabels[valuationCase.stage]}
-              </Badge>
-            }
-          />
-          <OverviewItem
-            label="Created"
-            value={new Date(valuationCase.createdAt).toLocaleDateString()}
-          />
-        </CardContent>
-      </Card>
+          </div>
+        </div>
+      </div>
 
       {/* Primary CTA for the assigned Site Engineer: jump straight into the
           Field Visit without hunting for the tab. Shown until a visit exists;
@@ -292,20 +282,42 @@ function Page() {
         </Card>
       )}
 
-      {/* Pipeline tracker — where the case sits in the workflow at a glance.
-          Hidden for Site Engineers, who only need their own case details. */}
-      {!isSiteEngineer && <CasePipeline stage={valuationCase.stage} />}
-
       {/* Two tabs for every role: the full case detail (Case Overview) and the
-          submitted inspection (Field Visit). */}
+          submitted inspection (Field Visit). Tabs are inline-width, not
+          stretched across the page. */}
       <Tabs defaultValue="overview">
-        <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+        <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
           <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
         <TabsContent value="overview" className="mt-6 space-y-6">
+          {/* Overview strip — the essentials at a glance */}
+          <Card>
+            <CardContent className="grid grid-cols-2 gap-4 py-5 sm:grid-cols-3 lg:grid-cols-5">
+              <OverviewItem label="Case Number" value={valuationCase.caseNumber} />
+              <OverviewItem label="Request Number" value={valuationCase.requestNumber} />
+              <OverviewItem label="Customer" value={customerName} />
+              <OverviewItem
+                label="Stage"
+                value={
+                  <Badge variant={stageBadgeVariant[valuationCase.stage]}>
+                    {stageLabels[valuationCase.stage]}
+                  </Badge>
+                }
+              />
+              <OverviewItem
+                label="Created"
+                value={new Date(valuationCase.createdAt).toLocaleDateString()}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Pipeline tracker — where the case sits in the workflow at a glance.
+              Hidden for Site Engineers, who only need their own case details. */}
+          {!isSiteEngineer && <CasePipeline stage={valuationCase.stage} />}
+
           {/* Case Information — redundant with the header + overview strip, kept
               in the tree but hidden so it's a one-word revert. */}
           <Card className="hidden">
