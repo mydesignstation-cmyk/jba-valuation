@@ -54,6 +54,16 @@ export function isMakerCasePending(stage: CaseStage): boolean {
 }
 
 /**
+ * An Uploader's work on a case is the final upload. From their point of view a
+ * case is "Pending" while it awaits the upload (UPLOADER_PENDING) and
+ * "Completed" once it has been closed (COMPLETED). Single source of truth for
+ * that split, shared by the uploader dashboard.
+ */
+export function isUploaderCasePending(stage: CaseStage): boolean {
+  return stage === "UPLOADER_PENDING";
+}
+
+/**
  * The case pipeline collapses the ten fine-grained stages into five
  * human-readable milestones, so the workflow reads as a clean tick-by-tick
  * flow (Field Visit → Maker → Checker → Uploader → Completed).

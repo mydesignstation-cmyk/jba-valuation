@@ -48,8 +48,9 @@ export const permissionRoles: Record<Permission, Role[]> = {
   "cases.delete": SUPER_ADMIN_ONLY,
   // Case detail is reachable by the roles that act on a case: admins, the
   // owning site engineer, and — once the field visit is submitted — the
-  // Checker (to assign a Maker) and the assigned Maker (to view it).
-  "cases.detail": [...ADMINS, "SITE_ENGINEER", "CHECKER", "MAKER"],
+  // Checker (to assign a Maker), the assigned Maker (to view it), and the
+  // Uploader (to open a case in their queue and mark the upload completed).
+  "cases.detail": [...ADMINS, "SITE_ENGINEER", "CHECKER", "MAKER", "UPLOADER"],
   // Assigning a Maker (when none is assigned) is a Checker or admin action.
   // Reassigning/changing an existing Maker is an admin-only responsibility.
   // These are UI gates only; api_assignMaker is the server-side authority.

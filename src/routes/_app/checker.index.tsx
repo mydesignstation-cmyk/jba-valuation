@@ -43,7 +43,7 @@ import { listSiteEngineers } from "@/services/user.service";
 import type { ValuationCase } from "@/types";
 
 export const Route = createFileRoute("/_app/checker/")({
-  head: () => pageMeta("Checker Queue", "Cases waiting for Checker review."),
+  head: () => pageMeta("My Cases", "Cases waiting for Checker review."),
   beforeLoad: requirePermission("checker.access"),
   component: Page,
 });
@@ -145,7 +145,7 @@ function Page() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Checker Queue"
+        title="My Cases"
         description="Cases with a submitted field visit, ready for Maker assignment."
         actions={
           <SearchInput placeholder="Search cases..." value={search} onValueChange={setSearch} />
@@ -154,7 +154,7 @@ function Page() {
 
       <Card>
         <CardHeader>
-          <CardTitle>Checker Queue</CardTitle>
+          <CardTitle>My Cases</CardTitle>
         </CardHeader>
         <CardContent>
           {isLoading ? (

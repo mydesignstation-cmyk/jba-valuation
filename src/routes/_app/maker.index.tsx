@@ -26,7 +26,7 @@ import { api_listBranches } from "@/data/branch.functions";
 import { listSiteEngineers } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/maker/")({
-  head: () => pageMeta("Maker Queue", "Cases assigned to you for review."),
+  head: () => pageMeta("My Cases", "Cases assigned to you for review."),
   beforeLoad: requirePermission("maker.access"),
   component: Page,
 });
@@ -86,7 +86,7 @@ function Page() {
   return (
     <div className="space-y-6">
       <PageHeader
-        title="Maker Queue"
+        title="My Cases"
         description="Cases assigned to you for review."
         actions={
           <SearchInput placeholder="Search cases..." value={search} onValueChange={setSearch} />

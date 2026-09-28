@@ -1507,6 +1507,33 @@ export async function api_listUploaderCases(
 }
 
 /**
+ * List the cases that make up the Uploader's dashboard workload: everything
+ * awaiting the final upload (UPLOADER_PENDING) plus everything already closed
+ * (COMPLETED). Unlike the Maker there is no per-user uploader assignment — the
+ * queue is shared — so "the uploader's cases" are simply the ones at or past
+ * the upload step. This backs the uploader's personal Pending/Completed
+ * dashboard split. Only UPLOADER (plus admins) sessions permitted.
+ */
+export async function api_listUploaderDashboardCases(
+  token: string | null | undefined,
+): Promise<ValuationCase[]> {
+  await requireServerUser(token, "UPLOADER", "ADMIN", "SUPER_ADMIN");
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(cases)
+      .where(inArray(cases.stage, ["UPLOADER_PENDING", "COMPLETED"]))
+      .orderBy(cases.created_at);
+
+    return rows.map(mapCaseRow);
+  } catch (error) {
+    console.error("Failed to list uploader dashboard cases:", error);
+    throw new Error("Failed to load uploader dashboard cases from database");
+  }
+}
+
+/**
  * Close the case: the Uploader's "Mark Upload Completed" action. Advances a
  * case awaiting upload (UPLOADER_PENDING) to COMPLETED, the terminal stage.
  * Enforced from the verified Neon Auth role — UPLOADER (plus admins). Guarded

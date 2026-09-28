@@ -19,6 +19,7 @@ import {
   api_submitToChecker as db_submitToChecker,
   api_submitToUploader as db_submitToUploader,
   api_listUploaderCases as db_listUploaderCases,
+  api_listUploaderDashboardCases as db_listUploaderDashboardCases,
   api_markUploadCompleted as db_markUploadCompleted,
 } from "@/server/api.server";
 import type { ValuationCase } from "@/types";
@@ -84,6 +85,10 @@ const submitToUploaderFn = createServerFn({ method: "POST" })
 const listUploaderCasesFn = createServerFn({ method: "GET" })
   .validator((token: string) => token)
   .handler(({ data }) => db_listUploaderCases(data));
+
+const listUploaderDashboardCasesFn = createServerFn({ method: "GET" })
+  .validator((token: string) => token)
+  .handler(({ data }) => db_listUploaderDashboardCases(data));
 
 const markUploadCompletedFn = createServerFn({ method: "POST" })
   .validator((input: MarkUploadCompletedInput) => input)
@@ -191,6 +196,16 @@ export function api_submitToUploader(token: string, caseId: string): Promise<Val
  */
 export function api_listUploaderCases(token: string): Promise<ValuationCase[]> {
   return listUploaderCasesFn({ data: token });
+}
+
+/**
+ * Cases that make up the Uploader's dashboard workload: those awaiting upload
+ * (UPLOADER_PENDING) plus those already closed (COMPLETED). Backs the uploader's
+ * personal Pending/Completed dashboard split. Pass the Neon Auth session token;
+ * the server verifies the UPLOADER role.
+ */
+export function api_listUploaderDashboardCases(token: string): Promise<ValuationCase[]> {
+  return listUploaderDashboardCasesFn({ data: token });
 }
 
 /**

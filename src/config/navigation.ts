@@ -36,11 +36,16 @@ export const navigation: NavGroup[] = [
     label: "Workflow",
     items: [
       { title: "Cases", to: "/cases", icon: FolderKanban, permission: "cases.view" },
+      // The four role-scoped queues all read simply "My Cases" in the sidebar.
+      // Each role only ever sees one of these (gated by permission), and users
+      // already know their own role, so a single standard label is clearer than
+      // "Maker Queue" / "Checker Queue" / "Uploader Queue". This is a label-only
+      // change — routes (/my-cases, /maker, /checker, /uploader) are unchanged.
       { title: "My Cases", to: "/my-cases", icon: Briefcase, permission: "myCases.view" },
-      { title: "Maker Queue", to: "/maker", icon: PenLine, permission: "maker.access" },
-      { title: "Checker Queue", to: "/checker", icon: ShieldCheck, permission: "checker.access" },
+      { title: "My Cases", to: "/maker", icon: PenLine, permission: "maker.access" },
+      { title: "My Cases", to: "/checker", icon: ShieldCheck, permission: "checker.access" },
       {
-        title: "Uploader Queue",
+        title: "My Cases",
         to: "/uploader",
         icon: UploadCloud,
         permission: "uploader.access",

@@ -23,8 +23,14 @@ import {
   stageBadgeVariant,
   isEngineerCasePending,
   isMakerCasePending,
+  isUploaderCasePending,
 } from "@/lib/case-format";
-import { api_listCases, api_listMyCases, api_listMakerCases } from "@/data/case.functions";
+import {
+  api_listCases,
+  api_listMyCases,
+  api_listMakerCases,
+  api_listUploaderDashboardCases,
+} from "@/data/case.functions";
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
@@ -91,18 +97,26 @@ function KpiCard({
 function Page() {
   const navigate = useNavigate();
   const currentUser = useCurrentUser();
-  // Site Engineers and Makers get a focused, personal dashboard: they only ever
-  // see the cases assigned to them and a simple Pending/Completed split. Their
-  // dashboard must never leak org-wide cases or master-data (customers, banks,
-  // branches). Every other role keeps the full pipeline-wide view.
+  // Site Engineers, Makers and Uploaders get a focused, personal dashboard:
+  // they only ever see the cases in their own workload and a simple
+  // Pending/Completed split. Their dashboard must never leak org-wide cases or
+  // master-data (customers, banks, branches). Every other role keeps the full
+  // pipeline-wide view.
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
   const isMaker = currentUser?.role === "MAKER";
-  const isPersonal = isSiteEngineer || isMaker;
+  const isUploader = currentUser?.role === "UPLOADER";
+  const isPersonal = isSiteEngineer || isMaker || isUploader;
 
   const { data: cases = [], isLoading: casesLoading } = useQuery({
     // Reuse the same query keys as the Maker Queue / My Cases views so their
     // caches stay in sync.
-    queryKey: isSiteEngineer ? ["my-cases"] : isMaker ? ["maker-cases"] : ["cases"],
+    queryKey: isSiteEngineer
+      ? ["my-cases"]
+      : isMaker
+        ? ["maker-cases"]
+        : isUploader
+          ? ["uploader-dashboard-cases"]
+          : ["cases"],
     queryFn: async () => {
       if (isSiteEngineer) {
         const token = await getSessionToken();
@@ -113,6 +127,11 @@ function Page() {
         const token = await getSessionToken();
         if (!token) throw new Error("Not authenticated");
         return api_listMakerCases(token);
+      }
+      if (isUploader) {
+        const token = await getSessionToken();
+        if (!token) throw new Error("Not authenticated");
+        return api_listUploaderDashboardCases(token);
       }
       return api_listCases();
     },
@@ -140,13 +159,17 @@ function Page() {
     // For a Site Engineer, "Completed" means they have submitted the field
     // visit and "Pending" means they still owe one. For a Maker, "Completed"
     // means they have finished their maker step and "Pending" means the case is
-    // still waiting on them. For other roles keep the pipeline-wide definitions.
+    // still waiting on them. For an Uploader, "Pending" means the case awaits
+    // upload and "Completed" means it has been closed. For other roles keep the
+    // pipeline-wide definitions.
     const isCasePending = (stage: CaseStage) =>
       isSiteEngineer
         ? isEngineerCasePending(stage)
         : isMaker
           ? isMakerCasePending(stage)
-          : PENDING_STAGES.includes(stage);
+          : isUploader
+            ? isUploaderCasePending(stage)
+            : PENDING_STAGES.includes(stage);
 
     const completed = isPersonal
       ? cases.filter((c) => !isCasePending(c.stage)).length
@@ -164,7 +187,7 @@ function Page() {
       .slice(0, 5);
 
     return { total, completed, pending, inProgress, byStage, recent };
-  }, [cases, isSiteEngineer, isMaker, isPersonal]);
+  }, [cases, isSiteEngineer, isMaker, isUploader, isPersonal]);
 
   return (
     <div className="space-y-6">
@@ -174,9 +197,9 @@ function Page() {
         crumbs={[{ label: "Dashboard" }]}
       />
 
-      {/* Case KPIs. For a Site Engineer or Maker these count only their own
-          assigned cases, and Pending/Completed reflect their personal workload.
-          A personal dashboard drops the pipeline-wide "In Progress" card. */}
+      {/* Case KPIs. For a Site Engineer, Maker or Uploader these count only
+          their own workload, and Pending/Completed reflect it. A personal
+          dashboard drops the pipeline-wide "In Progress" card. */}
       <div
         className={
           isPersonal

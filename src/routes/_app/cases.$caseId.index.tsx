@@ -197,14 +197,23 @@ function Page() {
     backAction: string;
   } = (() => {
     if (listsAllCases) return { backTo: "/cases", backLabel: "Cases", backAction: "Back to Cases" };
+    // The role-scoped queues (Checker / Maker / Uploader / Site Engineer) are
+    // all presented to the user as "My Cases", matching the sidebar label. Only
+    // the destination route differs per role.
     if (isChecker)
       return {
         backTo: "/checker",
-        backLabel: "Checker Queue",
-        backAction: "Back to Checker Queue",
+        backLabel: "My Cases",
+        backAction: "Back to My Cases",
       };
     if (isMaker)
-      return { backTo: "/maker", backLabel: "Maker Queue", backAction: "Back to Maker Queue" };
+      return { backTo: "/maker", backLabel: "My Cases", backAction: "Back to My Cases" };
+    if (isUploader)
+      return {
+        backTo: "/uploader",
+        backLabel: "My Cases",
+        backAction: "Back to My Cases",
+      };
     return { backTo: "/my-cases", backLabel: "My Cases", backAction: "Back to My Cases" };
   })();
 
@@ -367,6 +376,7 @@ function Page() {
       queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
       queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
       queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-dashboard-cases"] });
       setConfirmSubmitToUploader(false);
       toast.success("Case submitted to the uploader");
     },
@@ -386,6 +396,7 @@ function Page() {
       queryClient.setQueryData(["cases", caseId], updatedCase);
       queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
       queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-dashboard-cases"] });
       setConfirmMarkUploaded(false);
       toast.success("Case marked as upload completed");
     },
