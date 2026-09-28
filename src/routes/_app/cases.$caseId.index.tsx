@@ -13,15 +13,26 @@ import {
   MapPin,
   PenLine,
   Phone,
+  Send,
   User as UserIcon,
   UserCheck,
   UserCog,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useState } from "react";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -35,7 +46,7 @@ import { getSessionToken, useCurrentUser, roleLabels } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant, isMakerCasePending } from "@/lib/case-format";
-import { api_getCase, api_assignMaker } from "@/data/case.functions";
+import { api_getCase, api_assignMaker, api_submitToChecker } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
@@ -163,6 +174,7 @@ function Page() {
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [confirmSubmitToChecker, setConfirmSubmitToChecker] = useState(false);
 
   const {
     backTo,
@@ -311,6 +323,27 @@ function Page() {
     }
   };
 
+  // Maker action: hand the case to the Checker for review. Advances the stage
+  // to CHECKER_PENDING; the server enforces the assigned-maker + stage rules.
+  const submitToChecker = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_submitToChecker(token, valuationCase.id);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["maker-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
+      setConfirmSubmitToChecker(false);
+      toast.success("Case submitted to the checker for review");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Failed to submit case to checker");
+    },
+  });
+
   return (
     <div className="space-y-6">
       {/* Header: back button sits immediately before the case number title so
@@ -419,12 +452,22 @@ function Page() {
                 </p>
               </div>
             </div>
-            <Button asChild className="w-full sm:w-auto">
-              <Link to="/maker/$caseId" params={{ caseId: valuationCase.id }}>
-                <PenLine className="mr-2 h-4 w-4" />
-                Open Maker Review
-              </Link>
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link to="/maker/$caseId" params={{ caseId: valuationCase.id }}>
+                  <PenLine className="mr-2 h-4 w-4" />
+                  Open Maker Review
+                </Link>
+              </Button>
+              <Button
+                type="button"
+                className="w-full sm:w-auto"
+                onClick={() => setConfirmSubmitToChecker(true)}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Submit to Checker
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -655,6 +698,31 @@ function Page() {
         isReassign={hasMaker}
         currentMakerId={valuationCase.assignedMakerId}
       />
+
+      <AlertDialog open={confirmSubmitToChecker} onOpenChange={setConfirmSubmitToChecker}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit this case to the Checker?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This sends the case forward to the Checker for review. After submitting you will no
+              longer be able to edit the field visit for this case. Make sure your review is
+              complete.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitToChecker.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                submitToChecker.mutate();
+              }}
+              disabled={submitToChecker.isPending}
+            >
+              {submitToChecker.isPending ? "Submitting..." : "Submit to Checker"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
