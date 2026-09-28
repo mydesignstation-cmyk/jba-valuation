@@ -3,11 +3,9 @@ import {
   ArrowLeft,
   CalendarClock,
   CheckCircle2,
-  ClipboardCheck,
   ClipboardList,
   FileText,
   GitBranch,
-  History,
   Landmark,
   Mail,
   MapPin,
@@ -35,6 +33,7 @@ import { api_getCase } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
+import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { getSiteEngineer } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
@@ -78,7 +77,7 @@ function OverviewItem({ label, value }: { label: string; value: ReactNode }) {
 
 /**
  * Consistent empty state for workflow artifacts that don't have backing data
- * yet (maker/checker notes, field-visit form, history). Keeps unbuilt areas
+ * yet (e.g. the field visit before an engineer submits it). Keeps unbuilt areas
  * looking intentional rather than broken.
  */
 function EmptyState({
@@ -129,9 +128,9 @@ function Page() {
   // admin-only /cases list, so send them back where they came from.
   const currentUser = useCurrentUser();
   const listsAllCases = can(currentUser?.role, "cases.view");
-  // Site Engineers get a slimmed-down detail view: the pipeline tracker and the
-  // workflow (maker/checker/history) artifacts are internal to the admin flow,
-  // so hide them for that role.
+  // Site Engineers get a slimmed-down detail view: the pipeline tracker is
+  // internal to the admin flow, so hide it for that role. Both tabs (overview
+  // and field visit) are shown to everyone.
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
   const backTo = listsAllCases ? "/cases" : "/my-cases";
   const backLabel = listsAllCases ? "Cases" : "My Cases";
@@ -167,6 +166,15 @@ function Page() {
     queryKey: ["site-engineers", valuationCase?.assignedEngineerId],
     queryFn: () => getSiteEngineer(valuationCase!.assignedEngineerId),
     enabled: !!valuationCase?.assignedEngineerId,
+  });
+
+  // The submitted field visit for this case. Role-agnostic read (no token):
+  // authorization is handled by the case-detail route guard, mirroring how the
+  // case itself is read. Resolves to null when nothing has been submitted yet.
+  const { data: fieldVisit, isLoading: fieldVisitLoading } = useQuery({
+    queryKey: ["case-field-visit", caseId],
+    queryFn: async () => (await api_getCaseFieldVisit(caseId)) ?? null,
+    enabled: !!caseId,
   });
 
   if (isLoading) {
@@ -244,194 +252,177 @@ function Page() {
           Hidden for Site Engineers, who only need their own case details. */}
       {!isSiteEngineer && <CasePipeline stage={valuationCase.stage} />}
 
-      <div className="grid gap-6 md:grid-cols-2">
-        {/* Case Information */}
-        <Card className="hidden">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <FileText className="h-4 w-4" />
-              Case Information
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Case Number" value={valuationCase.caseNumber} />
-            <Field label="Request Number" value={valuationCase.requestNumber} />
-            <Field label="Stage" value={stageLabels[valuationCase.stage]} />
-            <Field label="Case ID" value={valuationCase.id} />
-          </CardContent>
-        </Card>
+      {/* Two tabs for every role: the full case detail (Case Overview) and the
+          submitted inspection (Field Visit). */}
+      <Tabs defaultValue="overview">
+        <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+          <TabsTrigger value="overview">Case Overview</TabsTrigger>
+          <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
+        </TabsList>
 
-        {/* Assignment */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserCog className="h-4 w-4" />
-              Assignment
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field label="Bank" value={bankName} icon={<Landmark className="h-3.5 w-3.5" />} />
-            <Field label="Branch" value={branchName} icon={<GitBranch className="h-3.5 w-3.5" />} />
-            <Field
-              label="Assigned Site Engineer"
-              value={engineerName}
-              icon={<UserCog className="h-3.5 w-3.5" />}
-            />
-            {engineer?.email && (
-              <Field
-                label="Engineer Email"
-                value={engineer.email}
-                icon={<Mail className="h-3.5 w-3.5" />}
-              />
-            )}
-          </CardContent>
-        </Card>
+        {/* ---- Case Overview -------------------------------------------------- */}
+        <TabsContent value="overview" className="mt-6 space-y-6">
+          {/* Case Information — redundant with the header + overview strip, kept
+              in the tree but hidden so it's a one-word revert. */}
+          <Card className="hidden">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Case Information
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <Field label="Case Number" value={valuationCase.caseNumber} />
+              <Field label="Request Number" value={valuationCase.requestNumber} />
+              <Field label="Stage" value={stageLabels[valuationCase.stage]} />
+              <Field label="Case ID" value={valuationCase.id} />
+            </CardContent>
+          </Card>
 
-        {/* Customer & Property */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <UserIcon className="h-4 w-4" />
-              Customer &amp; Property
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-              <Field
-                label="Customer Name"
-                value={customer?.name}
-                icon={<UserIcon className="h-3.5 w-3.5" />}
-              />
-              <Field
-                label="Contact"
-                value={customer?.contact}
-                icon={<Phone className="h-3.5 w-3.5" />}
-              />
-              <Field
-                label="Email"
-                value={customer?.email}
-                icon={<Mail className="h-3.5 w-3.5" />}
-              />
-            </div>
-            <Separator />
-            <Field
-              label="Property Address"
-              value={customer?.address}
-              icon={<MapPin className="h-3.5 w-3.5" />}
-            />
-          </CardContent>
-        </Card>
+          {/* Assignment and Customer & Property sit side-by-side on desktop. */}
+          <div className="grid gap-6 lg:grid-cols-2">
+            {/* Assignment */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserCog className="h-4 w-4" />
+                  Assignment
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Bank"
+                    value={bankName}
+                    icon={<Landmark className="h-3.5 w-3.5" />}
+                  />
+                  <Field
+                    label="Branch"
+                    value={branchName}
+                    icon={<GitBranch className="h-3.5 w-3.5" />}
+                  />
+                  <Field
+                    label="Assigned Site Engineer"
+                    value={engineerName}
+                    icon={<UserCog className="h-3.5 w-3.5" />}
+                  />
+                  {engineer?.email && (
+                    <Field
+                      label="Engineer Email"
+                      value={engineer.email}
+                      icon={<Mail className="h-3.5 w-3.5" />}
+                    />
+                  )}
+                </div>
+                <Separator />
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Created"
+                    value={new Date(valuationCase.createdAt).toLocaleString()}
+                    icon={<CalendarClock className="h-3.5 w-3.5" />}
+                  />
+                  <Field
+                    label="Last Updated"
+                    value={new Date(valuationCase.updatedAt).toLocaleString()}
+                    icon={<CalendarClock className="h-3.5 w-3.5" />}
+                  />
+                </div>
+              </CardContent>
+            </Card>
 
-        {/* Timestamps */}
-        <Card className="md:col-span-2">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <CalendarClock className="h-4 w-4" />
-              Timestamps
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            <Field
-              label="Created"
-              value={new Date(valuationCase.createdAt).toLocaleString()}
-              icon={<CalendarClock className="h-3.5 w-3.5" />}
-            />
-            <Field
-              label="Last Updated"
-              value={new Date(valuationCase.updatedAt).toLocaleString()}
-              icon={<CalendarClock className="h-3.5 w-3.5" />}
-            />
-          </CardContent>
-        </Card>
-      </div>
+            {/* Customer & Property */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <UserIcon className="h-4 w-4" />
+                  Customer &amp; Property
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <Field
+                    label="Customer Name"
+                    value={customer?.name}
+                    icon={<UserIcon className="h-3.5 w-3.5" />}
+                  />
+                  <Field
+                    label="Contact"
+                    value={customer?.contact}
+                    icon={<Phone className="h-3.5 w-3.5" />}
+                  />
+                  <Field
+                    label="Email"
+                    value={customer?.email}
+                    icon={<Mail className="h-3.5 w-3.5" />}
+                  />
+                </div>
+                <Separator />
+                <Field
+                  label="Property Address"
+                  value={customer?.address}
+                  icon={<MapPin className="h-3.5 w-3.5" />}
+                />
+              </CardContent>
+            </Card>
+          </div>
+        </TabsContent>
 
-      {/* Field Visit entry — Site Engineers submit the inspection here.
-          The Field Visit page itself enforces per-case ownership server-side. */}
-      {isSiteEngineer && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <MapPin className="h-4 w-4" />
-              Field Visit
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-sm text-muted-foreground">
-              Record the site inspection details for this case.
-            </p>
-            <Button asChild>
-              <Link to="/cases/$caseId/field-visit" params={{ caseId: valuationCase.id }}>
-                <MapPin className="mr-2 h-4 w-4" />
+        {/* ---- Field Visit ---------------------------------------------------- */}
+        <TabsContent value="field-visit" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <ClipboardList className="h-4 w-4" />
                 Field Visit
-              </Link>
-            </Button>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Workflow artifacts — field visit, notes and activity.
-          Read-only for now; each tab has a clean slot for data landing later.
-          Hidden for Site Engineers, who don't work the maker/checker flow. */}
-      {!isSiteEngineer && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <ClipboardList className="h-4 w-4" />
-              Workflow
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Tabs defaultValue="field-visit">
-              <TabsList className="grid w-full grid-cols-2 sm:w-auto sm:grid-cols-4">
-                <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
-                <TabsTrigger value="maker">Maker Notes</TabsTrigger>
-                <TabsTrigger value="checker">Checker Notes</TabsTrigger>
-                <TabsTrigger value="history">History</TabsTrigger>
-              </TabsList>
-
-              <TabsContent value="field-visit" className="mt-4">
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {fieldVisitLoading ? (
+                <Skeleton className="h-40 w-full" />
+              ) : fieldVisit ? (
+                <div className="space-y-6">
+                  <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/40 px-3 py-2">
+                    <CheckCircle2 className="h-4 w-4 text-green-600" />
+                    <span className="text-sm">
+                      Submitted
+                      {fieldVisit.submittedAt
+                        ? ` on ${new Date(fieldVisit.submittedAt).toLocaleString()}`
+                        : ""}
+                      . This field visit is read-only.
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <Field label="Floor" value={fieldVisit.floor} />
+                    <Field label="Building" value={fieldVisit.building} />
+                    <Field label="Age of Building" value={fieldVisit.ageOfBuilding} />
+                    <Field label="Sq. Feet" value={fieldVisit.sqFeet} />
+                  </div>
+                </div>
+              ) : (
                 <EmptyState
                   icon={MapPin}
                   title="No field visit submitted yet"
-                  message="Once the site engineer submits the field visit, the inspection details and report PDF will appear here."
+                  message={
+                    isSiteEngineer
+                      ? "Record the site inspection details for this case."
+                      : "Once the site engineer submits the field visit, the inspection details will appear here."
+                  }
                   action={
-                    <Button asChild variant="outline" size="sm">
-                      <Link to="/cases/$caseId/field-visit" params={{ caseId: valuationCase.id }}>
-                        <MapPin className="mr-2 h-4 w-4" />
-                        Open field visit
-                      </Link>
-                    </Button>
+                    isSiteEngineer ? (
+                      <Button asChild variant="outline" size="sm">
+                        <Link to="/cases/$caseId/field-visit" params={{ caseId: valuationCase.id }}>
+                          <MapPin className="mr-2 h-4 w-4" />
+                          Open field visit
+                        </Link>
+                      </Button>
+                    ) : undefined
                   }
                 />
-              </TabsContent>
-
-              <TabsContent value="maker" className="mt-4">
-                <EmptyState
-                  icon={ClipboardCheck}
-                  title="No maker notes yet"
-                  message="Notes recorded by the maker while preparing the valuation will show here."
-                />
-              </TabsContent>
-
-              <TabsContent value="checker" className="mt-4">
-                <EmptyState
-                  icon={CheckCircle2}
-                  title="No checker notes yet"
-                  message="Review notes and approvals from the checker will show here."
-                />
-              </TabsContent>
-
-              <TabsContent value="history" className="mt-4">
-                <EmptyState
-                  icon={History}
-                  title="No activity recorded yet"
-                  message="A timeline of stage changes and actions on this case will appear here."
-                />
-              </TabsContent>
-            </Tabs>
-          </CardContent>
-        </Card>
-      )}
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 }

@@ -12,12 +12,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import {
   api_getMyFieldVisit as db_getMyFieldVisit,
+  api_getCaseFieldVisit as db_getCaseFieldVisit,
   api_submitFieldVisit as db_submitFieldVisit,
 } from "@/server/api.server";
 import type { FieldVisit } from "@/types";
 import type { FieldVisitFormValues } from "@/schemas/fieldVisit.schema";
 
 type GetFieldVisitInput = { token: string; caseId: string };
+type GetCaseFieldVisitInput = { caseId: string };
 type SubmitFieldVisitInput = {
   token: string;
   caseId: string;
@@ -27,6 +29,10 @@ type SubmitFieldVisitInput = {
 const getMyFieldVisitFn = createServerFn({ method: "GET" })
   .validator((input: GetFieldVisitInput) => input)
   .handler(({ data }) => db_getMyFieldVisit(data.token, data.caseId));
+
+const getCaseFieldVisitFn = createServerFn({ method: "GET" })
+  .validator((input: GetCaseFieldVisitInput) => input)
+  .handler(({ data }) => db_getCaseFieldVisit(data.caseId));
 
 const submitFieldVisitFn = createServerFn({ method: "POST" })
   .validator((input: SubmitFieldVisitInput) => input)
@@ -42,6 +48,16 @@ export function api_getMyFieldVisit(
   caseId: string,
 ): Promise<FieldVisit | undefined> {
   return getMyFieldVisitFn({ data: { token, caseId } });
+}
+
+/**
+ * Read a Case's Field Visit by case id, for anyone allowed to view the case
+ * detail page (admins, maker, checker, and the owning site engineer). No token
+ * is passed; authorization is enforced by the case-detail route guard, matching
+ * how api_getCase reads case data. Resolves to undefined when none exists yet.
+ */
+export function api_getCaseFieldVisit(caseId: string): Promise<FieldVisit | undefined> {
+  return getCaseFieldVisitFn({ data: { caseId } });
 }
 
 /**

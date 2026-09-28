@@ -6,7 +6,7 @@
 
 import { getDb } from "@/db";
 import { customers, banks, branches, cases, fieldVisits } from "@/db/schema";
-import { eq, sql } from "drizzle-orm";
+import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit } from "@/types";
 import { requireServerUser } from "@/server/auth.server";
 import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
@@ -543,7 +543,10 @@ export async function api_createCase(data: {
         bank_id: data.bankId,
         branch_id: data.branchId,
         assigned_engineer_id: data.assignedEngineerId,
-        stage: "ASSIGNED",
+        // A new case is assigned to a site engineer up front, so it starts
+        // waiting on the field visit rather than sitting in a generic
+        // "assigned" state. Advances to FIELD_VISIT_SUBMITTED on submission.
+        stage: "FIELD_VISIT_PENDING",
         created_by_id: data.createdById,
         created_at: now,
         updated_at: now,
@@ -758,6 +761,35 @@ export async function api_getMyFieldVisit(
 }
 
 /**
+ * Read the Field Visit for a Case by case id, for anyone allowed to view the
+ * case detail page (admins, maker, checker, and the owning site engineer).
+ *
+ * Unlike api_getMyFieldVisit, this does NOT enforce SITE_ENGINEER ownership:
+ * it mirrors api_getCase, which performs no token/role check and relies on the
+ * route guard (`requirePermission("cases.detail")`) as the authorization
+ * boundary. The read is keyed only on case_id (UNIQUE), so a case has at most
+ * one visit. Returns undefined when no Field Visit exists yet.
+ */
+export async function api_getCaseFieldVisit(
+  caseId: string,
+): Promise<FieldVisit | undefined> {
+  try {
+    const rows = await getDb()
+      .select()
+      .from(fieldVisits)
+      .where(eq(fieldVisits.case_id, caseId))
+      .limit(1);
+
+    const row = rows[0];
+    if (!row) return undefined;
+    return mapFieldVisitRow(row);
+  } catch (error) {
+    console.error("Failed to get case field visit:", error);
+    throw new Error("Failed to load field visit from database");
+  }
+}
+
+/**
  * Submit the Field Visit for a Case the authenticated engineer owns.
  *
  * Creates the Field Visit as SUBMITTED (this first version has no separate
@@ -806,6 +838,20 @@ export async function api_submitFieldVisit(
 
     const row = rows[0];
     if (!row) throw new Error("Failed to retrieve created field visit");
+
+    // Advance the case stage now that the field visit is in. Only move forward
+    // from the pre-submission stages so we never drag a case that has already
+    // progressed (maker/checker/etc.) back to FIELD_VISIT_SUBMITTED.
+    await getDb()
+      .update(cases)
+      .set({ stage: "FIELD_VISIT_SUBMITTED", updated_at: now })
+      .where(
+        and(
+          eq(cases.id, caseId),
+          inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"]),
+        ),
+      );
+
     return mapFieldVisitRow(row);
   } catch (error) {
     // A race that slips past the pre-check still hits the UNIQUE constraint.
