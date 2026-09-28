@@ -773,7 +773,12 @@ export async function api_listMyCases(token: string | null | undefined): Promise
 // user's id as the authority.
 
 /** Stages a case can be in once it is eligible for the Checker queue. */
-const CHECKER_QUEUE_STAGES = ["FIELD_VISIT_SUBMITTED", "MAKER_ASSIGNED"] as const;
+const CHECKER_QUEUE_STAGES = [
+  "FIELD_VISIT_SUBMITTED",
+  "MAKER_ASSIGNED",
+  // Maker has submitted the case back for the Checker's review of the report.
+  "CHECKER_PENDING",
+] as const;
 
 /**
  * List the cases visible to a Checker: every case whose field visit has been
@@ -1372,6 +1377,66 @@ export async function api_updateFieldVisit(
     if (error instanceof Error) throw error;
     console.error("Failed to update field visit:", error);
     throw new Error("Failed to update field visit in database");
+  }
+}
+
+/**
+ * Hand the case forward from the Maker to the Checker for review.
+ *
+ * This is the Maker's "Submit to Checker" action — the workflow advance that
+ * moves the case out of the Maker's editable window and into the Checker's
+ * review queue. Authorization reuses requireMakerCase, so it is only permitted
+ * for the assigned Maker while the case is at MAKER_ASSIGNED/MAKER_PENDING; a
+ * submitted field visit must exist before the case can move on. The stage is
+ * advanced to CHECKER_PENDING via a guarded conditional UPDATE so a stale/racey
+ * request cannot push a case that has already moved past the Maker.
+ */
+export async function api_submitToChecker(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<ValuationCase> {
+  await requireMakerCase(token, caseId);
+
+  // A field visit must be submitted before the Maker can pass the case on.
+  const visitRows = await getDb()
+    .select()
+    .from(fieldVisits)
+    .where(eq(fieldVisits.case_id, caseId))
+    .limit(1);
+  const visit = visitRows[0];
+  if (!visit || visit.status !== "SUBMITTED") {
+    throw new Error("A submitted field visit is required before submitting to the checker");
+  }
+
+  try {
+    const now = new Date();
+
+    // Only advance from a Maker-editable stage. The WHERE clause encodes the
+    // guard so a case that already moved on is never dragged back.
+    const rows = await getDb()
+      .update(cases)
+      .set({ stage: "CHECKER_PENDING", updated_at: now })
+      .where(
+        and(eq(cases.id, caseId), inArray(cases.stage, [...MAKER_EDITABLE_STAGES])),
+      )
+      .returning();
+
+    const row = rows[0];
+    if (row) {
+      return mapCaseRow(row);
+    }
+
+    // No row matched: the case moved past the Maker stage between the guard
+    // and the update. Re-read to return a precise, non-leaky error.
+    const existing = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+    if (!existing[0]) {
+      throw new Error("Case not found");
+    }
+    throw new Error("This case is no longer awaiting Maker submission");
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to submit case to checker:", error);
+    throw new Error("Failed to submit case to checker in database");
   }
 }
 

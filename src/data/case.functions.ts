@@ -16,6 +16,7 @@ import {
   api_listCheckerCases as db_listCheckerCases,
   api_listMakerCases as db_listMakerCases,
   api_assignMaker as db_assignMaker,
+  api_submitToChecker as db_submitToChecker,
 } from "@/server/api.server";
 import type { ValuationCase } from "@/types";
 
@@ -40,6 +41,7 @@ type UpdateCaseData = {
 type UpdateCaseInput = { id: string; data: UpdateCaseData };
 
 type AssignMakerInput = { token: string; caseId: string; makerId: string };
+type SubmitToCheckerInput = { token: string; caseId: string };
 
 const listCasesFn = createServerFn({ method: "GET" }).handler(() => db_listCases());
 
@@ -65,6 +67,10 @@ const listMakerCasesFn = createServerFn({ method: "GET" })
 const assignMakerFn = createServerFn({ method: "POST" })
   .validator((input: AssignMakerInput) => input)
   .handler(({ data }) => db_assignMaker(data.token, data.caseId, data.makerId));
+
+const submitToCheckerFn = createServerFn({ method: "POST" })
+  .validator((input: SubmitToCheckerInput) => input)
+  .handler(({ data }) => db_submitToChecker(data.token, data.caseId));
 
 const getCaseFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
@@ -141,4 +147,14 @@ export function api_assignMaker(
   makerId: string,
 ): Promise<ValuationCase> {
   return assignMakerFn({ data: { token, caseId, makerId } });
+}
+
+/**
+ * Submit a case from the Maker back to the Checker for review (Maker action).
+ * Advances the case to CHECKER_PENDING. Pass the Neon Auth session token; the
+ * server verifies the MAKER role, that the caller is the assigned Maker, that
+ * the case is at a Maker stage, and that a field visit has been submitted.
+ */
+export function api_submitToChecker(token: string, caseId: string): Promise<ValuationCase> {
+  return submitToCheckerFn({ data: { token, caseId } });
 }
