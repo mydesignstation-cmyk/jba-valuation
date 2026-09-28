@@ -2,16 +2,32 @@ import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
   ArrowRight,
+  Building,
   Building2,
+  Castle,
   CheckCircle2,
   ClipboardCheck,
   Compass,
+  Factory,
   Hammer,
   Home,
+  Hotel,
+  Landmark as LandmarkIcon,
   MapPin,
+  Minus,
   RefreshCw,
+  Route as RouteIcon,
+  ShieldAlert,
+  ShieldCheck,
+  Trees,
+  TriangleAlert,
   User as UserIcon,
+  UserCheck,
+  UserCog,
+  Users,
+  Wrench,
 } from "lucide-react";
+import type { ComponentType } from "react";
 import { useMemo, useState } from "react";
 import { useForm, type Path } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -28,13 +44,7 @@ import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 import { PageHeader } from "@/components/app/PageHeader";
 import { requirePermission } from "@/lib/route-guard";
 import { useCurrentUser, getSessionToken } from "@/lib/auth-client";
@@ -55,6 +65,7 @@ import { api_getMyFieldVisit, api_submitFieldVisit } from "@/data/fieldVisit.fun
 import { api_getCase } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
+import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import type { FieldVisit } from "@/types";
 
 export const Route = createFileRoute("/_app/cases/$caseId/field-visit")({
@@ -121,6 +132,38 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   );
 }
 
+type IconType = ComponentType<{ className?: string }>;
+
+/** Per-option icons so every chip carries a glyph, not just a label. */
+const OPTION_ICONS: Record<string, IconType> = {
+  // Relationship
+  Owner: UserCheck,
+  Tenant: Users,
+  Banker: LandmarkIcon,
+  Agent: UserCog,
+  Other: UserIcon,
+  // Property type
+  Flat: Building,
+  House: Home,
+  Bungalow: Hotel,
+  Land: Trees,
+  Commercial: Factory,
+  // Locality + approach road + occupancy share Good/Average/Poor etc.
+  Good: ShieldCheck,
+  Average: ShieldAlert,
+  Poor: TriangleAlert,
+  "No Access": Minus,
+  // Occupancy status
+  Occupied: Users,
+  Vacant: Home,
+  "Under Construction": Hammer,
+  // Structure type
+  RCC: Building2,
+  Brick: Castle,
+  Wood: Trees,
+  Mixed: Wrench,
+};
+
 /** The 7 wizard steps, in order. Index 6 (Review) collects nothing new. */
 const STEPS = [
   { key: "visit", label: "Visit", icon: UserIcon },
@@ -163,12 +206,16 @@ function TextField({
   label,
   placeholder,
   type = "text",
+  inputMode,
+  maxLength,
 }: {
   form: FormType;
   name: Path<FieldVisitFormValues>;
   label: string;
   placeholder?: string;
   type?: string;
+  inputMode?: "text" | "tel" | "numeric" | "decimal";
+  maxLength?: number;
 }) {
   return (
     <FormField
@@ -181,7 +228,8 @@ function TextField({
             {...field}
             value={(field.value as string | number | undefined) ?? ""}
             type={type}
-            inputMode={type === "number" ? "decimal" : undefined}
+            inputMode={inputMode ?? (type === "number" ? "decimal" : undefined)}
+            maxLength={maxLength}
             placeholder={placeholder}
           />
           <FormMessage />
@@ -221,18 +269,19 @@ function TextAreaField({
   );
 }
 
-function SelectField({
+/** Integer-only text field: strips any non-digit as the user types. */
+function NumberField({
   form,
   name,
   label,
-  options,
   placeholder,
+  maxLength,
 }: {
   form: FormType;
   name: Path<FieldVisitFormValues>;
   label: string;
-  options: readonly string[];
   placeholder?: string;
+  maxLength?: number;
 }) {
   return (
     <FormField
@@ -241,21 +290,76 @@ function SelectField({
       render={({ field }) => (
         <FormItem>
           <FormLabel>{label}</FormLabel>
-          <Select value={(field.value as string | undefined) ?? ""} onValueChange={field.onChange}>
-            <SelectTrigger>
-              <SelectValue placeholder={placeholder ?? `Select ${label.toLowerCase()}`} />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((opt) => (
-                <SelectItem key={opt} value={opt}>
-                  {opt}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <Input
+            {...field}
+            value={(field.value as string | undefined) ?? ""}
+            type="text"
+            inputMode="numeric"
+            maxLength={maxLength}
+            placeholder={placeholder}
+            onChange={(e) => field.onChange(e.target.value.replace(/[^\d]/g, ""))}
+          />
           <FormMessage />
         </FormItem>
       )}
+    />
+  );
+}
+
+/**
+ * A single-select rendered as a row of chips (no dropdown). Each chip carries
+ * an icon and toggles the field value. Selection is required (validated by the
+ * enum schema), so there is no "clear" affordance.
+ */
+function ChipField({
+  form,
+  name,
+  label,
+  options,
+}: {
+  form: FormType;
+  name: Path<FieldVisitFormValues>;
+  label: string;
+  options: readonly string[];
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => {
+        const selected = (field.value as string | undefined) ?? "";
+        return (
+          <FormItem>
+            <FormLabel>{label}</FormLabel>
+            <div className="flex flex-wrap gap-2" role="radiogroup" aria-label={label}>
+              {options.map((opt) => {
+                const Icon = OPTION_ICONS[opt] ?? Minus;
+                const active = selected === opt;
+                return (
+                  <button
+                    key={opt}
+                    type="button"
+                    role="radio"
+                    aria-checked={active}
+                    onClick={() => field.onChange(opt)}
+                    className={cn(
+                      "inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm transition-colors",
+                      "focus:outline-none focus-visible:ring-2 focus-visible:ring-ring",
+                      active
+                        ? "border-primary bg-primary text-primary-foreground shadow-sm"
+                        : "border-input bg-background hover:bg-accent hover:text-accent-foreground",
+                    )}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {opt}
+                  </button>
+                );
+              })}
+            </div>
+            <FormMessage />
+          </FormItem>
+        );
+      }}
     />
   );
 }
@@ -492,20 +596,23 @@ function FieldVisitWizard({
                     name="personMet"
                     label="Name of Person Met"
                     placeholder="e.g. Rajesh Kumar"
+                    maxLength={255}
                   />
                   <TextField
                     form={form}
                     name="personPhone"
                     label="Phone Number"
                     placeholder="e.g. 9876543210"
-                  />
-                  <SelectField
-                    form={form}
-                    name="relationship"
-                    label="Relationship with Property"
-                    options={relationshipOptions}
+                    inputMode="tel"
+                    maxLength={15}
                   />
                 </div>
+                <ChipField
+                  form={form}
+                  name="relationship"
+                  label="Relationship with Property"
+                  options={relationshipOptions}
+                />
               </div>
             )}
 
@@ -518,85 +625,87 @@ function FieldVisitWizard({
                   <ReadOnlyField label="Complete Address" value={autoFill?.address ?? "—"} />
                 </div>
                 <Separator />
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <TextField
-                    form={form}
-                    name="landmark"
-                    label="Landmark"
-                    placeholder="e.g. Near City Hospital"
-                  />
-                  <SelectField
-                    form={form}
-                    name="propertyType"
-                    label="Type of Property"
-                    options={propertyTypeOptions}
-                  />
-                  <SelectField
-                    form={form}
-                    name="localityType"
-                    label="Type of Locality"
-                    options={localityTypeOptions}
-                  />
-                  <SelectField
-                    form={form}
-                    name="occupancyStatus"
-                    label="Occupancy Status"
-                    options={occupancyStatusOptions}
-                  />
-                </div>
+                <TextField
+                  form={form}
+                  name="landmark"
+                  label="Landmark"
+                  placeholder="e.g. Near City Hospital"
+                  maxLength={500}
+                />
+                <ChipField
+                  form={form}
+                  name="propertyType"
+                  label="Type of Property"
+                  options={propertyTypeOptions}
+                />
+                <ChipField
+                  form={form}
+                  name="localityType"
+                  label="Type of Locality"
+                  options={localityTypeOptions}
+                />
+                <ChipField
+                  form={form}
+                  name="occupancyStatus"
+                  label="Occupancy Status"
+                  options={occupancyStatusOptions}
+                />
               </div>
             )}
 
             {/* STEP 3 — Building information */}
             {stepIndex === 2 && (
-              <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                <SelectField
+              <div className="space-y-6">
+                <ChipField
                   form={form}
                   name="structureType"
                   label="Type of Structure"
                   options={structureTypeOptions}
                 />
-                <TextField
-                  form={form}
-                  name="occupancyLevel"
-                  label="Occupancy Level (%)"
-                  type="number"
-                  placeholder="0 - 100"
-                />
-                <TextField
-                  form={form}
-                  name="floorsInBuilding"
-                  label="No. of Floors in Building"
-                  type="number"
-                  placeholder="e.g. 12"
-                />
-                <TextField
-                  form={form}
-                  name="locatedOnFloor"
-                  label="Located on Floor No."
-                  placeholder="e.g. 3rd"
-                />
-                <TextField
-                  form={form}
-                  name="flatsOnFloor"
-                  label="No. of Flats on the Floor"
-                  type="number"
-                  placeholder="e.g. 4"
-                />
-                <TextField
-                  form={form}
-                  name="wingsInBuilding"
-                  label="No. of Wings in Building"
-                  type="number"
-                  placeholder="e.g. 2"
-                />
-                <TextField
-                  form={form}
-                  name="liftsStaircases"
-                  label="No. of Lifts/Staircases"
-                  type="number"
-                  placeholder="e.g. 2"
-                />
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <TextField
+                    form={form}
+                    name="occupancyLevel"
+                    label="Occupancy Level (%)"
+                    inputMode="numeric"
+                    placeholder="0 - 100"
+                  />
+                  <NumberField
+                    form={form}
+                    name="floorsInBuilding"
+                    label="No. of Floors in Building"
+                    placeholder="e.g. 12"
+                    maxLength={3}
+                  />
+                  <NumberField
+                    form={form}
+                    name="locatedOnFloor"
+                    label="Located on Floor No."
+                    placeholder="e.g. 3"
+                    maxLength={3}
+                  />
+                  <NumberField
+                    form={form}
+                    name="flatsOnFloor"
+                    label="No. of Flats on the Floor"
+                    placeholder="e.g. 4"
+                    maxLength={3}
+                  />
+                  <NumberField
+                    form={form}
+                    name="wingsInBuilding"
+                    label="No. of Wings in Building"
+                    placeholder="e.g. 2"
+                    maxLength={2}
+                  />
+                  <NumberField
+                    form={form}
+                    name="liftsStaircases"
+                    label="No. of Lifts/Staircases"
+                    placeholder="e.g. 2"
+                    maxLength={2}
+                  />
+                </div>
               </div>
             )}
 
@@ -604,18 +713,18 @@ function FieldVisitWizard({
             {stepIndex === 3 && (
               <div className="space-y-6">
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <TextField
+                  <NumberField
                     form={form}
                     name="yearOfConstruction"
                     label="Year of Construction"
-                    type="number"
                     placeholder="e.g. 2015"
+                    maxLength={4}
                   />
                   <TextField
                     form={form}
                     name="constructionStage"
                     label="Construction Stage (%)"
-                    type="number"
+                    inputMode="numeric"
                     placeholder="0 - 100"
                   />
                 </div>
@@ -647,25 +756,25 @@ function FieldVisitWizard({
             {/* STEP 6 — Assessment details */}
             {stepIndex === 5 && (
               <div className="space-y-6">
+                <ChipField
+                  form={form}
+                  name="approachRoadCondition"
+                  label="Condition of Approach Road"
+                  options={approachRoadOptions}
+                />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <SelectField
-                    form={form}
-                    name="approachRoadCondition"
-                    label="Condition of Approach Road"
-                    options={approachRoadOptions}
-                  />
                   <TextField
                     form={form}
                     name="areaSqFt"
                     label="Area of Property (Sq. Ft.)"
-                    type="number"
+                    inputMode="decimal"
                     placeholder="e.g. 1450"
                   />
                   <TextField
                     form={form}
                     name="ratePerSqFt"
                     label="Rate per Sq. Ft."
-                    type="number"
+                    inputMode="decimal"
                     placeholder="e.g. 5200"
                   />
                 </div>
@@ -821,116 +930,23 @@ function FieldVisitWizard({
   );
 }
 
-function ReviewSection({ title, children }: { title: string; children: React.ReactNode }) {
+function ReviewSection({
+  title,
+  icon: Icon,
+  children,
+}: {
+  title: string;
+  icon?: IconType;
+  children: React.ReactNode;
+}) {
   return (
     <div className="space-y-3">
-      <h3 className="text-sm font-semibold">{title}</h3>
+      <h3 className="flex items-center gap-2 text-sm font-semibold">
+        {Icon && <Icon className="h-4 w-4 text-muted-foreground" />}
+        {title}
+      </h3>
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
     </div>
-  );
-}
-
-// ---------------------------------------------------------------------------
-// Submitted (read-only) view
-// ---------------------------------------------------------------------------
-
-function SubmittedFieldVisit({
-  visit,
-  autoFill,
-}: {
-  visit: FieldVisit;
-  autoFill: AutoFill | null;
-}) {
-  const gpsText =
-    visit.gpsLatitude && visit.gpsLongitude ? `${visit.gpsLatitude}, ${visit.gpsLongitude}` : "—";
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <MapPin className="h-4 w-4" />
-          Field Visit Report
-        </CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/40 px-3 py-2">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <span className="text-sm">
-            Submitted
-            {visit.submittedAt ? ` on ${new Date(visit.submittedAt).toLocaleString()}` : ""}. This
-            report is read-only.
-          </span>
-        </div>
-
-        <ReviewSection title="Case">
-          <ReadOnlyField label="Case Number" value={autoFill?.caseNumber ?? "—"} />
-          <ReadOnlyField label="Request Number" value={autoFill?.requestNumber ?? "—"} />
-          <ReadOnlyField label="Bank" value={autoFill?.bankName ?? "—"} />
-          <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
-          <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
-          <ReadOnlyField label="Date of Visit" value={visit.visitDate ?? "—"} />
-          <ReadOnlyField label="GPS Location" value={gpsText} />
-        </ReviewSection>
-
-        <ReviewSection title="Visit Details">
-          <ReadOnlyField label="Person Met" value={visit.personMet ?? "—"} />
-          <ReadOnlyField label="Phone" value={visit.personPhone ?? "—"} />
-          <ReadOnlyField label="Relationship" value={visit.relationship ?? "—"} />
-        </ReviewSection>
-
-        <ReviewSection title="Property">
-          <ReadOnlyField label="Landmark" value={visit.landmark ?? "—"} />
-          <ReadOnlyField label="Property Type" value={visit.propertyType ?? "—"} />
-          <ReadOnlyField label="Locality" value={visit.localityType ?? "—"} />
-          <ReadOnlyField label="Occupancy" value={visit.occupancyStatus ?? "—"} />
-        </ReviewSection>
-
-        <ReviewSection title="Building">
-          <ReadOnlyField label="Structure" value={visit.structureType ?? "—"} />
-          <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
-          <ReadOnlyField
-            label="Floors in Building"
-            value={visit.floorsInBuilding?.toString() ?? "—"}
-          />
-          <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
-          <ReadOnlyField label="Flats on Floor" value={visit.flatsOnFloor?.toString() ?? "—"} />
-          <ReadOnlyField label="Wings" value={visit.wingsInBuilding?.toString() ?? "—"} />
-          <ReadOnlyField
-            label="Lifts/Staircases"
-            value={visit.liftsStaircases?.toString() ?? "—"}
-          />
-        </ReviewSection>
-
-        <ReviewSection title="Construction">
-          <ReadOnlyField
-            label="Year of Construction"
-            value={visit.yearOfConstruction?.toString() ?? "—"}
-          />
-          <ReadOnlyField label="Construction Stage (%)" value={visit.constructionStage ?? "—"} />
-          <ReadOnlyField label="Work Description" value={visit.workDescription ?? "—"} />
-        </ReviewSection>
-
-        <ReviewSection title="Boundaries">
-          <ReadOnlyField label="East" value={visit.boundaryEast ?? "—"} />
-          <ReadOnlyField label="West" value={visit.boundaryWest ?? "—"} />
-          <ReadOnlyField label="North" value={visit.boundaryNorth ?? "—"} />
-          <ReadOnlyField label="South" value={visit.boundarySouth ?? "—"} />
-        </ReviewSection>
-
-        <ReviewSection title="Assessment">
-          <ReadOnlyField label="Approach Road" value={visit.approachRoadCondition ?? "—"} />
-          <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
-          <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
-          <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
-          <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
-        </ReviewSection>
-
-        {visit.finalRemarks && (
-          <ReviewSection title="Final Remarks">
-            <ReadOnlyField label="Remarks" value={visit.finalRemarks} />
-          </ReviewSection>
-        )}
-      </CardContent>
-    </Card>
   );
 }
 
@@ -1027,7 +1043,7 @@ function Page() {
     <div className="space-y-6">
       {header}
       {fieldVisit ? (
-        <SubmittedFieldVisit visit={fieldVisit} autoFill={autoFill} />
+        <SubmittedFieldVisit visit={fieldVisit} autoFill={autoFill} engineerName={engineerName} />
       ) : (
         <FieldVisitWizard
           caseId={caseId}

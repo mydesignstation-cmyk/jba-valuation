@@ -34,6 +34,7 @@ import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
+import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { getSiteEngineer } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
@@ -61,16 +62,6 @@ function Field({
       <p className="text-sm font-medium break-words">
         {value ? value : <span className="text-muted-foreground">—</span>}
       </p>
-    </div>
-  );
-}
-
-/** A titled group of fields within the read-only Field Visit report. */
-function FieldVisitSection({ title, children }: { title: string; children: ReactNode }) {
-  return (
-    <div className="space-y-3">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">{children}</div>
     </div>
   );
 }
@@ -258,6 +249,49 @@ function Page() {
         </CardContent>
       </Card>
 
+      {/* Primary CTA for the assigned Site Engineer: jump straight into the
+          Field Visit without hunting for the tab. Shown until a visit exists;
+          once submitted it flips to a "View" affordance. The tab UX is kept. */}
+      {isSiteEngineer && (
+        <Card className={fieldVisit ? undefined : "border-primary/40 bg-primary/5"}>
+          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div
+                className={`mt-0.5 rounded-full p-2 ${
+                  fieldVisit ? "bg-green-600/15" : "bg-primary/15"
+                }`}
+              >
+                {fieldVisit ? (
+                  <CheckCircle2 className="h-5 w-5 text-green-600" />
+                ) : (
+                  <MapPin className="h-5 w-5 text-primary" />
+                )}
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold">
+                  {fieldVisit ? "Field Visit submitted" : "Field Visit pending"}
+                </p>
+                <p className="text-sm text-muted-foreground">
+                  {fieldVisit
+                    ? "Your inspection has been recorded for this case."
+                    : "Record the site inspection details for this case."}
+                </p>
+              </div>
+            </div>
+            <Button
+              asChild
+              className="w-full sm:w-auto"
+              variant={fieldVisit ? "outline" : "default"}
+            >
+              <Link to="/cases/$caseId/field-visit" params={{ caseId: valuationCase.id }}>
+                <MapPin className="mr-2 h-4 w-4" />
+                {fieldVisit ? "View Field Visit" : "Start Field Visit"}
+              </Link>
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Pipeline tracker — where the case sits in the workflow at a glance.
           Hidden for Site Engineers, who only need their own case details. */}
       {!isSiteEngineer && <CasePipeline stage={valuationCase.stage} />}
@@ -390,88 +424,17 @@ function Page() {
               {fieldVisitLoading ? (
                 <Skeleton className="h-40 w-full" />
               ) : fieldVisit ? (
-                <div className="space-y-6">
-                  <div className="flex items-center gap-2 rounded-md border border-dashed bg-muted/40 px-3 py-2">
-                    <CheckCircle2 className="h-4 w-4 text-green-600" />
-                    <span className="text-sm">
-                      Submitted
-                      {fieldVisit.submittedAt
-                        ? ` on ${new Date(fieldVisit.submittedAt).toLocaleString()}`
-                        : ""}
-                      . This field visit is read-only.
-                    </span>
-                  </div>
-                  <FieldVisitSection title="Visit Details">
-                    <Field label="Date of Visit" value={fieldVisit.visitDate} />
-                    <Field
-                      label="GPS Location"
-                      value={
-                        fieldVisit.gpsLatitude && fieldVisit.gpsLongitude
-                          ? `${fieldVisit.gpsLatitude}, ${fieldVisit.gpsLongitude}`
-                          : undefined
-                      }
-                    />
-                    <Field label="Person Met" value={fieldVisit.personMet} />
-                    <Field label="Phone" value={fieldVisit.personPhone} />
-                    <Field label="Relationship" value={fieldVisit.relationship} />
-                  </FieldVisitSection>
-
-                  <FieldVisitSection title="Property">
-                    <Field label="Bank" value={bankName} />
-                    <Field label="Customer" value={customerName} />
-                    <Field label="Address" value={customer?.address} />
-                    <Field label="Landmark" value={fieldVisit.landmark} />
-                    <Field label="Property Type" value={fieldVisit.propertyType} />
-                    <Field label="Locality" value={fieldVisit.localityType} />
-                    <Field label="Occupancy" value={fieldVisit.occupancyStatus} />
-                  </FieldVisitSection>
-
-                  <FieldVisitSection title="Building">
-                    <Field label="Structure" value={fieldVisit.structureType} />
-                    <Field label="Occupancy Level (%)" value={fieldVisit.occupancyLevel} />
-                    <Field
-                      label="Floors in Building"
-                      value={fieldVisit.floorsInBuilding?.toString()}
-                    />
-                    <Field label="Located on Floor" value={fieldVisit.locatedOnFloor} />
-                    <Field label="Flats on Floor" value={fieldVisit.flatsOnFloor?.toString()} />
-                    <Field label="Wings" value={fieldVisit.wingsInBuilding?.toString()} />
-                    <Field
-                      label="Lifts/Staircases"
-                      value={fieldVisit.liftsStaircases?.toString()}
-                    />
-                  </FieldVisitSection>
-
-                  <FieldVisitSection title="Construction">
-                    <Field
-                      label="Year of Construction"
-                      value={fieldVisit.yearOfConstruction?.toString()}
-                    />
-                    <Field label="Construction Stage (%)" value={fieldVisit.constructionStage} />
-                    <Field label="Work Description" value={fieldVisit.workDescription} />
-                  </FieldVisitSection>
-
-                  <FieldVisitSection title="Boundaries">
-                    <Field label="East" value={fieldVisit.boundaryEast} />
-                    <Field label="West" value={fieldVisit.boundaryWest} />
-                    <Field label="North" value={fieldVisit.boundaryNorth} />
-                    <Field label="South" value={fieldVisit.boundarySouth} />
-                  </FieldVisitSection>
-
-                  <FieldVisitSection title="Assessment">
-                    <Field label="Approach Road" value={fieldVisit.approachRoadCondition} />
-                    <Field label="Area (Sq. Ft.)" value={fieldVisit.areaSqFt} />
-                    <Field label="Rate per Sq. Ft." value={fieldVisit.ratePerSqFt} />
-                    <Field label="Negative Points" value={fieldVisit.negativePoints} />
-                    <Field label="Agent Opinion" value={fieldVisit.agentOpinion} />
-                  </FieldVisitSection>
-
-                  {fieldVisit.finalRemarks && (
-                    <FieldVisitSection title="Final Remarks">
-                      <Field label="Remarks" value={fieldVisit.finalRemarks} />
-                    </FieldVisitSection>
-                  )}
-                </div>
+                <SubmittedFieldVisit
+                  visit={fieldVisit}
+                  engineerName={engineerName}
+                  autoFill={{
+                    caseNumber: valuationCase.caseNumber,
+                    requestNumber: valuationCase.requestNumber,
+                    bankName,
+                    customerName,
+                    address: customer?.address ?? "—",
+                  }}
+                />
               ) : (
                 <EmptyState
                   icon={MapPin}

@@ -36,11 +36,11 @@ export const approachRoadSchema = z.enum(approachRoadOptions);
 // --- Reusable field helpers ---
 
 /** A trimmed, required free-text field with a friendly message and max length. */
-const requiredText = (label: string, max = 1000) =>
+const requiredText = (label: string, max = 1000, min = 1) =>
   z
     .string({ required_error: `${label} is required` })
     .trim()
-    .min(1, `${label} is required`)
+    .min(min, min > 1 ? `${label} must be at least ${min} characters` : `${label} is required`)
     .max(max, `${label} is too long`);
 
 /** An optional trimmed free-text field (empty string allowed, coerced to ""). */
@@ -101,9 +101,9 @@ export const gpsSchema = z.object({
 /** STEP 1 — Visit details (GPS is captured here and is compulsory). */
 export const step1Schema = z
   .object({
-    personMet: requiredText("Name of person met", 255),
-    personPhone: requiredText("Phone number", 50).refine(
-      (v) => /^[0-9+\-()\s]{6,20}$/.test(v),
+    personMet: requiredText("Name of person met", 255, 3),
+    personPhone: requiredText("Phone number", 15).refine(
+      (v) => /^[0-9+\-()\s]{6,15}$/.test(v),
       "Enter a valid phone number",
     ),
     relationship: relationshipSchema,
@@ -112,22 +112,55 @@ export const step1Schema = z
 
 /** STEP 2 — Property details. */
 export const step2Schema = z.object({
-  landmark: requiredText("Landmark", 500),
+  landmark: requiredText("Landmark", 500, 3),
   propertyType: propertyTypeSchema,
   localityType: localityTypeSchema,
   occupancyStatus: occupancyStatusSchema,
 });
 
-/** STEP 3 — Building information. */
-export const step3Schema = z.object({
+/**
+ * STEP 3 — Building information.
+ *
+ * All counts are numeric (whole numbers). An internal cross-field rule enforces
+ * that the floor the property sits on cannot exceed the number of floors in the
+ * building — a common data-entry mistake worth catching before submission.
+ */
+const step3Shape = {
   structureType: structureTypeSchema,
   occupancyLevel: percentString("Occupancy level"),
-  floorsInBuilding: integerString("No. of floors in building", { min: 0 }),
-  locatedOnFloor: requiredText("Located on floor no.", 100),
+  floorsInBuilding: integerString("No. of floors in building", { min: 1 }),
+  locatedOnFloor: integerString("Located on floor no.", { min: 0 }),
   flatsOnFloor: integerString("No. of flats on the floor", { min: 0 }),
   wingsInBuilding: integerString("No. of wings in building", { min: 0 }),
   liftsStaircases: integerString("No. of lifts/staircases", { min: 0 }),
-});
+};
+
+/**
+ * Cross-field rule shared by the per-step and full schemas: the floor the
+ * property sits on cannot exceed the number of floors in the building.
+ */
+const refineLocatedFloor = (
+  val: { floorsInBuilding: string; locatedOnFloor: string },
+  ctx: z.RefinementCtx,
+) => {
+  const floors = Number(val.floorsInBuilding);
+  const located = Number(val.locatedOnFloor);
+  if (
+    val.floorsInBuilding !== "" &&
+    val.locatedOnFloor !== "" &&
+    Number.isFinite(floors) &&
+    Number.isFinite(located) &&
+    located > floors
+  ) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      path: ["locatedOnFloor"],
+      message: "Located floor cannot be more than the number of floors in the building",
+    });
+  }
+};
+
+export const step3Schema = z.object(step3Shape).superRefine(refineLocatedFloor);
 
 /**
  * STEP 4 — Construction details.
@@ -179,11 +212,12 @@ export const step7Schema = z.object({
  */
 export const fieldVisitFormSchema = step1Schema
   .merge(step2Schema)
-  .merge(step3Schema)
+  .merge(z.object(step3Shape))
   .merge(step4Schema)
   .merge(step5Schema)
   .merge(step6Schema)
-  .merge(step7Schema);
+  .merge(step7Schema)
+  .superRefine(refineLocatedFloor);
 
 export type FieldVisitFormValues = z.infer<typeof fieldVisitFormSchema>;
 
