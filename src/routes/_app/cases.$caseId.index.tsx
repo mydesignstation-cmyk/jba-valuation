@@ -17,7 +17,6 @@ import {
   ShieldCheck,
   UploadCloud,
   User as UserIcon,
-  UserCheck,
   UserCog,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
@@ -42,7 +41,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { Separator } from "@/components/ui/separator";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app/PageHeader";
-import { CasePipeline } from "@/components/case/CasePipeline";
+import { CasePipeline, type PipelinePeople } from "@/components/case/CasePipeline";
 import { requirePermission } from "@/lib/route-guard";
 import { getSessionToken, useCurrentUser, roleLabels } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
@@ -61,7 +60,7 @@ import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
-import { getSiteEngineer, getMaker, getAssigner } from "@/services/user.service";
+import { getSiteEngineer, getMaker, getAssigner, getUser } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
   head: () => pageMeta("Case Detail", "Case information, customer, assignment and history."),
@@ -266,6 +265,20 @@ function Page() {
     enabled: !!valuationCase?.assignedByCheckerId,
   });
 
+  // Who checked the case (submitted it to the Uploader) and who performed the
+  // final upload. Both resolve any role (Checker/Uploader or an admin acting
+  // for them) so the label reads correctly. Null until the respective hand-off.
+  const { data: checkedBy } = useQuery({
+    queryKey: ["case-actor", valuationCase?.checkedById],
+    queryFn: async () => (await getUser(valuationCase!.checkedById)) ?? null,
+    enabled: !!valuationCase?.checkedById,
+  });
+  const { data: uploadedBy } = useQuery({
+    queryKey: ["case-actor", valuationCase?.uploadedById],
+    queryFn: async () => (await getUser(valuationCase!.uploadedById)) ?? null,
+    enabled: !!valuationCase?.uploadedById,
+  });
+
   // The submitted field visit for this case. Role-agnostic read (no token):
   // authorization is handled by the case-detail route guard, mirroring how the
   // case itself is read. Resolves to null when nothing has been submitted yet.
@@ -314,6 +327,29 @@ function Page() {
   const assignedByLabel = assignedBy?.role
     ? `Assigned By (${roleLabels[assignedBy.role]})`
     : "Assigned By";
+
+  // Checked By / Uploaded By names for the pipeline. Fall back to the raw id
+  // only if the user can't be resolved (deleted acct). These now surface under
+  // the pipeline milestones rather than in the Case Details card.
+  const hasCheckedBy = !!valuationCase.checkedById;
+  const checkedByName =
+    checkedBy?.name ?? (hasCheckedBy ? valuationCase.checkedById : undefined);
+
+  const hasUploadedBy = !!valuationCase.uploadedById;
+  const uploadedByName =
+    uploadedBy?.name ?? (hasUploadedBy ? valuationCase.uploadedById : undefined);
+
+  // The people behind each pipeline milestone, so the tracker doubles as the
+  // who-did-what. Field Visit → assigned Site Engineer; Maker → assigned Maker;
+  // Checker → who checked it; Uploader → who uploaded it. COMPLETED has no
+  // person. Only include a name when we actually have one (undefined falls back
+  // to showing the role alone in the pipeline).
+  const pipelinePeople: PipelinePeople = {
+    FIELD_VISIT: engineer?.name ?? undefined,
+    MAKER: hasMaker ? makerName : undefined,
+    CHECKER: hasCheckedBy ? checkedByName : undefined,
+    UPLOADER: hasUploadedBy ? uploadedByName : undefined,
+  };
 
   // Maker (re)assignment is only meaningful once the field visit is submitted
   // and before the case moves past Maker assignment.
@@ -638,7 +674,9 @@ function Page() {
 
           {/* Pipeline tracker — where the case sits in the workflow at a glance.
               Hidden for Site Engineers, who only need their own case details. */}
-          {!isSiteEngineer && <CasePipeline stage={valuationCase.stage} />}
+          {!isSiteEngineer && (
+            <CasePipeline stage={valuationCase.stage} people={pipelinePeople} />
+          )}
 
           {/* Case Information — redundant with the header + overview strip, kept
               in the tree but hidden so it's a one-word revert. */}
@@ -659,12 +697,15 @@ function Page() {
 
           {/* Assignment and Customer & Property sit side-by-side on desktop. */}
           <div className="grid gap-6 lg:grid-cols-2">
-            {/* Assignment */}
+            {/* Case Details — the non-people case attributes. The workflow
+                people (Site Engineer / Maker / Checker / Uploader) now live in
+                the pipeline tracker above, so this card carries only Bank,
+                Branch, who assigned the Maker, and the timestamps. */}
             <Card>
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
-                  <UserCog className="h-4 w-4" />
-                  Assignment
+                  <FileText className="h-4 w-4" />
+                  Case Details
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-4">
@@ -679,20 +720,8 @@ function Page() {
                     value={branchName}
                     icon={<GitBranch className="h-3.5 w-3.5" />}
                   />
-                  <Field
-                    label="Assigned Site Engineer"
-                    value={engineerName}
-                    icon={<UserCog className="h-3.5 w-3.5" />}
-                  />
-                  {/* Assigned Maker — explicitly shows "Not assigned yet" until
-                      a Checker assigns one, so a submitted-but-unassigned case
-                      never looks like it already has a Maker. */}
-                  <Field
-                    label="Assigned Maker"
-                    value={hasMaker ? makerName : "Not assigned yet"}
-                    icon={<UserCheck className="h-3.5 w-3.5" />}
-                  />
-                  {/* Who assigned the Maker (Checker/Admin/Super Admin). Only
+                  {/* Who assigned the Maker (Checker/Admin/Super Admin). Not a
+                      pipeline step of its own, so it stays in this card. Only
                       shown once assigned; blank on cases assigned before this
                       was tracked. */}
                   {hasMaker && assignedByName && (

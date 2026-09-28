@@ -16,6 +16,7 @@ import {
   api_getMaker as db_getMaker,
   api_getChecker as db_getChecker,
   api_getAssigner as db_getAssigner,
+  api_getUser as db_getUser,
 } from "@/server/api.server";
 import type { User } from "@/types";
 
@@ -38,6 +39,10 @@ const getCheckerFn = createServerFn({ method: "GET" })
 const getAssignerFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
   .handler(({ data }) => db_getAssigner(data));
+
+const getUserFn = createServerFn({ method: "GET" })
+  .validator((id: string) => id)
+  .handler(({ data }) => db_getUser(data));
 
 export function api_listSiteEngineers(): Promise<User[]> {
   return listSiteEngineersFn();
@@ -69,4 +74,13 @@ export function api_getChecker(id: string): Promise<User | undefined> {
  */
 export function api_getAssigner(id: string): Promise<User | undefined> {
   return getAssignerFn({ data: id });
+}
+
+/**
+ * Resolve any Neon Auth user by id with their real role. Used for attribution
+ * fields where the actor may be a specific role or an admin acting for them —
+ * e.g. "Checked By" and "Uploaded By" on case detail.
+ */
+export function api_getUser(id: string): Promise<User | undefined> {
+  return getUserFn({ data: id });
 }

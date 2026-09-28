@@ -166,6 +166,16 @@ export async function api_getChecker(id: string): Promise<User | undefined> {
 /** Roles that are allowed to assign/reassign a Maker (see api_assignMaker). */
 const ASSIGNER_ROLES = new Set<Role>(["CHECKER", "ADMIN", "SUPER_ADMIN"]);
 
+/** Every known application role — used to validate a resolved user's role. */
+const KNOWN_ROLES = new Set<Role>([
+  "SUPER_ADMIN",
+  "ADMIN",
+  "SITE_ENGINEER",
+  "MAKER",
+  "CHECKER",
+  "UPLOADER",
+]);
+
 /**
  * Resolve the user who assigned the Maker, regardless of whether they were a
  * Checker, Admin, or Super Admin, and return their real application role so the
@@ -198,6 +208,40 @@ export async function api_getAssigner(id: string): Promise<User | undefined> {
   } catch (error) {
     console.error("Failed to get assigner:", error);
     throw new Error("Failed to load assigner from database");
+  }
+}
+
+/**
+ * Resolve any Neon Auth user by id, returning their real application role so
+ * the UI can label them correctly. Used for attribution fields where the actor
+ * can be a specific role or an admin acting on their behalf — e.g. "Checked By"
+ * (Checker/admin) and "Uploaded By" (Uploader/admin) on case detail. Returns
+ * undefined when the id is unknown or the user has no known application role.
+ */
+export async function api_getUser(id: string): Promise<User | undefined> {
+  try {
+    const result = await getDb().execute(
+      sql`SELECT id, name, email, role
+          FROM neon_auth."user"
+          WHERE id = ${id}
+          LIMIT 1`,
+    );
+    const rows = result as unknown as (NeonAuthUserRow & { role: string | null })[];
+    const row = rows[0];
+    if (!row) return undefined;
+
+    const role = row.role && KNOWN_ROLES.has(row.role as Role) ? (row.role as Role) : null;
+    if (!role) return undefined;
+
+    return {
+      id: row.id,
+      name: row.name ?? row.email,
+      email: row.email,
+      role,
+    };
+  } catch (error) {
+    console.error("Failed to get user:", error);
+    throw new Error("Failed to load user from database");
   }
 }
 
@@ -596,6 +640,8 @@ function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
     assignedEngineerId: row.assigned_engineer_id || "",
     assignedMakerId: row.assigned_maker_id || "",
     assignedByCheckerId: row.assigned_by_checker_id || "",
+    checkedById: row.checked_by_id || "",
+    uploadedById: row.uploaded_by_id || "",
     stage: row.stage as ValuationCase["stage"],
     createdById: row.created_by_id || "",
     createdAt: row.created_at.toISOString(),
@@ -1453,14 +1499,17 @@ export async function api_submitToUploader(
   token: string | null | undefined,
   caseId: string,
 ): Promise<ValuationCase> {
-  await requireServerUser(token, "CHECKER", "ADMIN", "SUPER_ADMIN");
+  const actor = await requireServerUser(token, "CHECKER", "ADMIN", "SUPER_ADMIN");
 
   try {
     const now = new Date();
 
+    // Record who checked the case (the verified actor) alongside the stage
+    // advance, so the case detail can show "Checked By". Trusted id comes from
+    // the verified session, never a client-supplied field.
     const rows = await getDb()
       .update(cases)
-      .set({ stage: "UPLOADER_PENDING", updated_at: now })
+      .set({ stage: "UPLOADER_PENDING", checked_by_id: actor.id, updated_at: now })
       .where(and(eq(cases.id, caseId), eq(cases.stage, "CHECKER_PENDING")))
       .returning();
 
@@ -1543,14 +1592,17 @@ export async function api_markUploadCompleted(
   token: string | null | undefined,
   caseId: string,
 ): Promise<ValuationCase> {
-  await requireServerUser(token, "UPLOADER", "ADMIN", "SUPER_ADMIN");
+  const actor = await requireServerUser(token, "UPLOADER", "ADMIN", "SUPER_ADMIN");
 
   try {
     const now = new Date();
 
+    // Record who performed the final upload (the verified actor) alongside the
+    // close, so the case detail can show "Uploaded By". Trusted id comes from
+    // the verified session, never a client-supplied field.
     const rows = await getDb()
       .update(cases)
-      .set({ stage: "COMPLETED", updated_at: now })
+      .set({ stage: "COMPLETED", uploaded_by_id: actor.id, updated_at: now })
       .where(and(eq(cases.id, caseId), eq(cases.stage, "UPLOADER_PENDING")))
       .returning();
 

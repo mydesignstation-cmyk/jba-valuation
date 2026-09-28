@@ -1,16 +1,25 @@
 import { Check } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
-import { getCaseMilestones, stageLabels } from "@/lib/case-format";
+import { getCaseMilestones, stageLabels, type CaseMilestoneKey } from "@/lib/case-format";
 import type { CaseStage } from "@/types";
+
+/**
+ * Optional person name to show under a milestone, keyed by milestone. When a
+ * name is provided it renders as the primary caption with the owning role as
+ * secondary subtext (e.g. "Ravindra" / "Site Engineer"); otherwise the role
+ * alone is shown. COMPLETED has no person.
+ */
+export type PipelinePeople = Partial<Record<CaseMilestoneKey, string | undefined>>;
 
 /**
  * Horizontal (desktop) / vertical (mobile) pipeline tracker for a case.
  * Collapses the ten stages into five milestones and marks each as done,
  * current, or upcoming. Read-only — it reflects the case's stage, it does
- * not advance it.
+ * not advance it. When `people` is supplied, each milestone also shows who
+ * performed (or owns) that step, so the pipeline doubles as the who-did-what.
  */
-export function CasePipeline({ stage }: { stage: CaseStage }) {
+export function CasePipeline({ stage, people }: { stage: CaseStage; people?: PipelinePeople }) {
   const milestones = getCaseMilestones(stage);
 
   return (
@@ -71,7 +80,19 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   >
                     {m.label}
                   </p>
-                  <p className="text-xs text-muted-foreground">{m.role}</p>
+                  {/* When a person is known for this milestone, show their name
+                      as the primary caption with the role as subtext. Otherwise
+                      fall back to just the role. */}
+                  {people?.[m.key] ? (
+                    <>
+                      <p className="text-xs font-medium text-foreground break-words">
+                        {people[m.key]}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{m.role}</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">{m.role}</p>
+                  )}
                 </div>
               </li>
             );
@@ -117,7 +138,16 @@ export function CasePipeline({ stage }: { stage: CaseStage }) {
                   >
                     {m.label}
                   </p>
-                  <p className="text-xs text-muted-foreground">{m.role}</p>
+                  {people?.[m.key] ? (
+                    <>
+                      <p className="text-xs font-medium text-foreground break-words">
+                        {people[m.key]}
+                      </p>
+                      <p className="text-xs text-muted-foreground">{m.role}</p>
+                    </>
+                  ) : (
+                    <p className="text-xs text-muted-foreground">{m.role}</p>
+                  )}
                 </div>
               </li>
             );

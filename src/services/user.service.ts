@@ -6,6 +6,7 @@ import {
   api_getMaker,
   api_getChecker,
   api_getAssigner,
+  api_getUser,
 } from "@/data/user.functions";
 
 /**
@@ -39,4 +40,9 @@ export async function getChecker(id: string): Promise<User | undefined> {
 /** Resolve who assigned the Maker (Checker/Admin/Super Admin) with their role. */
 export async function getAssigner(id: string): Promise<User | undefined> {
   return api_getAssigner(id);
+}
+
+/** Resolve any user by id with their real role (for Checked By / Uploaded By). */
+export async function getUser(id: string): Promise<User | undefined> {
+  return api_getUser(id);
 }
