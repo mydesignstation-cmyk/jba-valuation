@@ -129,6 +129,10 @@ function Page() {
   // admin-only /cases list, so send them back where they came from.
   const currentUser = useCurrentUser();
   const listsAllCases = can(currentUser?.role, "cases.view");
+  // Site Engineers get a slimmed-down detail view: the pipeline tracker and the
+  // workflow (maker/checker/history) artifacts are internal to the admin flow,
+  // so hide them for that role.
+  const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
   const backTo = listsAllCases ? "/cases" : "/my-cases";
   const backLabel = listsAllCases ? "Cases" : "My Cases";
   const backAction = listsAllCases ? "Back to Cases" : "Back to My Cases";
@@ -236,8 +240,9 @@ function Page() {
         </CardContent>
       </Card>
 
-      {/* Pipeline tracker — where the case sits in the workflow at a glance */}
-      <CasePipeline stage={valuationCase.stage} />
+      {/* Pipeline tracker — where the case sits in the workflow at a glance.
+          Hidden for Site Engineers, who only need their own case details. */}
+      {!isSiteEngineer && <CasePipeline stage={valuationCase.stage} />}
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Case Information */}
@@ -341,7 +346,9 @@ function Page() {
       </div>
 
       {/* Workflow artifacts — field visit, notes and activity.
-          Read-only for now; each tab has a clean slot for data landing later. */}
+          Read-only for now; each tab has a clean slot for data landing later.
+          Hidden for Site Engineers, who don't work the maker/checker flow. */}
+      {!isSiteEngineer && (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
@@ -403,6 +410,7 @@ function Page() {
           </Tabs>
         </CardContent>
       </Card>
+      )}
     </div>
   );
 }
