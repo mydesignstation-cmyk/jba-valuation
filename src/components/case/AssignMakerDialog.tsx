@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { UserCog } from "lucide-react";
 import {
@@ -28,16 +28,24 @@ interface AssignMakerDialogProps {
   /** Called with the chosen Maker's Neon Auth UUID. Should perform the assign. */
   onAssign: (makerId: string) => Promise<void>;
   isSubmitting: boolean;
+  /**
+   * Reassignment mode (Admin / Super Admin changing an existing Maker). Adjusts
+   * the copy and pre-selects the currently assigned Maker. Defaults to false
+   * (first-time assignment).
+   */
+  isReassign?: boolean;
+  /** Currently assigned Maker id, used to pre-select the picker on reassign. */
+  currentMakerId?: string;
 }
 
 /**
- * Small dialog to assign a real Neon Auth MAKER to a case.
+ * Small dialog to assign (or reassign) a real Neon Auth MAKER to a case.
  *
  * Loads the live list of MAKER users (banned excluded) from
- * neon_auth."user" through the service layer. The Checker picks one and
+ * neon_auth."user" through the service layer. The actor picks one and
  * confirms; the parent runs the server-enforced assignment. This dialog only
- * gathers input — the server is the authority on whether the assignment is
- * allowed.
+ * gathers input — the server is the authority on whether the (re)assignment is
+ * allowed. The same dialog is reused for Admin/Super Admin reassignment.
  */
 export function AssignMakerDialog({
   open,
@@ -45,6 +53,8 @@ export function AssignMakerDialog({
   caseNumber,
   onAssign,
   isSubmitting,
+  isReassign = false,
+  currentMakerId,
 }: AssignMakerDialogProps) {
   const [makerId, setMakerId] = useState<string>("");
 
@@ -58,8 +68,25 @@ export function AssignMakerDialog({
     enabled: open,
   });
 
+  // On reassign, pre-select the current Maker each time the dialog opens so the
+  // admin sees who is assigned and can change it.
+  useEffect(() => {
+    if (open) {
+      setMakerId(isReassign && currentMakerId ? currentMakerId : "");
+    }
+  }, [open, isReassign, currentMakerId]);
+
+  const title = isReassign ? "Reassign Maker" : "Assign Maker";
+  const description = isReassign
+    ? `Change the Maker assigned to case ${caseNumber}. Only the newly selected Maker will see this case.`
+    : `Assign a Maker to case ${caseNumber}. Only the selected Maker will see this case.`;
+  const confirmIdle = isReassign ? "Reassign Maker" : "Assign Maker";
+  const confirmBusy = isReassign ? "Reassigning..." : "Assigning...";
+  // On reassign, block confirming the no-op of the already-assigned Maker.
+  const unchanged = isReassign && !!currentMakerId && makerId === currentMakerId;
+
   const handleAssign = async () => {
-    if (!makerId) return;
+    if (!makerId || unchanged) return;
     await onAssign(makerId);
   };
 
@@ -75,11 +102,9 @@ export function AssignMakerDialog({
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <UserCog className="h-4 w-4" />
-            Assign Maker
+            {title}
           </DialogTitle>
-          <DialogDescription>
-            Assign a Maker to case {caseNumber}. Only the selected Maker will see this case.
-          </DialogDescription>
+          <DialogDescription>{description}</DialogDescription>
         </DialogHeader>
 
         <div className="space-y-2 py-2">
@@ -118,8 +143,8 @@ export function AssignMakerDialog({
           <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
             Cancel
           </Button>
-          <Button onClick={handleAssign} disabled={!makerId || isSubmitting}>
-            {isSubmitting ? "Assigning..." : "Assign Maker"}
+          <Button onClick={handleAssign} disabled={!makerId || unchanged || isSubmitting}>
+            {isSubmitting ? confirmBusy : confirmIdle}
           </Button>
         </DialogFooter>
       </DialogContent>

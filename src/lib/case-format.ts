@@ -42,6 +42,18 @@ export function isEngineerCasePending(stage: CaseStage): boolean {
 }
 
 /**
+ * A Maker's work on a case is the maker report. From their point of view a
+ * case is "Pending" while it is still waiting on them (just assigned, or maker
+ * work in progress) and "Completed" once they have finished their maker step
+ * (regardless of where the case travels afterwards in the checker/uploader
+ * pipeline). Single source of truth for that split, shared by the Maker Queue
+ * and the maker dashboard.
+ */
+export function isMakerCasePending(stage: CaseStage): boolean {
+  return stage === "MAKER_ASSIGNED" || stage === "MAKER_PENDING";
+}
+
+/**
  * The case pipeline collapses the ten fine-grained stages into five
  * human-readable milestones, so the workflow reads as a clean tick-by-tick
  * flow (Field Visit → Maker → Checker → Uploader → Completed).

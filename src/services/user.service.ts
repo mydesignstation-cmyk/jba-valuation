@@ -4,6 +4,8 @@ import {
   api_getSiteEngineer,
   api_listMakers,
   api_getMaker,
+  api_getChecker,
+  api_getAssigner,
 } from "@/data/user.functions";
 
 /**
@@ -28,4 +30,13 @@ export async function listMakers(): Promise<User[]> {
 
 export async function getMaker(id: string): Promise<User | undefined> {
   return api_getMaker(id);
+}
+
+export async function getChecker(id: string): Promise<User | undefined> {
+  return api_getChecker(id);
+}
+
+/** Resolve who assigned the Maker (Checker/Admin/Super Admin) with their role. */
+export async function getAssigner(id: string): Promise<User | undefined> {
+  return api_getAssigner(id);
 }

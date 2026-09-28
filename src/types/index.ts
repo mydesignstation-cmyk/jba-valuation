@@ -62,6 +62,8 @@ export interface ValuationCase {
   assignedEngineerId: string;
   /** Neon Auth UUID of the Maker assigned by a Checker. Empty when unassigned. */
   assignedMakerId: string;
+  /** Neon Auth UUID of the Checker who assigned the Maker. Empty when unassigned. */
+  assignedByCheckerId: string;
   stage: CaseStage;
   createdById: string;
   createdAt: string;

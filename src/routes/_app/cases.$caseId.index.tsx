@@ -30,7 +30,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app/PageHeader";
 import { CasePipeline } from "@/components/case/CasePipeline";
 import { requirePermission } from "@/lib/route-guard";
-import { getSessionToken, useCurrentUser } from "@/lib/auth-client";
+import { getSessionToken, useCurrentUser, roleLabels } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
@@ -41,7 +41,7 @@ import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
-import { getSiteEngineer, getMaker } from "@/services/user.service";
+import { getSiteEngineer, getMaker, getAssigner } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
   head: () => pageMeta("Case Detail", "Case information, customer, assignment and history."),
@@ -153,9 +153,12 @@ function Page() {
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
   const isChecker = currentUser?.role === "CHECKER";
   const isMaker = currentUser?.role === "MAKER";
-  // Whether the signed-in Checker may assign a Maker is a UI hint only; the
-  // server is authoritative on the same rule.
+  // Who may assign vs reassign a Maker. These are UI gates only; the server
+  // (api_assignMaker) is the authority on the same rules.
+  //  - assign  : Checker + admins, only when no Maker is assigned yet.
+  //  - reassign: admins only, to change an already-assigned Maker.
   const canAssignMaker = can(currentUser?.role, "cases.assignMaker");
+  const canReassignMaker = can(currentUser?.role, "cases.reassignMaker");
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
@@ -220,6 +223,16 @@ function Page() {
     enabled: !!valuationCase?.assignedMakerId,
   });
 
+  // The Checker who assigned the Maker. Only relevant once an assignment has
+  // happened; older cases assigned before this was tracked resolve to null.
+  // Resolves any assigner role (Checker / Admin / Super Admin) so an admin
+  // assignment shows a name + correct label instead of a raw UUID.
+  const { data: assignedBy } = useQuery({
+    queryKey: ["assigner", valuationCase?.assignedByCheckerId],
+    queryFn: async () => (await getAssigner(valuationCase!.assignedByCheckerId)) ?? null,
+    enabled: !!valuationCase?.assignedByCheckerId,
+  });
+
   // The submitted field visit for this case. Role-agnostic read (no token):
   // authorization is handled by the case-detail route guard, mirroring how the
   // case itself is read. Resolves to null when nothing has been submitted yet.
@@ -259,11 +272,26 @@ function Page() {
   const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
   const hasMaker = !!valuationCase.assignedMakerId;
   const makerName = maker?.name ?? (hasMaker ? valuationCase.assignedMakerId : undefined);
+  // Name of whoever assigned the Maker; falls back to the raw id only if the
+  // user can't be resolved (e.g. deleted account).
+  const assignedByName =
+    assignedBy?.name ??
+    (valuationCase.assignedByCheckerId ? valuationCase.assignedByCheckerId : undefined);
+  // Role-aware label so it reads "Assigned By (Checker)" or "(Admin)" etc.
+  const assignedByLabel = assignedBy?.role
+    ? `Assigned By (${roleLabels[assignedBy.role]})`
+    : "Assigned By";
 
-  // A Checker may assign a Maker only while the field visit is submitted and no
-  // Maker has been assigned. This gates the button; the server re-checks it.
-  const showAssignMaker =
-    canAssignMaker && valuationCase.stage === "FIELD_VISIT_SUBMITTED" && !hasMaker;
+  // Maker (re)assignment is only meaningful once the field visit is submitted
+  // and before the case moves past Maker assignment.
+  const makerAssignable =
+    valuationCase.stage === "FIELD_VISIT_SUBMITTED" || valuationCase.stage === "MAKER_ASSIGNED";
+
+  // Assign: Checker or admin, only while no Maker is assigned yet.
+  const showAssignMaker = canAssignMaker && makerAssignable && !hasMaker;
+  // Reassign: admins only, to change an already-assigned Maker. Checkers never
+  // see this. These gate the buttons; the server re-checks both rules.
+  const showReassignMaker = canReassignMaker && makerAssignable && hasMaker;
 
   const handleAssignMaker = async (makerId: string) => {
     setIsAssigning(true);
@@ -271,7 +299,7 @@ function Page() {
       const token = await getSessionToken();
       if (!token) throw new Error("Not authenticated");
       await api_assignMaker(token, valuationCase.id, makerId);
-      toast.success("Maker assigned");
+      toast.success(hasMaker ? "Maker reassigned" : "Maker assigned");
       queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
       queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
       setAssignOpen(false);
@@ -310,13 +338,20 @@ function Page() {
             <Badge variant={stageBadgeVariant[valuationCase.stage]} className="text-sm">
               {stageLabels[valuationCase.stage]}
             </Badge>
-            {/* Primary Checker action: assign a Maker once the field visit is
-                submitted. Lives at the top right of Case Detail (not in list
-                rows). Hidden once a Maker is assigned. */}
+            {/* Primary action at the top right of Case Detail (not in list
+                rows). "Assign Maker" for Checkers/admins while unassigned;
+                "Reassign Maker" for admins once a Maker is assigned (Checkers
+                never see reassign). */}
             {showAssignMaker && (
               <Button onClick={() => setAssignOpen(true)}>
                 <UserCog className="mr-2 h-4 w-4" />
                 Assign Maker
+              </Button>
+            )}
+            {showReassignMaker && (
+              <Button variant="outline" onClick={() => setAssignOpen(true)}>
+                <UserCog className="mr-2 h-4 w-4" />
+                Reassign Maker
               </Button>
             )}
           </div>
@@ -460,13 +495,6 @@ function Page() {
                     value={engineerName}
                     icon={<UserCog className="h-3.5 w-3.5" />}
                   />
-                  {engineer?.email && (
-                    <Field
-                      label="Engineer Email"
-                      value={engineer.email}
-                      icon={<Mail className="h-3.5 w-3.5" />}
-                    />
-                  )}
                   {/* Assigned Maker — explicitly shows "Not assigned yet" until
                       a Checker assigns one, so a submitted-but-unassigned case
                       never looks like it already has a Maker. */}
@@ -475,11 +503,14 @@ function Page() {
                     value={hasMaker ? makerName : "Not assigned yet"}
                     icon={<UserCheck className="h-3.5 w-3.5" />}
                   />
-                  {hasMaker && maker?.email && maker.email !== maker.name && (
+                  {/* Who assigned the Maker (Checker/Admin/Super Admin). Only
+                      shown once assigned; blank on cases assigned before this
+                      was tracked. */}
+                  {hasMaker && assignedByName && (
                     <Field
-                      label="Maker Email"
-                      value={maker.email}
-                      icon={<Mail className="h-3.5 w-3.5" />}
+                      label={assignedByLabel}
+                      value={assignedByName}
+                      icon={<UserCog className="h-3.5 w-3.5" />}
                     />
                   )}
                 </div>
@@ -592,6 +623,8 @@ function Page() {
         caseNumber={valuationCase.caseNumber}
         onAssign={handleAssignMaker}
         isSubmitting={isAssigning}
+        isReassign={hasMaker}
+        currentMakerId={valuationCase.assignedMakerId}
       />
     </div>
   );

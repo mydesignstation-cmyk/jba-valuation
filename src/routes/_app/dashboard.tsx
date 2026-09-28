@@ -18,8 +18,13 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { requirePermission } from "@/lib/route-guard";
 import { useCurrentUser, getSessionToken } from "@/lib/auth-client";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant, isEngineerCasePending } from "@/lib/case-format";
-import { api_listCases, api_listMyCases } from "@/data/case.functions";
+import {
+  stageLabels,
+  stageBadgeVariant,
+  isEngineerCasePending,
+  isMakerCasePending,
+} from "@/lib/case-format";
+import { api_listCases, api_listMyCases, api_listMakerCases } from "@/data/case.functions";
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
@@ -86,51 +91,67 @@ function KpiCard({
 function Page() {
   const navigate = useNavigate();
   const currentUser = useCurrentUser();
-  // A Site Engineer's dashboard must never see cases that are not assigned to
-  // them. For that role we load ONLY their own cases (server verifies the
-  // token and filters by the engineer's id); every other role sees all cases.
+  // Site Engineers and Makers get a focused, personal dashboard: they only ever
+  // see the cases assigned to them and a simple Pending/Completed split. Their
+  // dashboard must never leak org-wide cases or master-data (customers, banks,
+  // branches). Every other role keeps the full pipeline-wide view.
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
+  const isMaker = currentUser?.role === "MAKER";
+  const isPersonal = isSiteEngineer || isMaker;
 
   const { data: cases = [], isLoading: casesLoading } = useQuery({
-    queryKey: isSiteEngineer ? ["my-cases"] : ["cases"],
+    // Reuse the same query keys as the Maker Queue / My Cases views so their
+    // caches stay in sync.
+    queryKey: isSiteEngineer ? ["my-cases"] : isMaker ? ["maker-cases"] : ["cases"],
     queryFn: async () => {
       if (isSiteEngineer) {
         const token = await getSessionToken();
         if (!token) throw new Error("Not authenticated");
         return api_listMyCases(token);
       }
+      if (isMaker) {
+        const token = await getSessionToken();
+        if (!token) throw new Error("Not authenticated");
+        return api_listMakerCases(token);
+      }
       return api_listCases();
     },
   });
-  // Org-wide master-data totals are only meaningful to admins. A Site Engineer
-  // sees a personal workload dashboard, so skip these reference queries.
+  // Org-wide master-data totals are only meaningful to admins. Site Engineers
+  // and Makers see a personal workload dashboard, so skip these reference queries.
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ["customers"],
     queryFn: api_listCustomers,
-    enabled: !isSiteEngineer,
+    enabled: !isPersonal,
   });
   const { data: banks = [], isLoading: banksLoading } = useQuery({
     queryKey: ["banks"],
     queryFn: api_listBanks,
-    enabled: !isSiteEngineer,
+    enabled: !isPersonal,
   });
   const { data: branches = [], isLoading: branchesLoading } = useQuery({
     queryKey: ["branches"],
     queryFn: api_listBranches,
-    enabled: !isSiteEngineer,
+    enabled: !isPersonal,
   });
 
   const stats = useMemo(() => {
     const total = cases.length;
     // For a Site Engineer, "Completed" means they have submitted the field
-    // visit; "Pending" means they still owe one. For other roles keep the
-    // pipeline-wide definitions.
-    const completed = isSiteEngineer
-      ? cases.filter((c) => !isEngineerCasePending(c.stage)).length
+    // visit and "Pending" means they still owe one. For a Maker, "Completed"
+    // means they have finished their maker step and "Pending" means the case is
+    // still waiting on them. For other roles keep the pipeline-wide definitions.
+    const isCasePending = (stage: CaseStage) =>
+      isSiteEngineer
+        ? isEngineerCasePending(stage)
+        : isMaker
+          ? isMakerCasePending(stage)
+          : PENDING_STAGES.includes(stage);
+
+    const completed = isPersonal
+      ? cases.filter((c) => !isCasePending(c.stage)).length
       : cases.filter((c) => c.stage === "COMPLETED").length;
-    const pending = isSiteEngineer
-      ? cases.filter((c) => isEngineerCasePending(c.stage)).length
-      : cases.filter((c) => PENDING_STAGES.includes(c.stage)).length;
+    const pending = cases.filter((c) => isCasePending(c.stage)).length;
     const inProgress = total - completed;
 
     const byStage = new Map<CaseStage, number>();
@@ -143,7 +164,7 @@ function Page() {
       .slice(0, 5);
 
     return { total, completed, pending, inProgress, byStage, recent };
-  }, [cases, isSiteEngineer]);
+  }, [cases, isSiteEngineer, isMaker, isPersonal]);
 
   return (
     <div className="space-y-6">
@@ -153,23 +174,32 @@ function Page() {
         crumbs={[{ label: "Dashboard" }]}
       />
 
-      {/* Case KPIs. For a Site Engineer these count only their own assigned
-          cases, and Pending/Completed reflect their field-visit workload. */}
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+      {/* Case KPIs. For a Site Engineer or Maker these count only their own
+          assigned cases, and Pending/Completed reflect their personal workload.
+          A personal dashboard drops the pipeline-wide "In Progress" card. */}
+      <div
+        className={
+          isPersonal
+            ? "grid gap-4 sm:grid-cols-3"
+            : "grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+        }
+      >
         <KpiCard
-          label={isSiteEngineer ? "My Cases" : "Total Cases"}
+          label={isPersonal ? "My Cases" : "Total Cases"}
           value={stats.total}
           icon={FolderKanban}
           loading={casesLoading}
         />
+        {!isPersonal && (
+          <KpiCard
+            label="In Progress"
+            value={stats.inProgress}
+            icon={Loader2}
+            loading={casesLoading}
+          />
+        )}
         <KpiCard
-          label="In Progress"
-          value={stats.inProgress}
-          icon={Loader2}
-          loading={casesLoading}
-        />
-        <KpiCard
-          label={isSiteEngineer ? "Pending" : "Awaiting Action"}
+          label={isPersonal ? "Pending" : "Awaiting Action"}
           value={stats.pending}
           icon={Clock}
           loading={casesLoading}
@@ -183,7 +213,7 @@ function Page() {
       </div>
 
       {/* Reference totals — org-wide master data, admins only. */}
-      {!isSiteEngineer && (
+      {!isPersonal && (
         <div className="grid gap-4 sm:grid-cols-3">
           <KpiCard
             label="Customers"
@@ -201,33 +231,38 @@ function Page() {
         </div>
       )}
 
-      <div className="grid gap-6 lg:grid-cols-2">
-        {/* Cases by stage */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Cases by Stage</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {casesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : stats.total === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No cases yet.</p>
-            ) : (
-              <ul className="divide-y">
-                {STAGE_ORDER.filter((stage) => (stats.byStage.get(stage) ?? 0) > 0).map((stage) => (
-                  <li key={stage} className="flex items-center justify-between py-2.5">
-                    <Badge variant={stageBadgeVariant[stage]}>{stageLabels[stage]}</Badge>
-                    <span className="text-sm font-medium tabular-nums">
-                      {stats.byStage.get(stage) ?? 0}
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
+      <div className={isPersonal ? "grid gap-6" : "grid gap-6 lg:grid-cols-2"}>
+        {/* Cases by stage — pipeline-wide breakdown, not meaningful for the
+            focused personal (Maker / Site Engineer) dashboards. */}
+        {!isPersonal && (
+          <Card className="shadow-card">
+            <CardHeader>
+              <CardTitle>Cases by Stage</CardTitle>
+            </CardHeader>
+            <CardContent>
+              {casesLoading ? (
+                <div className="flex items-center justify-center py-8">
+                  <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                </div>
+              ) : stats.total === 0 ? (
+                <p className="py-8 text-center text-sm text-muted-foreground">No cases yet.</p>
+              ) : (
+                <ul className="divide-y">
+                  {STAGE_ORDER.filter((stage) => (stats.byStage.get(stage) ?? 0) > 0).map(
+                    (stage) => (
+                      <li key={stage} className="flex items-center justify-between py-2.5">
+                        <Badge variant={stageBadgeVariant[stage]}>{stageLabels[stage]}</Badge>
+                        <span className="text-sm font-medium tabular-nums">
+                          {stats.byStage.get(stage) ?? 0}
+                        </span>
+                      </li>
+                    ),
+                  )}
+                </ul>
+              )}
+            </CardContent>
+          </Card>
+        )}
 
         {/* Recent cases */}
         <Card className="shadow-card">

@@ -7,7 +7,7 @@
 import { getDb } from "@/db";
 import { customers, banks, branches, cases, fieldVisits } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit } from "@/types";
+import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit, Role } from "@/types";
 import { requireServerUser } from "@/server/auth.server";
 import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
 import { buildFieldVisitPdf } from "@/server/fieldVisitPdf.server";
@@ -131,6 +131,73 @@ export async function api_getMaker(id: string): Promise<User | undefined> {
   } catch (error) {
     console.error("Failed to get maker:", error);
     throw new Error("Failed to load maker from database");
+  }
+}
+
+/**
+ * Resolve a single CHECKER user by id (for showing who assigned the Maker on
+ * case detail). Returns undefined when not found or not a Checker.
+ */
+export async function api_getChecker(id: string): Promise<User | undefined> {
+  try {
+    const result = await getDb().execute(
+      sql`SELECT id, name, email
+          FROM neon_auth."user"
+          WHERE id = ${id}
+            AND role = 'CHECKER'
+          LIMIT 1`,
+    );
+    const rows = result as unknown as NeonAuthUserRow[];
+    const row = rows[0];
+    if (!row) return undefined;
+
+    return {
+      id: row.id,
+      name: row.name ?? row.email,
+      email: row.email,
+      role: "CHECKER",
+    };
+  } catch (error) {
+    console.error("Failed to get checker:", error);
+    throw new Error("Failed to load checker from database");
+  }
+}
+
+/** Roles that are allowed to assign/reassign a Maker (see api_assignMaker). */
+const ASSIGNER_ROLES = new Set<Role>(["CHECKER", "ADMIN", "SUPER_ADMIN"]);
+
+/**
+ * Resolve the user who assigned the Maker, regardless of whether they were a
+ * Checker, Admin, or Super Admin, and return their real application role so the
+ * UI can label it correctly ("Assigned by (Checker/Admin/Super Administrator)").
+ * Returns undefined when the id is unknown or the user's role is not one that
+ * can assign. Replaces the Checker-only lookup, which showed a raw UUID when an
+ * admin performed the assignment.
+ */
+export async function api_getAssigner(id: string): Promise<User | undefined> {
+  try {
+    const result = await getDb().execute(
+      sql`SELECT id, name, email, role
+          FROM neon_auth."user"
+          WHERE id = ${id}
+          LIMIT 1`,
+    );
+    const rows = result as unknown as (NeonAuthUserRow & { role: string | null })[];
+    const row = rows[0];
+    if (!row) return undefined;
+
+    const role = row.role && ASSIGNER_ROLES.has(row.role as Role) ? (row.role as Role) : null;
+    if (!role) return undefined;
+
+    return {
+      id: row.id,
+      name: row.name ?? row.email,
+      email: row.email,
+      role,
+    };
+  } catch (error) {
+    console.error("Failed to get assigner:", error);
+    throw new Error("Failed to load assigner from database");
   }
 }
 
@@ -528,6 +595,7 @@ function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
     branchId: row.branch_id,
     assignedEngineerId: row.assigned_engineer_id || "",
     assignedMakerId: row.assigned_maker_id || "",
+    assignedByCheckerId: row.assigned_by_checker_id || "",
     stage: row.stage as ValuationCase["stage"],
     createdById: row.created_by_id || "",
     createdAt: row.created_at.toISOString(),
@@ -759,29 +827,41 @@ export async function api_listMakerCases(
 }
 
 /**
- * Assign a Maker to a case. This is the authoritative, server-enforced action.
+ * Stages in which a Maker may be (re)assigned — i.e. the field visit has been
+ * submitted and the case has not moved past Maker assignment. Assignment is
+ * meaningless before submission and we do not touch cases further down the
+ * pipeline here.
+ */
+const MAKER_ASSIGNABLE_STAGES = ["FIELD_VISIT_SUBMITTED", "MAKER_ASSIGNED"] as const;
+
+/**
+ * Assign (or, for admins, reassign) a Maker to a case. This is the
+ * authoritative, server-enforced action — the UI is never the gate.
  *
- * A CHECKER may assign a Maker ONLY when:
- *   - the authenticated user's app role is CHECKER (verified from the token),
- *   - the field visit is SUBMITTED (case stage is FIELD_VISIT_SUBMITTED), and
- *   - no Maker is currently assigned.
+ * Role rules, enforced from the verified Neon Auth application role:
+ *   - CHECKER      : may assign a Maker ONLY when no Maker is currently
+ *                    assigned and the field visit is submitted. A Checker can
+ *                    NEVER change/reassign an existing Maker.
+ *   - ADMIN        : may assign when unassigned AND may reassign/change an
+ *   - SUPER_ADMIN    existing Maker at any time (once the field visit is in).
+ *   - MAKER / SITE_ENGINEER / others : cannot assign or reassign at all
+ *                    (rejected by requireServerUser below).
  *
- * On success it saves the Maker's Neon Auth UUID, advances the stage to
- * MAKER_ASSIGNED, and bumps updated_at — all in a single conditional UPDATE
- * whose WHERE clause re-checks the preconditions, so a race cannot slip a
- * second assignment through. If a Maker is already assigned (or the case is not
- * in FIELD_VISIT_SUBMITTED) the update matches no rows and the operation is
- * rejected. A Checker can never replace an existing Maker — hiding the UI is
- * not relied upon; the server refuses.
+ * The rule is applied as a single conditional UPDATE whose WHERE clause encodes
+ * the caller's permission, so a race cannot slip an unauthorized change
+ * through. When the update matches no rows we re-read the case to return a
+ * precise, non-leaky error.
  */
 export async function api_assignMaker(
   token: string | null | undefined,
   caseId: string,
   makerId: string,
 ): Promise<ValuationCase> {
-  // Only a CHECKER may perform Checker assignment. (Admin reassignment is a
-  // later phase and deliberately not handled here.)
-  await requireServerUser(token, "CHECKER");
+  // Only these roles may assign/reassign. Makers and site engineers are
+  // rejected here. We keep the resolved user to record who assigned and to
+  // branch the reassignment rule on the real role.
+  const actor = await requireServerUser(token, "CHECKER", "ADMIN", "SUPER_ADMIN");
+  const canReassign = actor.role === "ADMIN" || actor.role === "SUPER_ADMIN";
 
   // Validate the target is a real, non-banned MAKER before assigning.
   const maker = await api_getMaker(makerId);
@@ -792,18 +872,26 @@ export async function api_assignMaker(
   try {
     const now = new Date();
 
-    // Conditional update: only assign when the case is FIELD_VISIT_SUBMITTED
-    // and has no Maker yet. This is the real enforcement point.
+    // Base guard for everyone: the case must be at a stage where Maker
+    // assignment is valid (field visit submitted, not further down the line).
+    const stageGuard = inArray(cases.stage, [...MAKER_ASSIGNABLE_STAGES]);
+
+    // A Checker may only act when NO Maker is assigned yet. Admins/Super Admins
+    // may act whether or not a Maker is already assigned (reassignment). This
+    // extra predicate is the real enforcement of "Checker cannot reassign".
+    const whereClause = canReassign
+      ? and(eq(cases.id, caseId), stageGuard)
+      : and(eq(cases.id, caseId), stageGuard, sql`${cases.assigned_maker_id} IS NULL`);
+
     const rows = await getDb()
       .update(cases)
-      .set({ assigned_maker_id: makerId, stage: "MAKER_ASSIGNED", updated_at: now })
-      .where(
-        and(
-          eq(cases.id, caseId),
-          eq(cases.stage, "FIELD_VISIT_SUBMITTED"),
-          sql`${cases.assigned_maker_id} IS NULL`,
-        ),
-      )
+      .set({
+        assigned_maker_id: makerId,
+        assigned_by_checker_id: actor.id,
+        stage: "MAKER_ASSIGNED",
+        updated_at: now,
+      })
+      .where(whereClause)
       .returning();
 
     const row = rows[0];
@@ -812,17 +900,19 @@ export async function api_assignMaker(
     }
 
     // The update matched nothing — figure out why so the UI can show a useful
-    // message, without leaking anything a Checker shouldn't see.
+    // message, without leaking anything the caller shouldn't see.
     const existing = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
     const current = existing[0];
     if (!current) {
       throw new Error("Case not found");
     }
-    if (current.assigned_maker_id) {
-      throw new Error("A Maker is already assigned to this case");
-    }
-    if (current.stage !== "FIELD_VISIT_SUBMITTED") {
+    if (!(MAKER_ASSIGNABLE_STAGES as readonly string[]).includes(current.stage)) {
       throw new Error("This case is not ready for Maker assignment");
+    }
+    // Reached only for a Checker hitting an already-assigned case: reassignment
+    // is an admin-only action, so the Checker is refused server-side.
+    if (!canReassign && current.assigned_maker_id) {
+      throw new Error("A Maker is already assigned. Only an admin can reassign it.");
     }
     // Should be unreachable, but never claim success without a row.
     throw new Error("Failed to assign Maker");

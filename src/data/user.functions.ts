@@ -14,6 +14,8 @@ import {
   api_getSiteEngineer as db_getSiteEngineer,
   api_listMakers as db_listMakers,
   api_getMaker as db_getMaker,
+  api_getChecker as db_getChecker,
+  api_getAssigner as db_getAssigner,
 } from "@/server/api.server";
 import type { User } from "@/types";
 
@@ -28,6 +30,14 @@ const listMakersFn = createServerFn({ method: "GET" }).handler(() => db_listMake
 const getMakerFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
   .handler(({ data }) => db_getMaker(data));
+
+const getCheckerFn = createServerFn({ method: "GET" })
+  .validator((id: string) => id)
+  .handler(({ data }) => db_getChecker(data));
+
+const getAssignerFn = createServerFn({ method: "GET" })
+  .validator((id: string) => id)
+  .handler(({ data }) => db_getAssigner(data));
 
 export function api_listSiteEngineers(): Promise<User[]> {
   return listSiteEngineersFn();
@@ -45,4 +55,18 @@ export function api_listMakers(): Promise<User[]> {
 /** Resolve a single MAKER user by id (for showing the assigned Maker's name). */
 export function api_getMaker(id: string): Promise<User | undefined> {
   return getMakerFn({ data: id });
+}
+
+/** Resolve a single CHECKER user by id (for showing who assigned the Maker). */
+export function api_getChecker(id: string): Promise<User | undefined> {
+  return getCheckerFn({ data: id });
+}
+
+/**
+ * Resolve the user who assigned the Maker (Checker, Admin, or Super Admin),
+ * with their real role, so the UI can show a name + correct label instead of a
+ * raw UUID when an admin performed the assignment.
+ */
+export function api_getAssigner(id: string): Promise<User | undefined> {
+  return getAssignerFn({ data: id });
 }

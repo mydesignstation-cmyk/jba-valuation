@@ -69,6 +69,9 @@ export const cases = pgTable(
     // is submitted. NULL until assignment. Like assigned_engineer_id, users
     // live in the neon_auth schema, so this is a plain uuid with no app FK.
     assigned_maker_id: uuid("assigned_maker_id"),
+    // Neon Auth user UUID of the Checker who assigned the Maker. NULL until a
+    // Maker is assigned. Plain uuid (no app FK) since users live in neon_auth.
+    assigned_by_checker_id: uuid("assigned_by_checker_id"),
     stage: varchar("stage", { length: 50 }).notNull().default("CREATED"),
     created_by_id: uuid("created_by_id"),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -98,6 +101,7 @@ export const cases = pgTable(
     index("cases_branch_id_idx").on(table.branch_id),
     index("cases_assigned_engineer_id_idx").on(table.assigned_engineer_id),
     index("cases_assigned_maker_id_idx").on(table.assigned_maker_id),
+    index("cases_assigned_by_checker_id_idx").on(table.assigned_by_checker_id),
     index("cases_stage_idx").on(table.stage),
     index("cases_created_at_idx").on(table.created_at),
   ],

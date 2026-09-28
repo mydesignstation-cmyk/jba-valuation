@@ -13,6 +13,7 @@ export type Permission =
   | "cases.delete"
   | "cases.detail"
   | "cases.assignMaker"
+  | "cases.reassignMaker"
   | "fieldVisit.access"
   | "myCases.view"
   | "maker.access"
@@ -48,8 +49,11 @@ export const permissionRoles: Record<Permission, Role[]> = {
   // owning site engineer, and — once the field visit is submitted — the
   // Checker (to assign a Maker) and the assigned Maker (to view it).
   "cases.detail": [...ADMINS, "SITE_ENGINEER", "CHECKER", "MAKER"],
-  // Assigning a Maker is a Checker action (UI gate; the server is authoritative).
-  "cases.assignMaker": ["CHECKER"],
+  // Assigning a Maker (when none is assigned) is a Checker or admin action.
+  // Reassigning/changing an existing Maker is an admin-only responsibility.
+  // These are UI gates only; api_assignMaker is the server-side authority.
+  "cases.assignMaker": [...ADMINS, "CHECKER"],
+  "cases.reassignMaker": ADMINS,
   "fieldVisit.access": [...ADMINS, "SITE_ENGINEER"],
   "myCases.view": ["SITE_ENGINEER"],
   "maker.access": ["MAKER"],
