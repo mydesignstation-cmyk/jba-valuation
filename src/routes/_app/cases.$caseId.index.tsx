@@ -14,6 +14,8 @@ import {
   PenLine,
   Phone,
   Send,
+  ShieldCheck,
+  UploadCloud,
   User as UserIcon,
   UserCheck,
   UserCog,
@@ -46,7 +48,13 @@ import { getSessionToken, useCurrentUser, roleLabels } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant, isMakerCasePending } from "@/lib/case-format";
-import { api_getCase, api_assignMaker, api_submitToChecker } from "@/data/case.functions";
+import {
+  api_getCase,
+  api_assignMaker,
+  api_submitToChecker,
+  api_submitToUploader,
+  api_markUploadCompleted,
+} from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
@@ -165,6 +173,7 @@ function Page() {
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
   const isChecker = currentUser?.role === "CHECKER";
   const isMaker = currentUser?.role === "MAKER";
+  const isUploader = currentUser?.role === "UPLOADER";
   // Who may assign vs reassign a Maker. These are UI gates only; the server
   // (api_assignMaker) is the authority on the same rules.
   //  - assign  : Checker + admins, only when no Maker is assigned yet.
@@ -175,6 +184,8 @@ function Page() {
   const [assignOpen, setAssignOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
   const [confirmSubmitToChecker, setConfirmSubmitToChecker] = useState(false);
+  const [confirmSubmitToUploader, setConfirmSubmitToUploader] = useState(false);
+  const [confirmMarkUploaded, setConfirmMarkUploaded] = useState(false);
 
   const {
     backTo,
@@ -344,6 +355,45 @@ function Page() {
     },
   });
 
+  // Checker action: hand the case to the Uploader. Advances to UPLOADER_PENDING.
+  const submitToUploader = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_submitToUploader(token, valuationCase.id);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
+      setConfirmSubmitToUploader(false);
+      toast.success("Case submitted to the uploader");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Failed to submit case to uploader");
+    },
+  });
+
+  // Uploader action: close the case. Advances to COMPLETED (terminal stage).
+  const markUploaded = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_markUploadCompleted(token, valuationCase.id);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
+      setConfirmMarkUploaded(false);
+      toast.success("Case marked as upload completed");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Failed to mark upload completed");
+    },
+  });
+
   return (
     <div className="space-y-6">
       {/* Header: back button sits immediately before the case number title so
@@ -468,6 +518,63 @@ function Page() {
                 Submit to Checker
               </Button>
             </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Primary CTA for the Checker: hand the case to the Uploader once the
+          Maker's work has been reviewed. Shown while the case is under Checker
+          review (CHECKER_PENDING). */}
+      {isChecker && valuationCase.stage === "CHECKER_PENDING" && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-primary/15 p-2">
+                <ShieldCheck className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold">Ready for the Uploader</p>
+                <p className="text-sm text-muted-foreground">
+                  Once your review is done, submit the case to the Uploader for the final upload.
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={() => setConfirmSubmitToUploader(true)}
+            >
+              <Send className="mr-2 h-4 w-4" />
+              Submit to Uploader
+            </Button>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Primary CTA for the Uploader: close the case once the upload is done.
+          Shown while the case awaits upload (UPLOADER_PENDING). */}
+      {isUploader && valuationCase.stage === "UPLOADER_PENDING" && (
+        <Card className="border-primary/40 bg-primary/5">
+          <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex items-start gap-3">
+              <div className="mt-0.5 rounded-full bg-primary/15 p-2">
+                <UploadCloud className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-0.5">
+                <p className="text-sm font-semibold">Final upload</p>
+                <p className="text-sm text-muted-foreground">
+                  When the upload is complete, mark this case as completed to close it.
+                </p>
+              </div>
+            </div>
+            <Button
+              type="button"
+              className="w-full sm:w-auto"
+              onClick={() => setConfirmMarkUploaded(true)}
+            >
+              <CheckCircle2 className="mr-2 h-4 w-4" />
+              Mark Upload Completed
+            </Button>
           </CardContent>
         </Card>
       )}
@@ -719,6 +826,54 @@ function Page() {
               disabled={submitToChecker.isPending}
             >
               {submitToChecker.isPending ? "Submitting..." : "Submit to Checker"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmSubmitToUploader} onOpenChange={setConfirmSubmitToUploader}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Submit this case to the Uploader?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This sends the case forward to the Uploader for the final upload. Make sure your
+              review is complete before submitting.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={submitToUploader.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                submitToUploader.mutate();
+              }}
+              disabled={submitToUploader.isPending}
+            >
+              {submitToUploader.isPending ? "Submitting..." : "Submit to Uploader"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <AlertDialog open={confirmMarkUploaded} onOpenChange={setConfirmMarkUploaded}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Mark this case as upload completed?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This closes the case as completed — the final stage of the workflow. Only do this once
+              the upload is actually finished.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={markUploaded.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={(e) => {
+                e.preventDefault();
+                markUploaded.mutate();
+              }}
+              disabled={markUploaded.isPending}
+            >
+              {markUploaded.isPending ? "Completing..." : "Mark Upload Completed"}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

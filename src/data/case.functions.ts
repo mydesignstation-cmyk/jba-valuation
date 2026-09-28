@@ -17,6 +17,9 @@ import {
   api_listMakerCases as db_listMakerCases,
   api_assignMaker as db_assignMaker,
   api_submitToChecker as db_submitToChecker,
+  api_submitToUploader as db_submitToUploader,
+  api_listUploaderCases as db_listUploaderCases,
+  api_markUploadCompleted as db_markUploadCompleted,
 } from "@/server/api.server";
 import type { ValuationCase } from "@/types";
 
@@ -42,6 +45,8 @@ type UpdateCaseInput = { id: string; data: UpdateCaseData };
 
 type AssignMakerInput = { token: string; caseId: string; makerId: string };
 type SubmitToCheckerInput = { token: string; caseId: string };
+type SubmitToUploaderInput = { token: string; caseId: string };
+type MarkUploadCompletedInput = { token: string; caseId: string };
 
 const listCasesFn = createServerFn({ method: "GET" }).handler(() => db_listCases());
 
@@ -71,6 +76,18 @@ const assignMakerFn = createServerFn({ method: "POST" })
 const submitToCheckerFn = createServerFn({ method: "POST" })
   .validator((input: SubmitToCheckerInput) => input)
   .handler(({ data }) => db_submitToChecker(data.token, data.caseId));
+
+const submitToUploaderFn = createServerFn({ method: "POST" })
+  .validator((input: SubmitToUploaderInput) => input)
+  .handler(({ data }) => db_submitToUploader(data.token, data.caseId));
+
+const listUploaderCasesFn = createServerFn({ method: "GET" })
+  .validator((token: string) => token)
+  .handler(({ data }) => db_listUploaderCases(data));
+
+const markUploadCompletedFn = createServerFn({ method: "POST" })
+  .validator((input: MarkUploadCompletedInput) => input)
+  .handler(({ data }) => db_markUploadCompleted(data.token, data.caseId));
 
 const getCaseFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
@@ -157,4 +174,30 @@ export function api_assignMaker(
  */
 export function api_submitToChecker(token: string, caseId: string): Promise<ValuationCase> {
   return submitToCheckerFn({ data: { token, caseId } });
+}
+
+/**
+ * Submit a case from the Checker to the Uploader (Checker action). Advances the
+ * case to UPLOADER_PENDING. Pass the Neon Auth session token; the server
+ * verifies the CHECKER role and that the case is at CHECKER_PENDING.
+ */
+export function api_submitToUploader(token: string, caseId: string): Promise<ValuationCase> {
+  return submitToUploaderFn({ data: { token, caseId } });
+}
+
+/**
+ * Cases in the Uploader queue (awaiting final upload). Not filtered by user id.
+ * Pass the Neon Auth session token; the server verifies the UPLOADER role.
+ */
+export function api_listUploaderCases(token: string): Promise<ValuationCase[]> {
+  return listUploaderCasesFn({ data: token });
+}
+
+/**
+ * Close a case (Uploader action). Advances the case from UPLOADER_PENDING to
+ * COMPLETED. Pass the Neon Auth session token; the server verifies the UPLOADER
+ * role and that the case is awaiting upload.
+ */
+export function api_markUploadCompleted(token: string, caseId: string): Promise<ValuationCase> {
+  return markUploadCompletedFn({ data: { token, caseId } });
 }

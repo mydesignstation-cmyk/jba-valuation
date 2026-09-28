@@ -6,9 +6,6 @@ import {
   UserCog,
   Hash,
   FileText,
-  User as UserIcon,
-  Landmark,
-  GitBranch,
   HardHat,
   Activity,
   CalendarClock,
@@ -42,9 +39,6 @@ import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
 import { getSessionToken } from "@/lib/auth-client";
 import { api_listCheckerCases, api_assignMaker } from "@/data/case.functions";
-import { api_listCustomers } from "@/data/customer.functions";
-import { api_listBanks } from "@/data/bank.functions";
-import { api_listBranches } from "@/data/branch.functions";
 import { listSiteEngineers } from "@/services/user.service";
 import type { ValuationCase } from "@/types";
 
@@ -74,20 +68,11 @@ function Page() {
       return api_listCheckerCases(token);
     },
   });
-  const { data: customers = [] } = useQuery({
-    queryKey: ["customers"],
-    queryFn: api_listCustomers,
-  });
-  const { data: banks = [] } = useQuery({ queryKey: ["banks"], queryFn: api_listBanks });
-  const { data: branches = [] } = useQuery({ queryKey: ["branches"], queryFn: api_listBranches });
   const { data: engineers = [] } = useQuery({
     queryKey: ["site-engineers"],
     queryFn: listSiteEngineers,
   });
 
-  const customerName = useMemo(() => new Map(customers.map((c) => [c.id, c.name])), [customers]);
-  const bankName = useMemo(() => new Map(banks.map((b) => [b.id, b.name])), [banks]);
-  const branchName = useMemo(() => new Map(branches.map((b) => [b.id, b.name])), [branches]);
   const engineerName = useMemo(() => new Map(engineers.map((e) => [e.id, e.name])), [engineers]);
 
   const filteredCases = useMemo(() => {
@@ -97,9 +82,6 @@ function Page() {
         const haystack = [
           c.caseNumber,
           c.requestNumber,
-          customerName.get(c.customerId) ?? "",
-          bankName.get(c.bankId) ?? "",
-          branchName.get(c.branchId) ?? "",
           engineerName.get(c.assignedEngineerId) ?? "",
         ]
           .join(" ")
@@ -107,7 +89,7 @@ function Page() {
         return haystack.includes(term);
       })
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-  }, [cases, search, customerName, bankName, branchName, engineerName]);
+  }, [cases, search, engineerName]);
 
   const handleAssign = async (makerId: string) => {
     if (!assignCase) return;
@@ -204,9 +186,9 @@ function Page() {
                     key={c.id}
                     caseNumber={c.caseNumber}
                     requestNumber={c.requestNumber}
-                    customerName={customerName.get(c.customerId) ?? "—"}
-                    bankName={bankName.get(c.bankId) ?? "—"}
-                    branchName={branchName.get(c.branchId) ?? "—"}
+                    customerName=""
+                    bankName=""
+                    branchName=""
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
                     stage={c.stage}
                     createdAt={c.createdAt}
@@ -231,24 +213,6 @@ function Page() {
                         <span className="flex items-center gap-1.5">
                           <FileText className="h-3.5 w-3.5 text-muted-foreground" />
                           Request Number
-                        </span>
-                      </TableHead>
-                      <TableHead>
-                        <span className="flex items-center gap-1.5">
-                          <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
-                          Customer
-                        </span>
-                      </TableHead>
-                      <TableHead>
-                        <span className="flex items-center gap-1.5">
-                          <Landmark className="h-3.5 w-3.5 text-muted-foreground" />
-                          Bank
-                        </span>
-                      </TableHead>
-                      <TableHead>
-                        <span className="flex items-center gap-1.5">
-                          <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
-                          Branch
                         </span>
                       </TableHead>
                       <TableHead>
@@ -286,9 +250,6 @@ function Page() {
                           </span>
                         </TableCell>
                         <TableCell>{c.requestNumber}</TableCell>
-                        <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                        <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                        <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>

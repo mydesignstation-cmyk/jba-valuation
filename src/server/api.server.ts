@@ -1441,6 +1441,110 @@ export async function api_submitToChecker(
 }
 
 /**
+ * Hand the case forward from the Checker to the Uploader for the final upload.
+ *
+ * The Checker's "Submit to Uploader" action: it advances a case that is under
+ * Checker review (CHECKER_PENDING) to UPLOADER_PENDING, dropping it into the
+ * Uploader's queue. Enforced from the verified Neon Auth role — CHECKER (plus
+ * admins so their access keeps working). The transition is a guarded
+ * conditional UPDATE so a case that already moved on cannot be dragged back.
+ */
+export async function api_submitToUploader(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<ValuationCase> {
+  await requireServerUser(token, "CHECKER", "ADMIN", "SUPER_ADMIN");
+
+  try {
+    const now = new Date();
+
+    const rows = await getDb()
+      .update(cases)
+      .set({ stage: "UPLOADER_PENDING", updated_at: now })
+      .where(and(eq(cases.id, caseId), eq(cases.stage, "CHECKER_PENDING")))
+      .returning();
+
+    const row = rows[0];
+    if (row) {
+      return mapCaseRow(row);
+    }
+
+    const existing = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+    if (!existing[0]) {
+      throw new Error("Case not found");
+    }
+    throw new Error("This case is not awaiting Checker review");
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to submit case to uploader:", error);
+    throw new Error("Failed to submit case to uploader in database");
+  }
+}
+
+/**
+ * List the cases in the Uploader's queue: everything awaiting the final upload
+ * (UPLOADER_PENDING). Not filtered by user id — all Uploaders see the same
+ * eligible cases (mirrors the Checker queue). Admins are allowed too so their
+ * access keeps working.
+ */
+export async function api_listUploaderCases(
+  token: string | null | undefined,
+): Promise<ValuationCase[]> {
+  await requireServerUser(token, "UPLOADER", "ADMIN", "SUPER_ADMIN");
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(cases)
+      .where(eq(cases.stage, "UPLOADER_PENDING"))
+      .orderBy(cases.created_at);
+
+    return rows.map(mapCaseRow);
+  } catch (error) {
+    console.error("Failed to list uploader cases:", error);
+    throw new Error("Failed to load uploader cases from database");
+  }
+}
+
+/**
+ * Close the case: the Uploader's "Mark Upload Completed" action. Advances a
+ * case awaiting upload (UPLOADER_PENDING) to COMPLETED, the terminal stage.
+ * Enforced from the verified Neon Auth role — UPLOADER (plus admins). Guarded
+ * conditional UPDATE so only a case genuinely awaiting upload can be closed.
+ */
+export async function api_markUploadCompleted(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<ValuationCase> {
+  await requireServerUser(token, "UPLOADER", "ADMIN", "SUPER_ADMIN");
+
+  try {
+    const now = new Date();
+
+    const rows = await getDb()
+      .update(cases)
+      .set({ stage: "COMPLETED", updated_at: now })
+      .where(and(eq(cases.id, caseId), eq(cases.stage, "UPLOADER_PENDING")))
+      .returning();
+
+    const row = rows[0];
+    if (row) {
+      return mapCaseRow(row);
+    }
+
+    const existing = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+    if (!existing[0]) {
+      throw new Error("Case not found");
+    }
+    throw new Error("This case is not awaiting upload");
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to mark upload completed:", error);
+    throw new Error("Failed to mark upload completed in database");
+  }
+}
+
+/**
  * Result of an on-demand Field Visit PDF generation.
  * `base64` is the PDF bytes base64-encoded for JSON transport back to the
  * client (the existing createServerFn layer is JSON-only). Nothing is stored.
