@@ -29,6 +29,17 @@ export const stageBadgeVariant: Record<CaseStage, "default" | "secondary" | "out
 };
 
 /**
+ * A Site Engineer's work on a case is the field visit. From their point of
+ * view a case is "Pending" until they submit the field visit, and "Completed"
+ * once it has been submitted (regardless of where the case travels afterwards
+ * in the maker/checker/uploader pipeline). This is the single source of truth
+ * for that split, shared by My Cases and the engineer dashboard.
+ */
+export function isEngineerCasePending(stage: CaseStage): boolean {
+  return stage === "CREATED" || stage === "ASSIGNED" || stage === "FIELD_VISIT_PENDING";
+}
+
+/**
  * The case pipeline collapses the ten fine-grained stages into five
  * human-readable milestones, so the workflow reads as a clean tick-by-tick
  * flow (Field Visit → Maker → Checker → Uploader → Completed).

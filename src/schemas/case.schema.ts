@@ -24,13 +24,16 @@ export const caseStageSchema = z.enum([
   "COMPLETED",
 ]);
 
+const requestNumberSchema = z
+  .string()
+  .trim()
+  .min(1, "Request number is required")
+  .max(15, "Request number must be 15 characters or less")
+  .regex(/^[a-zA-Z0-9]+$/, "Request number must be alphanumeric only");
+
 export const createCaseSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
-  requestNumber: z
-    .string()
-    .min(1, "Request number is required")
-    .trim()
-    .max(100, "Request number must be 100 characters or less"),
+  requestNumber: requestNumberSchema,
   bankId: z.string().min(1, "Bank is required"),
   branchId: z.string().min(1, "Branch is required"),
   assignedEngineerId: z.string().min(1, "Site engineer is required"),
@@ -38,11 +41,7 @@ export const createCaseSchema = z.object({
 
 export const updateCaseSchema = z.object({
   customerId: z.string().min(1, "Customer is required"),
-  requestNumber: z
-    .string()
-    .min(1, "Request number is required")
-    .trim()
-    .max(100, "Request number must be 100 characters or less"),
+  requestNumber: requestNumberSchema,
   bankId: z.string().min(1, "Bank is required"),
   branchId: z.string().min(1, "Branch is required"),
   assignedEngineerId: z.string().min(1, "Site engineer is required"),

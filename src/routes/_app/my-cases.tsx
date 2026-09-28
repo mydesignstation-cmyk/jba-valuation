@@ -16,12 +16,14 @@ import { api_listMyCases } from "@/data/case.functions";
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useMemo, useState } from "react";
 import { PageHeader } from "@/components/app/PageHeader";
 import { SearchInput } from "@/components/app/SearchInput";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels } from "@/lib/case-format";
+import { stageLabels, isEngineerCasePending } from "@/lib/case-format";
+import type { ValuationCase } from "@/types";
 
 export const Route = createFileRoute("/_app/my-cases")({
   head: () => pageMeta("My Cases", "Cases assigned to you for field visits."),
@@ -72,6 +74,82 @@ function Page() {
       .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
   }, [cases, search, customerName, bankName, branchName]);
 
+  // Split the engineer's cases by whether their field visit is still pending.
+  const pendingCases = useMemo(
+    () => filteredCases.filter((c) => isEngineerCasePending(c.stage)),
+    [filteredCases],
+  );
+  const completedCases = useMemo(
+    () => filteredCases.filter((c) => !isEngineerCasePending(c.stage)),
+    [filteredCases],
+  );
+
+  function renderTable(rows: ValuationCase[], emptyMessage: string) {
+    if (isLoading) {
+      return (
+        <div className="flex items-center justify-center py-12">
+          <p className="text-muted-foreground">Loading cases...</p>
+        </div>
+      );
+    }
+    if (isError) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12">
+          <p className="text-destructive">Error loading cases: {(error as Error).message}</p>
+        </div>
+      );
+    }
+    if (rows.length === 0) {
+      return (
+        <div className="flex flex-col items-center justify-center py-12 text-center">
+          <div className="rounded-full bg-muted p-4 mb-4">
+            <Search className="h-8 w-8 text-muted-foreground" />
+          </div>
+          <h3 className="text-lg font-semibold">No cases found</h3>
+          <p className="text-muted-foreground mt-2">
+            {search ? "Try adjusting your search terms" : emptyMessage}
+          </p>
+        </div>
+      );
+    }
+    return (
+      <div className="rounded-md border">
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Case Number</TableHead>
+              <TableHead>Request Number</TableHead>
+              <TableHead>Customer</TableHead>
+              <TableHead>Bank</TableHead>
+              <TableHead>Branch</TableHead>
+              <TableHead>Stage</TableHead>
+              <TableHead>Created</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {rows.map((c) => (
+              <TableRow
+                key={c.id}
+                className="cursor-pointer hover:bg-muted/50"
+                onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
+              >
+                <TableCell className="font-medium">{c.caseNumber}</TableCell>
+                <TableCell>{c.requestNumber}</TableCell>
+                <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
+                <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
+                <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
+                <TableCell>
+                  <Badge variant="secondary">{stageLabels[c.stage]}</Badge>
+                </TableCell>
+                <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -87,62 +165,30 @@ function Page() {
           <CardTitle>My Cases</CardTitle>
         </CardHeader>
         <CardContent>
-          {isLoading ? (
-            <div className="flex items-center justify-center py-12">
-              <p className="text-muted-foreground">Loading cases...</p>
-            </div>
-          ) : isError ? (
-            <div className="flex flex-col items-center justify-center py-12">
-              <p className="text-destructive">Error loading cases: {(error as Error).message}</p>
-            </div>
-          ) : filteredCases.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-12 text-center">
-              <div className="rounded-full bg-muted p-4 mb-4">
-                <Search className="h-8 w-8 text-muted-foreground" />
-              </div>
-              <h3 className="text-lg font-semibold">No cases found</h3>
-              <p className="text-muted-foreground mt-2">
-                {search
-                  ? "Try adjusting your search terms"
-                  : "Your assigned cases will appear here."}
-              </p>
-            </div>
-          ) : (
-            <div className="rounded-md border">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Case Number</TableHead>
-                    <TableHead>Request Number</TableHead>
-                    <TableHead>Customer</TableHead>
-                    <TableHead>Bank</TableHead>
-                    <TableHead>Branch</TableHead>
-                    <TableHead>Stage</TableHead>
-                    <TableHead>Created</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredCases.map((c) => (
-                    <TableRow
-                      key={c.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
-                    >
-                      <TableCell className="font-medium">{c.caseNumber}</TableCell>
-                      <TableCell>{c.requestNumber}</TableCell>
-                      <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                      <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                      <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
-                      <TableCell>
-                        <Badge variant="secondary">{stageLabels[c.stage]}</Badge>
-                      </TableCell>
-                      <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          )}
+          <Tabs defaultValue="pending">
+            <TabsList className="grid w-full grid-cols-2 sm:w-auto">
+              <TabsTrigger value="pending">
+                Pending{!isLoading && !isError ? ` (${pendingCases.length})` : ""}
+              </TabsTrigger>
+              <TabsTrigger value="completed">
+                Completed{!isLoading && !isError ? ` (${completedCases.length})` : ""}
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="pending" className="mt-4">
+              {renderTable(
+                pendingCases,
+                "Cases awaiting your field visit will appear here.",
+              )}
+            </TabsContent>
+
+            <TabsContent value="completed" className="mt-4">
+              {renderTable(
+                completedCases,
+                "Cases where you have submitted the field visit will appear here.",
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
     </div>

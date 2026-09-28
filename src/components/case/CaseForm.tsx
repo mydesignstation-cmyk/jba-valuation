@@ -89,7 +89,25 @@ export function CaseForm({
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
-        <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4 sm:px-6">
+        <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
+          {/* Request Number — required, first field */}
+          <FormField
+            control={form.control}
+            name="requestNumber"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Request Number</FormLabel>
+                <Input
+                  {...field}
+                  maxLength={15}
+                  autoCapitalize="characters"
+                  placeholder="Enter bank/customer request reference"
+                />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
           {/* Customer — required searchable select */}
           <FormField
             control={form.control}
@@ -166,93 +184,83 @@ export function CaseForm({
             </p>
           </div>
 
-          {/* Request Number — required text input */}
-          <FormField
-            control={form.control}
-            name="requestNumber"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Request Number</FormLabel>
-                <Input {...field} placeholder="Enter bank/customer request reference" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+          {/* Bank & Branch — share a row on wider screens, stack on mobile */}
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            {/* Bank — required select */}
+            <FormField
+              control={form.control}
+              name="bankId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Bank</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select bank" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {banks.map((bank) => (
+                        <SelectItem key={bank.id} value={bank.id}>
+                          {bank.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Bank — required select */}
-          <FormField
-            control={form.control}
-            name="bankId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Bank</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select bank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {banks.map((bank) => (
-                      <SelectItem key={bank.id} value={bank.id}>
-                        {bank.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Branch — required select */}
+            <FormField
+              control={form.control}
+              name="branchId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Branch</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select branch" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {branches.map((branch) => (
+                        <SelectItem key={branch.id} value={branch.id}>
+                          {branch.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-          {/* Branch — required select */}
-          <FormField
-            control={form.control}
-            name="branchId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Branch</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select branch" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {branches.map((branch) => (
-                      <SelectItem key={branch.id} value={branch.id}>
-                        {branch.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          {/* Site Engineer — required select */}
-          <FormField
-            control={form.control}
-            name="assignedEngineerId"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Site Engineer</FormLabel>
-                <Select value={field.value} onValueChange={field.onChange}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select site engineer" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {engineers.map((engineer) => (
-                      <SelectItem key={engineer.id} value={engineer.id}>
-                        <span className="flex flex-col">
-                          <span>{engineer.name}</span>
-                          <span className="text-xs text-muted-foreground">{engineer.email}</span>
-                        </span>
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                <FormMessage />
-              </FormItem>
-            )}
-          />
+            {/* Site Engineer — required select, spans full width on wide screens */}
+            <FormField
+              control={form.control}
+              name="assignedEngineerId"
+              render={({ field }) => (
+                <FormItem className="sm:col-span-2">
+                  <FormLabel>Site Engineer</FormLabel>
+                  <Select value={field.value} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select site engineer" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {engineers.map((engineer) => (
+                        <SelectItem key={engineer.id} value={engineer.id}>
+                          <span className="flex flex-col">
+                            <span>{engineer.name}</span>
+                            <span className="text-xs text-muted-foreground">{engineer.email}</span>
+                          </span>
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
         </div>
 
         <FormActions submitText={submitText} isSubmitting={isSubmitting} onCancel={onCancel} />

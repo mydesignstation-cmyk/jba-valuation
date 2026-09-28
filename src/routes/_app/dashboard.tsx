@@ -16,9 +16,10 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/app/PageHeader";
 import { requirePermission } from "@/lib/route-guard";
+import { useCurrentUser, getSessionToken } from "@/lib/auth-client";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
-import { api_listCases } from "@/data/case.functions";
+import { stageLabels, stageBadgeVariant, isEngineerCasePending } from "@/lib/case-format";
+import { api_listCases, api_listMyCases } from "@/data/case.functions";
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
@@ -84,28 +85,52 @@ function KpiCard({
 
 function Page() {
   const navigate = useNavigate();
+  const currentUser = useCurrentUser();
+  // A Site Engineer's dashboard must never see cases that are not assigned to
+  // them. For that role we load ONLY their own cases (server verifies the
+  // token and filters by the engineer's id); every other role sees all cases.
+  const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
 
   const { data: cases = [], isLoading: casesLoading } = useQuery({
-    queryKey: ["cases"],
-    queryFn: api_listCases,
+    queryKey: isSiteEngineer ? ["my-cases"] : ["cases"],
+    queryFn: async () => {
+      if (isSiteEngineer) {
+        const token = await getSessionToken();
+        if (!token) throw new Error("Not authenticated");
+        return api_listMyCases(token);
+      }
+      return api_listCases();
+    },
   });
+  // Org-wide master-data totals are only meaningful to admins. A Site Engineer
+  // sees a personal workload dashboard, so skip these reference queries.
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ["customers"],
     queryFn: api_listCustomers,
+    enabled: !isSiteEngineer,
   });
   const { data: banks = [], isLoading: banksLoading } = useQuery({
     queryKey: ["banks"],
     queryFn: api_listBanks,
+    enabled: !isSiteEngineer,
   });
   const { data: branches = [], isLoading: branchesLoading } = useQuery({
     queryKey: ["branches"],
     queryFn: api_listBranches,
+    enabled: !isSiteEngineer,
   });
 
   const stats = useMemo(() => {
     const total = cases.length;
-    const completed = cases.filter((c) => c.stage === "COMPLETED").length;
-    const pending = cases.filter((c) => PENDING_STAGES.includes(c.stage)).length;
+    // For a Site Engineer, "Completed" means they have submitted the field
+    // visit; "Pending" means they still owe one. For other roles keep the
+    // pipeline-wide definitions.
+    const completed = isSiteEngineer
+      ? cases.filter((c) => !isEngineerCasePending(c.stage)).length
+      : cases.filter((c) => c.stage === "COMPLETED").length;
+    const pending = isSiteEngineer
+      ? cases.filter((c) => isEngineerCasePending(c.stage)).length
+      : cases.filter((c) => PENDING_STAGES.includes(c.stage)).length;
     const inProgress = total - completed;
 
     const byStage = new Map<CaseStage, number>();
@@ -118,7 +143,7 @@ function Page() {
       .slice(0, 5);
 
     return { total, completed, pending, inProgress, byStage, recent };
-  }, [cases]);
+  }, [cases, isSiteEngineer]);
 
   return (
     <div className="space-y-6">
@@ -128,10 +153,11 @@ function Page() {
         crumbs={[{ label: "Dashboard" }]}
       />
 
-      {/* Case KPIs */}
+      {/* Case KPIs. For a Site Engineer these count only their own assigned
+          cases, and Pending/Completed reflect their field-visit workload. */}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <KpiCard
-          label="Total Cases"
+          label={isSiteEngineer ? "My Cases" : "Total Cases"}
           value={stats.total}
           icon={FolderKanban}
           loading={casesLoading}
@@ -143,7 +169,7 @@ function Page() {
           loading={casesLoading}
         />
         <KpiCard
-          label="Awaiting Action"
+          label={isSiteEngineer ? "Pending" : "Awaiting Action"}
           value={stats.pending}
           icon={Clock}
           loading={casesLoading}
@@ -156,12 +182,24 @@ function Page() {
         />
       </div>
 
-      {/* Reference totals */}
-      <div className="grid gap-4 sm:grid-cols-3">
-        <KpiCard label="Customers" value={customers.length} icon={Users} loading={customersLoading} />
-        <KpiCard label="Banks" value={banks.length} icon={Landmark} loading={banksLoading} />
-        <KpiCard label="Branches" value={branches.length} icon={Building2} loading={branchesLoading} />
-      </div>
+      {/* Reference totals — org-wide master data, admins only. */}
+      {!isSiteEngineer && (
+        <div className="grid gap-4 sm:grid-cols-3">
+          <KpiCard
+            label="Customers"
+            value={customers.length}
+            icon={Users}
+            loading={customersLoading}
+          />
+          <KpiCard label="Banks" value={banks.length} icon={Landmark} loading={banksLoading} />
+          <KpiCard
+            label="Branches"
+            value={branches.length}
+            icon={Building2}
+            loading={branchesLoading}
+          />
+        </div>
+      )}
 
       <div className="grid gap-6 lg:grid-cols-2">
         {/* Cases by stage */}

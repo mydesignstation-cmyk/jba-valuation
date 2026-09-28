@@ -29,8 +29,10 @@ interface FormModalProps {
 export function FormModal({ open, onOpenChange, title, description, children }: FormModalProps) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="flex max-h-[92dvh] flex-col gap-0 overflow-hidden p-0 sm:max-w-lg">
-        <DialogHeader className="shrink-0 space-y-1.5 border-b px-4 py-4 text-left sm:px-6">
+      <DialogContent className="flex max-h-[90dvh] flex-col gap-0 overflow-hidden p-0 sm:max-h-[85dvh] sm:max-w-lg">
+        {/* Drag-handle affordance on the mobile bottom sheet */}
+        <div className="mx-auto mt-2 h-1.5 w-10 shrink-0 rounded-full bg-muted-foreground/25 sm:hidden" />
+        <DialogHeader className="shrink-0 space-y-1 border-b px-4 py-3.5 pr-10 text-left sm:px-6 sm:py-4">
           <DialogTitle>{title}</DialogTitle>
           {description ? <DialogDescription>{description}</DialogDescription> : null}
         </DialogHeader>

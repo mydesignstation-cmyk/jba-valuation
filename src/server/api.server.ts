@@ -950,6 +950,11 @@ export async function api_submitFieldVisit(
       .set({ stage: "FIELD_VISIT_SUBMITTED", updated_at: now })
       .where(and(eq(cases.id, caseId), inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"])));
 
+    // Always refresh the case's "last updated" timestamp on submission, even if
+    // the stage guard above didn't match (e.g. the case had already advanced).
+    // This keeps the case's last-updated time in sync with the field visit.
+    await getDb().update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
+
     return mapFieldVisitRow(row);
   } catch (error) {
     // A race that slips past the pre-check still hits the UNIQUE constraint.

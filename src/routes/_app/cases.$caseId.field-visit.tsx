@@ -524,8 +524,21 @@ function FieldVisitWizard({
     }
     void form.handleSubmit(
       (values) => submit.mutate(values),
-      () => {
-        toast.error("Please complete all required fields before submitting.");
+      (errors) => {
+        // Find the first step that owns an invalid field and jump there, so the
+        // user is taken straight to what needs fixing instead of being told
+        // "complete all fields" only at the very end.
+        const errorFields = Object.keys(errors) as Path<FieldVisitFormValues>[];
+        const firstBadStep = STEP_FIELDS.findIndex((fields) =>
+          fields.some((f) => errorFields.includes(f)),
+        );
+        if (firstBadStep !== -1) {
+          setStepIndex(firstBadStep);
+          const stepLabel = STEPS[firstBadStep]?.label ?? "an earlier step";
+          toast.error(`Please complete the required fields in "${stepLabel}".`);
+        } else {
+          toast.error("Please complete all required fields before submitting.");
+        }
       },
     )();
   };
@@ -598,13 +611,12 @@ function FieldVisitWizard({
                     placeholder="e.g. Rajesh Kumar"
                     maxLength={255}
                   />
-                  <TextField
+                  <NumberField
                     form={form}
                     name="personPhone"
                     label="Phone Number"
                     placeholder="e.g. 9876543210"
-                    inputMode="tel"
-                    maxLength={15}
+                    maxLength={10}
                   />
                 </div>
                 <ChipField

@@ -102,9 +102,9 @@ export const gpsSchema = z.object({
 export const step1Schema = z
   .object({
     personMet: requiredText("Name of person met", 255, 3),
-    personPhone: requiredText("Phone number", 15).refine(
-      (v) => /^[0-9+\-()\s]{6,15}$/.test(v),
-      "Enter a valid phone number",
+    personPhone: requiredText("Phone number", 10).refine(
+      (v) => /^\d{10}$/.test(v),
+      "Enter a valid 10-digit phone number",
     ),
     relationship: relationshipSchema,
   })
