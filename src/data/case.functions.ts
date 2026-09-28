@@ -38,9 +38,12 @@ type UpdateCaseInput = { id: string; data: UpdateCaseData };
 
 const listCasesFn = createServerFn({ method: "GET" }).handler(() => db_listCases());
 
-// No validator/argument by design: the authenticated Site Engineer's id is
-// resolved server-side from the session cookie, never accepted from the client.
-const listMyCasesFn = createServerFn({ method: "GET" }).handler(() => db_listMyCases());
+// The client passes a Neon Auth session TOKEN (a credential), never a user id.
+// The server verifies the token with Neon Auth and derives the engineer id from
+// the verified response, so the browser is not the authority on identity.
+const listMyCasesFn = createServerFn({ method: "GET" })
+  .validator((token: string) => token)
+  .handler(({ data }) => db_listMyCases(data));
 
 const getCaseFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
@@ -62,9 +65,12 @@ export function api_listCases(): Promise<ValuationCase[]> {
   return listCasesFn();
 }
 
-/** Cases assigned to the currently authenticated Site Engineer (server-derived). */
-export function api_listMyCases(): Promise<ValuationCase[]> {
-  return listMyCasesFn();
+/**
+ * Cases assigned to the currently authenticated Site Engineer.
+ * Pass the Neon Auth session token; the server verifies it and derives the id.
+ */
+export function api_listMyCases(token: string): Promise<ValuationCase[]> {
+  return listMyCasesFn({ data: token });
 }
 
 export function api_getCase(id: string): Promise<ValuationCase | undefined> {

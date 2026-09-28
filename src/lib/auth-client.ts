@@ -168,6 +168,34 @@ export async function signOut(): Promise<void> {
 }
 
 /**
+ * Fetch a short-lived Neon Auth JWT for the current session.
+ *
+ * The session cookie is first-party to the Neon Auth domain, so only the
+ * browser (with credentials: "include") can exchange it for a token. That
+ * token is then handed to our server functions, which verify it back with
+ * Neon Auth to derive the caller's identity — the app server never sees the
+ * session cookie directly, and never trusts a raw client-supplied user id.
+ *
+ * Better Auth's JWT plugin returns the token in the `set-auth-jwt` response
+ * header and/or the JSON body (`{ token }`); we read whichever is present.
+ * Returns null when there is no active session.
+ */
+export async function getSessionToken(): Promise<string | null> {
+  try {
+    const res = await authFetch("/token", { method: "GET" });
+    if (!res.ok) return null;
+
+    const headerToken = res.headers.get("set-auth-jwt");
+    if (headerToken) return headerToken;
+
+    const data = (await res.json().catch(() => null)) as { token?: string } | null;
+    return data?.token ?? null;
+  } catch {
+    return null;
+  }
+}
+
+/**
  * Restore the current session from the Neon Auth cookie (if any).
  * Safe to call multiple times; only meaningful in the browser.
  */

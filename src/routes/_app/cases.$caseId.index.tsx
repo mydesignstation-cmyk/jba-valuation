@@ -27,6 +27,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app/PageHeader";
 import { CasePipeline } from "@/components/case/CasePipeline";
 import { requirePermission } from "@/lib/route-guard";
+import { useCurrentUser } from "@/lib/auth-client";
+import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
 import { api_getCase } from "@/data/case.functions";
@@ -123,6 +125,14 @@ function DetailSkeleton() {
 function Page() {
   const { caseId } = Route.useParams();
 
+  // Site Engineers reach case detail from "My Cases" and cannot view the
+  // admin-only /cases list, so send them back where they came from.
+  const currentUser = useCurrentUser();
+  const listsAllCases = can(currentUser?.role, "cases.view");
+  const backTo = listsAllCases ? "/cases" : "/my-cases";
+  const backLabel = listsAllCases ? "Cases" : "My Cases";
+  const backAction = listsAllCases ? "Back to Cases" : "Back to My Cases";
+
   const {
     data: valuationCase,
     isLoading,
@@ -166,12 +176,12 @@ function Page() {
         <PageHeader
           title="Case"
           description={errorMessage}
-          crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: "Not Found" }]}
+          crumbs={[{ label: backLabel, link: { to: backTo } }, { label: "Not Found" }]}
         />
         <Button asChild>
-          <Link to="/cases">
+          <Link to={backTo}>
             <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Cases
+            {backAction}
           </Link>
         </Button>
       </div>
@@ -189,16 +199,16 @@ function Page() {
       <PageHeader
         title={valuationCase.caseNumber}
         description={`Request ${valuationCase.requestNumber}`}
-        crumbs={[{ label: "Cases", link: { to: "/cases" } }, { label: valuationCase.caseNumber }]}
+        crumbs={[{ label: backLabel, link: { to: backTo } }, { label: valuationCase.caseNumber }]}
         actions={
           <>
             <Badge variant={stageBadgeVariant[valuationCase.stage]} className="text-sm">
               {stageLabels[valuationCase.stage]}
             </Badge>
             <Button asChild variant="outline">
-              <Link to="/cases">
+              <Link to={backTo}>
                 <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to Cases
+                {backAction}
               </Link>
             </Button>
           </>

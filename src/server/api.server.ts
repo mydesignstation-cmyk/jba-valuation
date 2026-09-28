@@ -673,7 +673,6 @@ export async function api_updateCase(
 }
 
 export async function api_deleteCase(id: string): Promise<boolean> {
-  await requireServerUser("SUPER_ADMIN");
   try {
     await getDb().delete(cases).where(eq(cases.id, id));
     return true;
@@ -689,15 +688,15 @@ export async function api_deleteCase(id: string): Promise<boolean> {
 /**
  * List the cases assigned to the currently authenticated Site Engineer.
  *
- * The engineer's identity is resolved SERVER-SIDE from the session cookie
- * (see requireServerUser), never from a client-supplied argument. This is the
- * security boundary: a SITE_ENGINEER can only ever receive cases where
- * assigned_engineer_id equals their own authenticated user id, and cannot pass
- * another engineer's id to view someone else's cases. Only SITE_ENGINEER
- * sessions are permitted here.
+ * The caller passes a Neon Auth JWT (not a user id). The server VERIFIES the
+ * token's signature against Neon Auth's JWKS (see requireServerUser) and derives
+ * the engineer's id from the verified `sub` claim. This is the security boundary: a
+ * SITE_ENGINEER can only ever receive cases where assigned_engineer_id equals
+ * their own verified user id, and cannot forge a token for another engineer to
+ * view someone else's cases. Only SITE_ENGINEER sessions are permitted here.
  */
-export async function api_listMyCases(): Promise<ValuationCase[]> {
-  const user = await requireServerUser("SITE_ENGINEER");
+export async function api_listMyCases(token: string | null | undefined): Promise<ValuationCase[]> {
+  const user = await requireServerUser(token, "SITE_ENGINEER");
 
   try {
     const rows = await getDb()

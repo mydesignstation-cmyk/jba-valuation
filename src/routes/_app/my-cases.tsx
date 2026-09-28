@@ -11,6 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { useQuery } from "@tanstack/react-query";
+import { getSessionToken } from "@/lib/auth-client";
 import { api_listMyCases } from "@/data/case.functions";
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
@@ -39,7 +40,11 @@ function Page() {
     error,
   } = useQuery({
     queryKey: ["my-cases"],
-    queryFn: api_listMyCases,
+    queryFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_listMyCases(token);
+    },
   });
   const { data: customers = [] } = useQuery({ queryKey: ["customers"], queryFn: api_listCustomers });
   const { data: banks = [] } = useQuery({ queryKey: ["banks"], queryFn: api_listBanks });
