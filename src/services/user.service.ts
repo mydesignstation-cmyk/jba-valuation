@@ -1,5 +1,10 @@
 import type { User } from "@/types";
-import { api_listSiteEngineers, api_getSiteEngineer } from "@/data/user.functions";
+import {
+  api_listSiteEngineers,
+  api_getSiteEngineer,
+  api_listMakers,
+  api_getMaker,
+} from "@/data/user.functions";
 
 /**
  * Service layer: single place for user data access.
@@ -15,4 +20,12 @@ export async function listSiteEngineers(): Promise<User[]> {
 
 export async function getSiteEngineer(id: string): Promise<User | undefined> {
   return api_getSiteEngineer(id);
+}
+
+export async function listMakers(): Promise<User[]> {
+  return api_listMakers();
+}
+
+export async function getMaker(id: string): Promise<User | undefined> {
+  return api_getMaker(id);
 }

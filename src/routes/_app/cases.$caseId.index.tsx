@@ -1,20 +1,25 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, type LinkProps } from "@tanstack/react-router";
 import {
+  Activity,
   ArrowLeft,
   CalendarClock,
   CheckCircle2,
   ClipboardList,
   FileText,
   GitBranch,
+  Hash,
   Landmark,
   Mail,
   MapPin,
   Phone,
   User as UserIcon,
+  UserCheck,
   UserCog,
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
-import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
@@ -25,17 +30,18 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PageHeader } from "@/components/app/PageHeader";
 import { CasePipeline } from "@/components/case/CasePipeline";
 import { requirePermission } from "@/lib/route-guard";
-import { useCurrentUser } from "@/lib/auth-client";
+import { getSessionToken, useCurrentUser } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
-import { api_getCase } from "@/data/case.functions";
+import { api_getCase, api_assignMaker } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
-import { getSiteEngineer } from "@/services/user.service";
+import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
+import { getSiteEngineer, getMaker } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
   head: () => pageMeta("Case Detail", "Case information, customer, assignment and history."),
@@ -67,10 +73,21 @@ function Field({
 }
 
 /** One item in the top overview strip. */
-function OverviewItem({ label, value }: { label: string; value: ReactNode }) {
+function OverviewItem({
+  label,
+  value,
+  icon,
+}: {
+  label: string;
+  value: ReactNode;
+  icon?: ReactNode;
+}) {
   return (
     <div className="min-w-0 space-y-1">
-      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="flex items-center gap-1.5 text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {icon}
+        {label}
+      </p>
       <div className="truncate text-sm font-semibold">{value}</div>
     </div>
   );
@@ -124,18 +141,45 @@ function DetailSkeleton() {
 
 function Page() {
   const { caseId } = Route.useParams();
+  const queryClient = useQueryClient();
 
-  // Site Engineers reach case detail from "My Cases" and cannot view the
-  // admin-only /cases list, so send them back where they came from.
+  // Different roles reach case detail from different lists, so send them back
+  // where they came from.
   const currentUser = useCurrentUser();
   const listsAllCases = can(currentUser?.role, "cases.view");
   // Site Engineers get a slimmed-down detail view: the pipeline tracker is
   // internal to the admin flow, so hide it for that role. Both tabs (overview
   // and field visit) are shown to everyone.
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
-  const backTo = listsAllCases ? "/cases" : "/my-cases";
-  const backLabel = listsAllCases ? "Cases" : "My Cases";
-  const backAction = listsAllCases ? "Back to Cases" : "Back to My Cases";
+  const isChecker = currentUser?.role === "CHECKER";
+  const isMaker = currentUser?.role === "MAKER";
+  // Whether the signed-in Checker may assign a Maker is a UI hint only; the
+  // server is authoritative on the same rule.
+  const canAssignMaker = can(currentUser?.role, "cases.assignMaker");
+
+  const [assignOpen, setAssignOpen] = useState(false);
+  const [isAssigning, setIsAssigning] = useState(false);
+
+  const {
+    backTo,
+    backLabel,
+    backAction,
+  }: {
+    backTo: NonNullable<LinkProps["to"]>;
+    backLabel: string;
+    backAction: string;
+  } = (() => {
+    if (listsAllCases) return { backTo: "/cases", backLabel: "Cases", backAction: "Back to Cases" };
+    if (isChecker)
+      return {
+        backTo: "/checker",
+        backLabel: "Checker Queue",
+        backAction: "Back to Checker Queue",
+      };
+    if (isMaker)
+      return { backTo: "/maker", backLabel: "Maker Queue", backAction: "Back to Maker Queue" };
+    return { backTo: "/my-cases", backLabel: "My Cases", backAction: "Back to My Cases" };
+  })();
 
   const {
     data: valuationCase,
@@ -167,6 +211,13 @@ function Page() {
     queryKey: ["site-engineers", valuationCase?.assignedEngineerId],
     queryFn: () => getSiteEngineer(valuationCase!.assignedEngineerId),
     enabled: !!valuationCase?.assignedEngineerId,
+  });
+  // The assigned Maker (once a Checker has assigned one). Resolves to null when
+  // no Maker is assigned yet, so the UI can show an explicit "not assigned".
+  const { data: maker } = useQuery({
+    queryKey: ["makers", valuationCase?.assignedMakerId],
+    queryFn: async () => (await getMaker(valuationCase!.assignedMakerId)) ?? null,
+    enabled: !!valuationCase?.assignedMakerId,
   });
 
   // The submitted field visit for this case. Role-agnostic read (no token):
@@ -206,6 +257,30 @@ function Page() {
   const bankName = bank?.name ?? valuationCase.bankId;
   const branchName = branch?.name ?? valuationCase.branchId;
   const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
+  const hasMaker = !!valuationCase.assignedMakerId;
+  const makerName = maker?.name ?? (hasMaker ? valuationCase.assignedMakerId : undefined);
+
+  // A Checker may assign a Maker only while the field visit is submitted and no
+  // Maker has been assigned. This gates the button; the server re-checks it.
+  const showAssignMaker =
+    canAssignMaker && valuationCase.stage === "FIELD_VISIT_SUBMITTED" && !hasMaker;
+
+  const handleAssignMaker = async (makerId: string) => {
+    setIsAssigning(true);
+    try {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      await api_assignMaker(token, valuationCase.id, makerId);
+      toast.success("Maker assigned");
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
+      setAssignOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to assign Maker");
+    } finally {
+      setIsAssigning(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -235,6 +310,15 @@ function Page() {
             <Badge variant={stageBadgeVariant[valuationCase.stage]} className="text-sm">
               {stageLabels[valuationCase.stage]}
             </Badge>
+            {/* Primary Checker action: assign a Maker once the field visit is
+                submitted. Lives at the top right of Case Detail (not in list
+                rows). Hidden once a Maker is assigned. */}
+            {showAssignMaker && (
+              <Button onClick={() => setAssignOpen(true)}>
+                <UserCog className="mr-2 h-4 w-4" />
+                Assign Maker
+              </Button>
+            )}
           </div>
         </div>
       </div>
@@ -296,11 +380,24 @@ function Page() {
           {/* Overview strip — the essentials at a glance */}
           <Card>
             <CardContent className="grid grid-cols-2 gap-4 py-5 sm:grid-cols-3 lg:grid-cols-5">
-              <OverviewItem label="Case Number" value={valuationCase.caseNumber} />
-              <OverviewItem label="Request Number" value={valuationCase.requestNumber} />
-              <OverviewItem label="Customer" value={customerName} />
+              <OverviewItem
+                label="Case Number"
+                value={valuationCase.caseNumber}
+                icon={<Hash className="h-3.5 w-3.5" />}
+              />
+              <OverviewItem
+                label="Request Number"
+                value={valuationCase.requestNumber}
+                icon={<FileText className="h-3.5 w-3.5" />}
+              />
+              <OverviewItem
+                label="Customer"
+                value={customerName}
+                icon={<UserIcon className="h-3.5 w-3.5" />}
+              />
               <OverviewItem
                 label="Stage"
+                icon={<Activity className="h-3.5 w-3.5" />}
                 value={
                   <Badge variant={stageBadgeVariant[valuationCase.stage]}>
                     {stageLabels[valuationCase.stage]}
@@ -310,6 +407,7 @@ function Page() {
               <OverviewItem
                 label="Created"
                 value={new Date(valuationCase.createdAt).toLocaleDateString()}
+                icon={<CalendarClock className="h-3.5 w-3.5" />}
               />
             </CardContent>
           </Card>
@@ -366,6 +464,21 @@ function Page() {
                     <Field
                       label="Engineer Email"
                       value={engineer.email}
+                      icon={<Mail className="h-3.5 w-3.5" />}
+                    />
+                  )}
+                  {/* Assigned Maker — explicitly shows "Not assigned yet" until
+                      a Checker assigns one, so a submitted-but-unassigned case
+                      never looks like it already has a Maker. */}
+                  <Field
+                    label="Assigned Maker"
+                    value={hasMaker ? makerName : "Not assigned yet"}
+                    icon={<UserCheck className="h-3.5 w-3.5" />}
+                  />
+                  {hasMaker && maker?.email && maker.email !== maker.name && (
+                    <Field
+                      label="Maker Email"
+                      value={maker.email}
                       icon={<Mail className="h-3.5 w-3.5" />}
                     />
                   )}
@@ -472,6 +585,14 @@ function Page() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <AssignMakerDialog
+        open={assignOpen}
+        onOpenChange={setAssignOpen}
+        caseNumber={valuationCase.caseNumber}
+        onAssign={handleAssignMaker}
+        isSubmitting={isAssigning}
+      />
     </div>
   );
 }

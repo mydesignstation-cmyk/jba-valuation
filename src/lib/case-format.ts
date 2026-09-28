@@ -6,6 +6,7 @@ export const stageLabels: Record<CaseStage, string> = {
   ASSIGNED: "Assigned",
   FIELD_VISIT_PENDING: "Field Visit Pending",
   FIELD_VISIT_SUBMITTED: "Field Visit Submitted",
+  MAKER_ASSIGNED: "Maker Assigned",
   MAKER_PENDING: "Maker Pending",
   MAKER_COMPLETED: "Maker Completed",
   CHECKER_PENDING: "Checker Pending",
@@ -20,6 +21,7 @@ export const stageBadgeVariant: Record<CaseStage, "default" | "secondary" | "out
   ASSIGNED: "secondary",
   FIELD_VISIT_PENDING: "secondary",
   FIELD_VISIT_SUBMITTED: "secondary",
+  MAKER_ASSIGNED: "secondary",
   MAKER_PENDING: "secondary",
   MAKER_COMPLETED: "secondary",
   CHECKER_PENDING: "secondary",
@@ -75,7 +77,12 @@ const STAGE_POSITION: Record<CaseStage, number> = {
   CREATED: -1,
   ASSIGNED: -0.5,
   FIELD_VISIT_PENDING: 0,
-  FIELD_VISIT_SUBMITTED: 0.5,
+  // Field visit is submitted but no Maker assigned yet: keep the Field Visit
+  // milestone current and do NOT light up the Maker milestone. Advancing the
+  // pipeline is the Checker's Maker-assignment action, not submission.
+  FIELD_VISIT_SUBMITTED: 0,
+  // Checker has assigned a Maker: Field Visit is done, Maker is now current.
+  MAKER_ASSIGNED: 1,
   MAKER_PENDING: 1,
   MAKER_COMPLETED: 1.5,
   CHECKER_PENDING: 2,

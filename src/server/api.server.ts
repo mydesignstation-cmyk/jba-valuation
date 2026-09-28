@@ -78,6 +78,62 @@ export async function api_getSiteEngineer(id: string): Promise<User | undefined>
   }
 }
 
+/**
+ * List real Neon Auth users with the MAKER role, for the Checker's "Assign
+ * Maker" picker. Banned users are excluded. Mirrors api_listSiteEngineers —
+ * reads directly from neon_auth."user"; no app-owned users table.
+ */
+export async function api_listMakers(): Promise<User[]> {
+  try {
+    const result = await getDb().execute(
+      sql`SELECT id, name, email
+          FROM neon_auth."user"
+          WHERE role = 'MAKER'
+            AND banned IS NOT TRUE
+          ORDER BY name`,
+    );
+
+    const rows = result as unknown as NeonAuthUserRow[];
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name ?? row.email,
+      email: row.email,
+      role: "MAKER" as const,
+    }));
+  } catch (error) {
+    console.error("Failed to list makers:", error);
+    throw new Error("Failed to load makers from database");
+  }
+}
+
+/**
+ * Resolve a single MAKER user by id (for showing the assigned Maker's name on
+ * case detail). Returns undefined when not found or not a Maker.
+ */
+export async function api_getMaker(id: string): Promise<User | undefined> {
+  try {
+    const result = await getDb().execute(
+      sql`SELECT id, name, email
+          FROM neon_auth."user"
+          WHERE id = ${id}
+            AND role = 'MAKER'
+          LIMIT 1`,
+    );
+    const rows = result as unknown as NeonAuthUserRow[];
+    const row = rows[0];
+    if (!row) return undefined;
+    return {
+      id: row.id,
+      name: row.name ?? row.email,
+      email: row.email,
+      role: "MAKER",
+    };
+  } catch (error) {
+    console.error("Failed to get maker:", error);
+    throw new Error("Failed to load maker from database");
+  }
+}
+
 // ============================================================================
 // CUSTOMERS
 // ============================================================================
@@ -461,23 +517,28 @@ export async function api_deleteBranch(id: string): Promise<boolean> {
 // CASES
 // ============================================================================
 
+/** Map a raw `cases` row to the domain ValuationCase shape (single source). */
+function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
+  return {
+    id: row.id,
+    caseNumber: row.case_number,
+    requestNumber: row.request_number,
+    customerId: row.customer_id,
+    bankId: row.bank_id,
+    branchId: row.branch_id,
+    assignedEngineerId: row.assigned_engineer_id || "",
+    assignedMakerId: row.assigned_maker_id || "",
+    stage: row.stage as ValuationCase["stage"],
+    createdById: row.created_by_id || "",
+    createdAt: row.created_at.toISOString(),
+    updatedAt: row.updated_at.toISOString(),
+  };
+}
+
 export async function api_listCases(): Promise<ValuationCase[]> {
   try {
     const rows = await getDb().select().from(cases).orderBy(cases.created_at);
-
-    return rows.map((row) => ({
-      id: row.id,
-      caseNumber: row.case_number,
-      requestNumber: row.request_number,
-      customerId: row.customer_id,
-      bankId: row.bank_id,
-      branchId: row.branch_id,
-      assignedEngineerId: row.assigned_engineer_id || "",
-      stage: row.stage as any,
-      createdById: row.created_by_id || "",
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    }));
+    return rows.map(mapCaseRow);
   } catch (error) {
     console.error("Failed to list cases:", error);
     throw new Error("Failed to load cases from database");
@@ -492,19 +553,7 @@ export async function api_getCase(id: string): Promise<ValuationCase | undefined
     const row = rows[0];
     if (!row) return undefined;
 
-    return {
-      id: row.id,
-      caseNumber: row.case_number,
-      requestNumber: row.request_number,
-      customerId: row.customer_id,
-      bankId: row.bank_id,
-      branchId: row.branch_id,
-      assignedEngineerId: row.assigned_engineer_id || "",
-      stage: row.stage as any,
-      createdById: row.created_by_id || "",
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    };
+    return mapCaseRow(row);
   } catch (error) {
     console.error("Failed to get case:", error);
     throw new Error("Failed to load case from database");
@@ -558,19 +607,7 @@ export async function api_createCase(data: {
     const row = rows[0];
     if (!row) throw new Error("Failed to retrieve created case");
 
-    return {
-      id: row.id,
-      caseNumber: row.case_number,
-      requestNumber: row.request_number,
-      customerId: row.customer_id,
-      bankId: row.bank_id,
-      branchId: row.branch_id,
-      assignedEngineerId: row.assigned_engineer_id || "",
-      stage: row.stage as any,
-      createdById: row.created_by_id || "",
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    };
+    return mapCaseRow(row);
   } catch (error) {
     console.error("Failed to create case:", error);
     throw new Error("Failed to create case in database");
@@ -594,7 +631,7 @@ export async function api_updateCase(
     if (!existing || existing.length === 0) return undefined;
 
     const now = new Date();
-    const updateData: any = { updated_at: now };
+    const updateData: Partial<typeof cases.$inferInsert> = { updated_at: now };
 
     if (data.requestNumber !== undefined) updateData.request_number = data.requestNumber;
     if (data.customerId !== undefined) updateData.customer_id = data.customerId;
@@ -610,19 +647,7 @@ export async function api_updateCase(
     const row = rows[0];
     if (!row) return undefined;
 
-    return {
-      id: row.id,
-      caseNumber: row.case_number,
-      requestNumber: row.request_number,
-      customerId: row.customer_id,
-      bankId: row.bank_id,
-      branchId: row.branch_id,
-      assignedEngineerId: row.assigned_engineer_id || "",
-      stage: row.stage as any,
-      createdById: row.created_by_id || "",
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    };
+    return mapCaseRow(row);
   } catch (error) {
     console.error("Failed to update case:", error);
     throw new Error("Failed to update case in database");
@@ -662,22 +687,149 @@ export async function api_listMyCases(token: string | null | undefined): Promise
       .where(eq(cases.assigned_engineer_id, user.id))
       .orderBy(cases.created_at);
 
-    return rows.map((row) => ({
-      id: row.id,
-      caseNumber: row.case_number,
-      requestNumber: row.request_number,
-      customerId: row.customer_id,
-      bankId: row.bank_id,
-      branchId: row.branch_id,
-      assignedEngineerId: row.assigned_engineer_id || "",
-      stage: row.stage as any,
-      createdById: row.created_by_id || "",
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
-    }));
+    return rows.map(mapCaseRow);
   } catch (error) {
     console.error("Failed to list my cases:", error);
     throw new Error("Failed to load your cases from database");
+  }
+}
+
+// ============================================================================
+// CHECKER QUEUE + MAKER ASSIGNMENT
+// ============================================================================
+//
+// Security model mirrors api_listMyCases: the caller passes a Neon Auth session
+// TOKEN (a credential), never a user id or role. requireServerUser verifies the
+// token against Neon Auth's JWKS and reads the authoritative app role from
+// neon_auth."user". The browser can neither forge a role nor supply another
+// user's id as the authority.
+
+/** Stages a case can be in once it is eligible for the Checker queue. */
+const CHECKER_QUEUE_STAGES = ["FIELD_VISIT_SUBMITTED", "MAKER_ASSIGNED"] as const;
+
+/**
+ * List the cases visible to a Checker: every case whose field visit has been
+ * submitted and is ready for Maker assignment/review. This is intentionally
+ * NOT filtered by checker user id — all Checkers see the same eligible cases.
+ * Admins/Super Admins are also allowed so their existing access keeps working.
+ */
+export async function api_listCheckerCases(
+  token: string | null | undefined,
+): Promise<ValuationCase[]> {
+  await requireServerUser(token, "CHECKER", "ADMIN", "SUPER_ADMIN");
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(cases)
+      .where(inArray(cases.stage, [...CHECKER_QUEUE_STAGES]))
+      .orderBy(cases.created_at);
+
+    return rows.map(mapCaseRow);
+  } catch (error) {
+    console.error("Failed to list checker cases:", error);
+    throw new Error("Failed to load checker cases from database");
+  }
+}
+
+/**
+ * List the cases assigned to the currently authenticated Maker.
+ *
+ * The trusted maker id comes from the verified token's `sub` claim, never from
+ * a client-supplied field, so a Maker can only ever see cases where
+ * assigned_maker_id equals their own verified id. Only MAKER sessions permitted.
+ */
+export async function api_listMakerCases(
+  token: string | null | undefined,
+): Promise<ValuationCase[]> {
+  const user = await requireServerUser(token, "MAKER");
+
+  try {
+    const rows = await getDb()
+      .select()
+      .from(cases)
+      .where(eq(cases.assigned_maker_id, user.id))
+      .orderBy(cases.created_at);
+
+    return rows.map(mapCaseRow);
+  } catch (error) {
+    console.error("Failed to list maker cases:", error);
+    throw new Error("Failed to load your cases from database");
+  }
+}
+
+/**
+ * Assign a Maker to a case. This is the authoritative, server-enforced action.
+ *
+ * A CHECKER may assign a Maker ONLY when:
+ *   - the authenticated user's app role is CHECKER (verified from the token),
+ *   - the field visit is SUBMITTED (case stage is FIELD_VISIT_SUBMITTED), and
+ *   - no Maker is currently assigned.
+ *
+ * On success it saves the Maker's Neon Auth UUID, advances the stage to
+ * MAKER_ASSIGNED, and bumps updated_at — all in a single conditional UPDATE
+ * whose WHERE clause re-checks the preconditions, so a race cannot slip a
+ * second assignment through. If a Maker is already assigned (or the case is not
+ * in FIELD_VISIT_SUBMITTED) the update matches no rows and the operation is
+ * rejected. A Checker can never replace an existing Maker — hiding the UI is
+ * not relied upon; the server refuses.
+ */
+export async function api_assignMaker(
+  token: string | null | undefined,
+  caseId: string,
+  makerId: string,
+): Promise<ValuationCase> {
+  // Only a CHECKER may perform Checker assignment. (Admin reassignment is a
+  // later phase and deliberately not handled here.)
+  await requireServerUser(token, "CHECKER");
+
+  // Validate the target is a real, non-banned MAKER before assigning.
+  const maker = await api_getMaker(makerId);
+  if (!maker) {
+    throw new Error("Selected user is not a valid Maker");
+  }
+
+  try {
+    const now = new Date();
+
+    // Conditional update: only assign when the case is FIELD_VISIT_SUBMITTED
+    // and has no Maker yet. This is the real enforcement point.
+    const rows = await getDb()
+      .update(cases)
+      .set({ assigned_maker_id: makerId, stage: "MAKER_ASSIGNED", updated_at: now })
+      .where(
+        and(
+          eq(cases.id, caseId),
+          eq(cases.stage, "FIELD_VISIT_SUBMITTED"),
+          sql`${cases.assigned_maker_id} IS NULL`,
+        ),
+      )
+      .returning();
+
+    const row = rows[0];
+    if (row) {
+      return mapCaseRow(row);
+    }
+
+    // The update matched nothing — figure out why so the UI can show a useful
+    // message, without leaking anything a Checker shouldn't see.
+    const existing = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+    const current = existing[0];
+    if (!current) {
+      throw new Error("Case not found");
+    }
+    if (current.assigned_maker_id) {
+      throw new Error("A Maker is already assigned to this case");
+    }
+    if (current.stage !== "FIELD_VISIT_SUBMITTED") {
+      throw new Error("This case is not ready for Maker assignment");
+    }
+    // Should be unreachable, but never claim success without a row.
+    throw new Error("Failed to assign Maker");
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to assign maker:", error);
+    throw new Error("Failed to assign Maker in database");
   }
 }
 

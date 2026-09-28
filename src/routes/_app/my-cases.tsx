@@ -1,5 +1,14 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { Search } from "lucide-react";
+import {
+  Search,
+  Hash,
+  FileText,
+  User as UserIcon,
+  Landmark,
+  GitBranch,
+  Activity,
+  CalendarClock,
+} from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -137,13 +146,48 @@ function Page() {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Case Number</TableHead>
-                <TableHead>Request Number</TableHead>
-                <TableHead>Customer</TableHead>
-                <TableHead>Bank</TableHead>
-                <TableHead>Branch</TableHead>
-                <TableHead>Stage</TableHead>
-                <TableHead>Created</TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                    Case Number
+                  </span>
+                </TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="h-3.5 w-3.5 text-muted-foreground" />
+                    Request Number
+                  </span>
+                </TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <UserIcon className="h-3.5 w-3.5 text-muted-foreground" />
+                    Customer
+                  </span>
+                </TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <Landmark className="h-3.5 w-3.5 text-muted-foreground" />
+                    Bank
+                  </span>
+                </TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
+                    Branch
+                  </span>
+                </TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <Activity className="h-3.5 w-3.5 text-muted-foreground" />
+                    Stage
+                  </span>
+                </TableHead>
+                <TableHead>
+                  <span className="flex items-center gap-1.5">
+                    <CalendarClock className="h-3.5 w-3.5 text-muted-foreground" />
+                    Created
+                  </span>
+                </TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -153,7 +197,12 @@ function Page() {
                   className="cursor-pointer hover:bg-muted/50"
                   onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
                 >
-                  <TableCell className="font-medium">{c.caseNumber}</TableCell>
+                  <TableCell className="font-medium">
+                    <span className="flex items-center gap-1.5">
+                      <Hash className="h-3.5 w-3.5 text-muted-foreground" />
+                      {c.caseNumber}
+                    </span>
+                  </TableCell>
                   <TableCell>{c.requestNumber}</TableCell>
                   <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
                   <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>

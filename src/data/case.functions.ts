@@ -13,6 +13,9 @@ import {
   api_updateCase as db_updateCase,
   api_deleteCase as db_deleteCase,
   api_listMyCases as db_listMyCases,
+  api_listCheckerCases as db_listCheckerCases,
+  api_listMakerCases as db_listMakerCases,
+  api_assignMaker as db_assignMaker,
 } from "@/server/api.server";
 import type { ValuationCase } from "@/types";
 
@@ -36,6 +39,8 @@ type UpdateCaseData = {
 
 type UpdateCaseInput = { id: string; data: UpdateCaseData };
 
+type AssignMakerInput = { token: string; caseId: string; makerId: string };
+
 const listCasesFn = createServerFn({ method: "GET" }).handler(() => db_listCases());
 
 // The client passes a Neon Auth session TOKEN (a credential), never a user id.
@@ -44,6 +49,22 @@ const listCasesFn = createServerFn({ method: "GET" }).handler(() => db_listCases
 const listMyCasesFn = createServerFn({ method: "GET" })
   .validator((token: string) => token)
   .handler(({ data }) => db_listMyCases(data));
+
+// Checker queue + Maker "my cases": the client passes only its Neon Auth
+// session TOKEN. The server verifies it, enforces the caller's role, and (for
+// makers) derives the maker id from the verified token — never trusting a
+// client-supplied id or role.
+const listCheckerCasesFn = createServerFn({ method: "GET" })
+  .validator((token: string) => token)
+  .handler(({ data }) => db_listCheckerCases(data));
+
+const listMakerCasesFn = createServerFn({ method: "GET" })
+  .validator((token: string) => token)
+  .handler(({ data }) => db_listMakerCases(data));
+
+const assignMakerFn = createServerFn({ method: "POST" })
+  .validator((input: AssignMakerInput) => input)
+  .handler(({ data }) => db_assignMaker(data.token, data.caseId, data.makerId));
 
 const getCaseFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
@@ -90,4 +111,34 @@ export function api_updateCase(
 
 export function api_deleteCase(id: string): Promise<boolean> {
   return deleteCaseFn({ data: id });
+}
+
+/**
+ * Cases eligible for the Checker queue (field visit submitted / maker assigned).
+ * Not filtered by checker id — all Checkers see the same cases. Pass the Neon
+ * Auth session token; the server verifies it and enforces the CHECKER role.
+ */
+export function api_listCheckerCases(token: string): Promise<ValuationCase[]> {
+  return listCheckerCasesFn({ data: token });
+}
+
+/**
+ * Cases assigned to the currently authenticated Maker. Pass the Neon Auth
+ * session token; the server verifies it and derives the maker id from the token.
+ */
+export function api_listMakerCases(token: string): Promise<ValuationCase[]> {
+  return listMakerCasesFn({ data: token });
+}
+
+/**
+ * Assign a Maker to a case (Checker action). Pass the Neon Auth session token;
+ * the server verifies the CHECKER role and enforces that the field visit is
+ * submitted and no Maker is already assigned. Rejects otherwise.
+ */
+export function api_assignMaker(
+  token: string,
+  caseId: string,
+  makerId: string,
+): Promise<ValuationCase> {
+  return assignMakerFn({ data: { token, caseId, makerId } });
 }

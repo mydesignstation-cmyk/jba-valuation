@@ -10,6 +10,8 @@ export type CaseStage =
   | "ASSIGNED"
   | "FIELD_VISIT_PENDING"
   | "FIELD_VISIT_SUBMITTED"
+  // Set when a Checker assigns a Maker to a case whose field visit is submitted.
+  | "MAKER_ASSIGNED"
   | "MAKER_PENDING"
   | "MAKER_COMPLETED"
   | "CHECKER_PENDING"
@@ -58,6 +60,8 @@ export interface ValuationCase {
   bankId: string;
   branchId: string;
   assignedEngineerId: string;
+  /** Neon Auth UUID of the Maker assigned by a Checker. Empty when unassigned. */
+  assignedMakerId: string;
   stage: CaseStage;
   createdById: string;
   createdAt: string;
