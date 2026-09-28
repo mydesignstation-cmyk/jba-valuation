@@ -192,3 +192,38 @@
     color: var(--color-foreground);
   }
 }
+
+/* ---------------------------------------------------------------------------
+ * Feature reveal flags (CSS-only hide)
+ *
+ * These classes hide features that are built but not yet "released" to
+ * customers. The staged rollout reveals one feature per day so the product
+ * feels like it is under active, steady development instead of dropping
+ * everything at once.
+ *
+ * IMPORTANT: This is a pure CSS hide. The components stay mounted and fully
+ * functional — they are only visually removed via `display: none`. Nothing is
+ * deleted or disabled in logic.
+ *
+ * TO UNHIDE / RELEASE A FEATURE:
+ *   Remove the corresponding class name from the JSX element (search the repo
+ *   for the class name below). Do NOT edit the rule here — deleting the class
+ *   usage is the "flag off" switch. Once removed, the feature is live again.
+ *
+ * See docs/feature-reveal-flags.md for the full playbook and schedule.
+ * ------------------------------------------------------------------------- */
+
+/* Reveal 1 — Dashboard internal cards (KPIs, Cases-by-Stage, Recent Cases). */
+.feature-hidden-dashboard {
+  display: none !important;
+}
+
+/* Reveal 2 — Case pipeline / stage tracker inside the case detail page. */
+.feature-hidden-pipeline {
+  display: none !important;
+}
+
+/* Reveal 3 — All search boxes (the shared SearchInput component). */
+.feature-hidden-search {
+  display: none !important;
+}

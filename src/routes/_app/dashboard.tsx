@@ -197,6 +197,22 @@ function Page() {
         crumbs={[{ label: "Dashboard" }]}
       />
 
+      {/* Staged reveal: the dashboard content is built but not yet released to
+          customers. A plain "Coming soon" message shows in its place while the
+          cards below are CSS-hidden. To release, remove the
+          `feature-hidden-dashboard` class from the wrapper further down and
+          delete this placeholder. See docs/feature-reveal-flags.md. */}
+      <div className="rounded-lg border border-dashed py-16 text-center">
+        <p className="text-lg font-medium">Coming soon</p>
+        <p className="mt-1 text-sm text-muted-foreground">
+          Your dashboard is on the way. Check back shortly.
+        </p>
+      </div>
+
+      {/* FEATURE-HIDDEN (CSS-only). Everything below stays mounted and working;
+          it is only visually hidden via `.feature-hidden-dashboard`. Remove the
+          class to release. */}
+      <div className="feature-hidden-dashboard space-y-6">
       {/* Case KPIs. For a Site Engineer, Maker or Uploader these count only
           their own workload, and Pending/Completed reflect it. A personal
           dashboard drops the pipeline-wide "In Progress" card. */}
@@ -322,6 +338,7 @@ function Page() {
             )}
           </CardContent>
         </Card>
+      </div>
       </div>
     </div>
   );

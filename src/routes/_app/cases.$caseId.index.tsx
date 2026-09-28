@@ -673,9 +673,15 @@ function Page() {
           </Card>
 
           {/* Pipeline tracker — where the case sits in the workflow at a glance.
-              Hidden for Site Engineers, who only need their own case details. */}
+              Hidden for Site Engineers, who only need their own case details.
+              FEATURE-HIDDEN (CSS-only): the `feature-hidden-pipeline` wrapper
+              visually hides the pipeline during the staged rollout. It stays
+              mounted and working. To release, remove the wrapper div (keep the
+              CasePipeline). See docs/feature-reveal-flags.md. */}
           {!isSiteEngineer && (
-            <CasePipeline stage={valuationCase.stage} people={pipelinePeople} />
+            <div className="feature-hidden-pipeline">
+              <CasePipeline stage={valuationCase.stage} people={pipelinePeople} />
+            </div>
           )}
 
           {/* Case Information — redundant with the header + overview strip, kept

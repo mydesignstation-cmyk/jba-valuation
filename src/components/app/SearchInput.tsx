@@ -22,7 +22,11 @@ export const SearchInput = React.forwardRef<HTMLInputElement, SearchInputProps>(
     ref,
   ) => {
     return (
-      <div className={cn("relative w-full sm:w-64", containerClassName)}>
+      // FEATURE-HIDDEN (CSS-only): `feature-hidden-search` hides every search
+      // box app-wide during the staged rollout. The input stays mounted and
+      // functional. To release, remove `feature-hidden-search` from the
+      // container class below. See docs/feature-reveal-flags.md.
+      <div className={cn("feature-hidden-search relative w-full sm:w-64", containerClassName)}>
         <Search className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
         <Input
           ref={ref}
