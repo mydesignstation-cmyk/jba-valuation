@@ -187,7 +187,9 @@ export function CaseForm({
                       <FormLabel>Contact</FormLabel>
                       <Input
                         {...field}
-                        placeholder="Enter contact number"
+                        placeholder="Enter contact number (10 digits)"
+                        maxLength={14}
+                        type="tel"
                         disabled={finalIsSubmitting}
                       />
                       <FormMessage />
