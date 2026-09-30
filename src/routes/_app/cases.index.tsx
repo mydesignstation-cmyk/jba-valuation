@@ -412,6 +412,7 @@ function Page() {
           }}
           isSubmitting={isSubmitting}
           submitText={editingCase ? "Update Case" : "Create Case"}
+          isNewCase={!editingCase}
         />
       </FormModal>
 
