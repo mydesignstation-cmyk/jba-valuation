@@ -137,15 +137,23 @@ export function CaseForm({
           assignedEngineerId: values.assignedEngineerId,
         });
         
-        console.log("Case created successfully");
+        console.log("Case submitted successfully");
       } catch (err) {
         console.error("Error creating customer or case:", err);
-        toast.error(`Failed to create customer or case: ${err instanceof Error ? err.message : String(err)}`);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        toast.error(`Failed to create customer or case: ${errorMessage}`);
         setIsCreatingCustomer(false);
       }
     } else {
       // For edit mode or if no customer data, just submit normally
-      await onSubmit(values);
+      try {
+        await onSubmit(values);
+        console.log("Case submitted successfully");
+      } catch (err) {
+        console.error("Error submitting case:", err);
+        const errorMessage = err instanceof Error ? err.message : String(err);
+        toast.error(`Failed to submit case: ${errorMessage}`);
+      }
     }
   };
 

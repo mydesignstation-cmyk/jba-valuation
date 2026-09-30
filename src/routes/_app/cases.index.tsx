@@ -122,21 +122,28 @@ function Page() {
         toast.success("Case updated successfully");
       } else {
         const currentUser = getCurrentUser();
+        console.log("Current user:", currentUser);
+        if (!currentUser?.id) {
+          throw new Error("User not authenticated - cannot create case");
+        }
         const created = await api_createCase({
           requestNumber: data.requestNumber,
           customerId: data.customerId,
           bankId: data.bankId,
           branchId: data.branchId,
           assignedEngineerId: data.assignedEngineerId,
-          createdById: currentUser?.id ?? "unknown",
+          createdById: currentUser.id,
         });
+        console.log("Case created successfully:", created);
         toast.success(`Case ${created.caseNumber} created successfully`);
       }
       queryClient.invalidateQueries({ queryKey: ["cases"] });
       setFormOpen(false);
       setEditingCase(null);
     } catch (err) {
-      toast.error(editingCase ? "Failed to update case" : "Failed to create case");
+      console.error("Error in case submission:", err);
+      const errorMessage = err instanceof Error ? err.message : String(err);
+      toast.error(editingCase ? `Failed to update case: ${errorMessage}` : `Failed to create case: ${errorMessage}`);
     } finally {
       setIsSubmitting(false);
     }
