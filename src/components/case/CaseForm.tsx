@@ -100,16 +100,33 @@ export function CaseForm({
   });
 
   const handleSubmit = async (values: any) => {
+    console.log("Form submitted with values:", {
+      customerName: values.customerName,
+      customerContact: values.customerContact,
+      customerAddress: values.customerAddress,
+      requestNumber: values.requestNumber,
+      bankId: values.bankId,
+      branchId: values.branchId,
+      assignedEngineerId: values.assignedEngineerId,
+    });
+
     // If this is a new case with customer data, create the customer first
     if (isNewCase && values.customerName) {
       setIsCreatingCustomer(true);
       try {
+        console.log("Creating customer with:", {
+          name: values.customerName,
+          contact: values.customerContact,
+          address: values.customerAddress,
+        });
         const newCustomer = await api_createCustomer({
           name: values.customerName,
           contact: values.customerContact,
           email: values.customerEmail || undefined,
           address: values.customerAddress,
         });
+
+        console.log("Customer created successfully:", newCustomer.id);
 
         // Call parent submit with the new customer ID
         await onSubmit({
@@ -119,8 +136,11 @@ export function CaseForm({
           branchId: values.branchId,
           assignedEngineerId: values.assignedEngineerId,
         });
+        
+        console.log("Case created successfully");
       } catch (err) {
-        toast.error("Failed to create customer");
+        console.error("Error creating customer or case:", err);
+        toast.error(`Failed to create customer or case: ${err instanceof Error ? err.message : String(err)}`);
         setIsCreatingCustomer(false);
       }
     } else {
