@@ -407,14 +407,12 @@ function DropdownField({
   label,
   options,
   placeholder,
-  icon: Icon,
 }: {
   form: FormType;
   name: Path<FieldVisitFormValues>;
   label: string;
   options: readonly string[];
   placeholder?: string;
-  icon?: React.ComponentType<{ className?: string }>;
 }) {
   return (
     <FormField
@@ -422,10 +420,7 @@ function DropdownField({
       name={name}
       render={({ field }) => (
         <FormItem>
-          <FormLabel className="flex items-center gap-2">
-            {Icon && <Icon className="h-4 w-4" />}
-            {label}
-          </FormLabel>
+          <FormLabel>{label}</FormLabel>
           <select
             {...field}
             value={(field.value as string | undefined) ?? ""}
@@ -896,7 +891,6 @@ export function FieldVisitWizard({
                   label="Type of Structure"
                   options={structureTypeOptions}
                   placeholder="Select structure type"
-                  icon={Building2}
                 />
                 {v.structureType === "Other" && (
                   <TextField
