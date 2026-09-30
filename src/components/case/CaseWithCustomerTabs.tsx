@@ -278,110 +278,89 @@ export function CaseWithCustomerTabs({
         <TabsContent value="customer" className="flex flex-1 flex-col">
           <Form {...customerForm}>
             <form onSubmit={customerForm.handleSubmit(handleCreateCustomer)} className="flex flex-1 flex-col">
-              <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4 sm:px-6">
-                <div>
-                  <h3 className="mb-4 font-semibold text-sm">Create New Customer</h3>
+              <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
+                {/* Create New Customer Form */}
+                <FormField
+                  control={customerForm.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name</FormLabel>
+                      <Input
+                        {...field}
+                        placeholder="Enter customer name"
+                        disabled={isCreatingCustomer || useExisting}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={customerForm.control}
-                    name="name"
-                    render={({ field }) => (
-                      <FormItem className="mb-4">
-                        <FormLabel>Name</FormLabel>
+                <FormField
+                  control={customerForm.control}
+                  name="contact"
+                  render={({ field }) => {
+                    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      field.onChange(value);
+                    };
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Contact</FormLabel>
                         <Input
                           {...field}
-                          placeholder="Enter customer name"
+                          placeholder="10 digit phone number"
+                          maxLength={10}
+                          type="tel"
                           disabled={isCreatingCustomer || useExisting}
+                          onChange={handlePhoneChange}
+                          inputMode="numeric"
                         />
                         <FormMessage />
                       </FormItem>
-                    )}
-                  />
+                    );
+                  }}
+                />
 
-                  <FormField
-                    control={customerForm.control}
-                    name="contact"
-                    render={({ field }) => {
-                      const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                        const value = e.target.value.replace(/\D/g, "");
-                        field.onChange(value);
-                      };
+                <FormField
+                  control={customerForm.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <Input
+                        {...field}
+                        placeholder="Enter email address (optional)"
+                        type="email"
+                        disabled={isCreatingCustomer || useExisting}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                      return (
-                        <FormItem className="mb-4">
-                          <FormLabel>Contact</FormLabel>
-                          <Input
-                            {...field}
-                            placeholder="10 digit phone number"
-                            maxLength={10}
-                            type="tel"
-                            disabled={isCreatingCustomer || useExisting}
-                            onChange={handlePhoneChange}
-                            inputMode="numeric"
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      );
-                    }}
-                  />
+                <FormField
+                  control={customerForm.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <Textarea
+                        {...field}
+                        placeholder="Enter address"
+                        className="resize-none"
+                        rows={3}
+                        disabled={isCreatingCustomer || useExisting}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
 
-                  <FormField
-                    control={customerForm.control}
-                    name="email"
-                    render={({ field }) => (
-                      <FormItem className="mb-4">
-                        <FormLabel>Email</FormLabel>
-                        <Input
-                          {...field}
-                          placeholder="Enter email address (optional)"
-                          type="email"
-                          disabled={isCreatingCustomer || useExisting}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <FormField
-                    control={customerForm.control}
-                    name="address"
-                    render={({ field }) => (
-                      <FormItem className="mb-4">
-                        <FormLabel>Address</FormLabel>
-                        <Textarea
-                          {...field}
-                          placeholder="Enter address"
-                          className="resize-none"
-                          rows={3}
-                          disabled={isCreatingCustomer || useExisting}
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
-                  <Button
-                    type="submit"
-                    disabled={isCreatingCustomer || useExisting}
-                    className="w-full"
-                  >
-                    {isCreatingCustomer ? "Creating..." : "Create Customer"}
-                  </Button>
-                </div>
-
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300" />
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="bg-white px-2 text-muted-foreground">or</span>
-                  </div>
-                </div>
-
-                {/* Use Existing Customer Option */}
-                <div>
-                  <div className="mb-4 flex items-center space-x-2">
+                {/* Use Existing Customer Checkbox */}
+                <div className="pt-2">
+                  <div className="flex items-center space-x-2">
                     <Checkbox
                       id="useExisting"
                       checked={useExisting}
@@ -396,36 +375,46 @@ export function CaseWithCustomerTabs({
                       Use Existing Customer
                     </Label>
                   </div>
-
-                  {useExisting && (
-                    <div className="space-y-2">
-                      <FormLabel>Select Customer</FormLabel>
-                      {customers.length === 0 ? (
-                        <p className="text-sm text-muted-foreground">No customers found</p>
-                      ) : (
-                        <Select value={selectedCustomerId} onValueChange={handleSelectExisting}>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select a customer" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {customers.map((customer) => (
-                              <SelectItem key={customer.id} value={customer.id}>
-                                {customer.name} ({customer.contact})
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  )}
                 </div>
+
+                {/* Existing Customer Dropdown (only shown when checkbox is checked) */}
+                {useExisting && (
+                  <div className="space-y-2">
+                    <FormLabel>Select Customer</FormLabel>
+                    {customers.length === 0 ? (
+                      <p className="text-sm text-muted-foreground">No customers found</p>
+                    ) : (
+                      <Select value={selectedCustomerId} onValueChange={handleSelectExisting}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select a customer" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {customers.map((customer) => (
+                            <SelectItem key={customer.id} value={customer.id}>
+                              {customer.name} ({customer.contact})
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    )}
+                  </div>
+                )}
               </div>
 
-              <div className="border-t px-4 py-4 sm:px-6">
+              {/* Action Buttons */}
+              <div className="border-t space-y-3 px-4 py-4 sm:px-6">
+                <Button
+                  type="submit"
+                  disabled={isCreatingCustomer || useExisting}
+                  className="w-full"
+                >
+                  {isCreatingCustomer ? "Creating..." : "Create Customer"}
+                </Button>
                 <Button
                   type="button"
                   onClick={handleProceedToCaseDetails}
                   disabled={!selectedCustomerId}
+                  variant="outline"
                   className="w-full"
                 >
                   Next: Case Details
