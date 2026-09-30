@@ -253,14 +253,22 @@ export async function api_listCustomers(): Promise<Customer[]> {
   try {
     const rows = await getDb().select().from(customers).orderBy(customers.created_at);
 
+    const toISO = (value: unknown) => {
+      if (!value) return new Date().toISOString();
+      if (typeof value === 'string') return value;
+      if (value instanceof Date) return value.toISOString();
+      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      return new Date(String(value)).toISOString();
+    };
+
     return rows.map((row) => {
       const customer: Customer = {
         id: row.id,
         name: row.name,
         contact: row.contact,
         address: row.address,
-        createdAt: row.created_at.toISOString(),
-        updatedAt: row.updated_at.toISOString(),
+        createdAt: toISO(row.created_at),
+        updatedAt: toISO(row.updated_at),
       };
       if (row.email !== null) {
         customer.email = row.email;
@@ -284,13 +292,22 @@ export async function api_getCustomer(id: string): Promise<Customer | undefined>
     const row = rows[0];
     if (!row) return undefined;
 
+    // Safe timestamp conversion
+    const toISO = (value: unknown) => {
+      if (!value) return new Date().toISOString();
+      if (typeof value === 'string') return value;
+      if (value instanceof Date) return value.toISOString();
+      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      return new Date(String(value)).toISOString();
+    };
+
     const customer: Customer = {
       id: row.id,
       name: row.name,
       contact: row.contact,
       address: row.address,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
+      createdAt: toISO(row.created_at),
+      updatedAt: toISO(row.updated_at),
     };
     if (row.email !== null) {
       customer.email = row.email;
@@ -418,11 +435,19 @@ export async function api_listBanks(): Promise<Bank[]> {
   try {
     const rows = await getDb().select().from(banks).orderBy(banks.created_at);
 
+    const toISO = (value: unknown) => {
+      if (!value) return new Date().toISOString();
+      if (typeof value === 'string') return value;
+      if (value instanceof Date) return value.toISOString();
+      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      return new Date(String(value)).toISOString();
+    };
+
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
+      createdAt: toISO(row.created_at),
+      updatedAt: toISO(row.updated_at),
     }));
   } catch (error) {
     console.error("Failed to list banks:", error);
@@ -438,11 +463,20 @@ export async function api_getBank(id: string): Promise<Bank | undefined> {
     const row = rows[0];
     if (!row) return undefined;
 
+    // Safe timestamp conversion
+    const toISO = (value: unknown) => {
+      if (!value) return new Date().toISOString();
+      if (typeof value === 'string') return value;
+      if (value instanceof Date) return value.toISOString();
+      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      return new Date(String(value)).toISOString();
+    };
+
     return {
       id: row.id,
       name: row.name,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
+      createdAt: toISO(row.created_at),
+      updatedAt: toISO(row.updated_at),
     };
   } catch (error) {
     console.error("Failed to get bank:", error);
@@ -525,11 +559,19 @@ export async function api_listBranches(): Promise<Branch[]> {
   try {
     const rows = await getDb().select().from(branches).orderBy(branches.created_at);
 
+    const toISO = (value: unknown) => {
+      if (!value) return new Date().toISOString();
+      if (typeof value === 'string') return value;
+      if (value instanceof Date) return value.toISOString();
+      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      return new Date(String(value)).toISOString();
+    };
+
     return rows.map((row) => ({
       id: row.id,
       name: row.name,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
+      createdAt: toISO(row.created_at),
+      updatedAt: toISO(row.updated_at),
     }));
   } catch (error) {
     console.error("Failed to list branches:", error);
@@ -545,11 +587,20 @@ export async function api_getBranch(id: string): Promise<Branch | undefined> {
     const row = rows[0];
     if (!row) return undefined;
 
+    // Safe timestamp conversion
+    const toISO = (value: unknown) => {
+      if (!value) return new Date().toISOString();
+      if (typeof value === 'string') return value;
+      if (value instanceof Date) return value.toISOString();
+      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      return new Date(String(value)).toISOString();
+    };
+
     return {
       id: row.id,
       name: row.name,
-      createdAt: row.created_at.toISOString(),
-      updatedAt: row.updated_at.toISOString(),
+      createdAt: toISO(row.created_at),
+      updatedAt: toISO(row.updated_at),
     };
   } catch (error) {
     console.error("Failed to get branch:", error);
@@ -630,6 +681,15 @@ export async function api_deleteBranch(id: string): Promise<boolean> {
 
 /** Map a raw `cases` row to the domain ValuationCase shape (single source). */
 function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
+  // Safe timestamp conversion - handle Date objects, strings, or other types
+  const toISO = (value: unknown) => {
+    if (!value) return new Date().toISOString();
+    if (typeof value === 'string') return value;
+    if (value instanceof Date) return value.toISOString();
+    if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+    return new Date(String(value)).toISOString();
+  };
+
   return {
     id: row.id,
     caseNumber: row.case_number,
@@ -644,8 +704,8 @@ function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
     uploadedById: row.uploaded_by_id || "",
     stage: row.stage as ValuationCase["stage"],
     createdById: row.created_by_id || "",
-    createdAt: row.created_at.toISOString(),
-    updatedAt: row.updated_at.toISOString(),
+    createdAt: toISO(row.created_at),
+    updatedAt: toISO(row.updated_at),
   };
 }
 
@@ -995,10 +1055,27 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
     ageOfBuilding: row.age_of_building,
     sqFeet: row.sq_feet,
     status: row.status === "SUBMITTED" ? "SUBMITTED" : "DRAFT",
-    createdAt: row.created_at.toISOString(),
-    updatedAt: row.updated_at.toISOString(),
+    createdAt: (() => {
+      const v = row.created_at;
+      if (!v) return new Date().toISOString();
+      if (typeof v === 'string') return v;
+      if (v instanceof Date) return v.toISOString();
+      if (typeof v === 'object' && 'toISOString' in v) return (v as any).toISOString();
+      return new Date(String(v)).toISOString();
+    })(),
+    updatedAt: (() => {
+      const v = row.updated_at;
+      if (!v) return new Date().toISOString();
+      if (typeof v === 'string') return v;
+      if (v instanceof Date) return v.toISOString();
+      if (typeof v === 'object' && 'toISOString' in v) return (v as any).toISOString();
+      return new Date(String(v)).toISOString();
+    })(),
   };
-  if (row.submitted_at) visit.submittedAt = row.submitted_at.toISOString();
+  if (row.submitted_at) {
+    const v = row.submitted_at;
+    visit.submittedAt = typeof v === 'string' ? v : (v instanceof Date ? v.toISOString() : new Date(String(v)).toISOString());
+  }
   if (row.updated_by_id) visit.updatedById = row.updated_by_id;
 
   // Expanded report fields — only surface those that are populated so a

@@ -256,12 +256,17 @@ export async function buildFieldVisitPdf(
   writer.drawSection("Property Details", [
     { label: "Landmark", value: show(visit.landmark) },
     { label: "Property Type", value: show(visit.propertyType) },
+    { label: "Property Type Remarks", value: show(visit.propertyTypeRemarks) },
     { label: "Locality", value: show(visit.localityType) },
     { label: "Occupancy Status", value: show(visit.occupancyStatus) },
+    { label: "Occupancy Status Remarks", value: show(visit.occupancyStatusRemarks) },
+    { label: "Occupancy with Name", value: show(visit.occupancyWithName) },
   ]);
 
   writer.drawSection("Building Details", [
     { label: "Type of Structure", value: show(visit.structureType) },
+    { label: "Structure Type Remarks", value: show(visit.structureTypeRemarks) },
+    { label: "Year of Living", value: show(visit.yearOfLiving) },
     { label: "Occupancy Level", value: show(visit.occupancyLevel) },
     { label: "Total Floors", value: show(visit.floorsInBuilding) },
     { label: "Located Floor", value: show(visit.locatedOnFloor) },
@@ -274,6 +279,10 @@ export async function buildFieldVisitPdf(
     { label: "Year of Construction", value: show(visit.yearOfConstruction) },
     { label: "Construction Stage", value: show(visit.constructionStage) },
     { label: "Description of Work", value: show(visit.workDescription) },
+    { label: "Flat Identification", value: show(visit.flatIdentification) },
+    { label: "Plot Demarcation", value: show(visit.plotDemarcation) },
+    { label: "No. of Labor", value: show(visit.noOfLabor) },
+    { label: "Material at Site", value: show(visit.materialAtSite) },
   ]);
 
   writer.drawSection("Boundaries", [
@@ -285,8 +294,12 @@ export async function buildFieldVisitPdf(
 
   writer.drawSection("Assessment", [
     { label: "Approach Road Condition", value: show(visit.approachRoadCondition) },
+    { label: "Width of Approach Road", value: show(visit.widthOfApproachRoad) },
+    { label: "Remarks on Approach Road", value: show(visit.remarksApproachRoad) },
+    { label: "Society Name Board", value: show(visit.societyNameBoard) },
     { label: "Area of Property", value: show(visit.areaSqFt) },
     { label: "Rate per Sq. Ft.", value: show(visit.ratePerSqFt) },
+    { label: "Rate Basis", value: show(visit.rateBasis) },
     { label: "Negative Points", value: show(visit.negativePoints) },
     { label: "Agent Opinion", value: show(visit.agentOpinion) },
   ]);
