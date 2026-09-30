@@ -49,7 +49,7 @@ import { PageHeader } from "@/components/app/PageHeader";
 import { SearchInput } from "@/components/app/SearchInput";
 import { FormModal } from "@/components/app/FormModal";
 import { ConfirmDialog } from "@/components/app/ConfirmDialog";
-import { CaseForm, type CaseFormValues } from "@/components/case/CaseForm";
+import { CaseWithCustomerTabs, type CaseFormValues } from "@/components/case/CaseWithCustomerTabs";
 import { CaseListCard } from "@/components/app/CaseListCard";
 import { requirePermission } from "@/lib/route-guard";
 import { can } from "@/lib/permissions";
@@ -399,7 +399,7 @@ function Page() {
             : "Create a new valuation case. The case number is generated automatically."
         }
       >
-        <CaseForm
+        <CaseWithCustomerTabs
           key={editingCase?.id ?? "new"}
           initialData={
             editingCase
