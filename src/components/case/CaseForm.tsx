@@ -199,6 +199,12 @@ export function CaseForm({
                         maxLength={14}
                         type="tel"
                         disabled={finalIsSubmitting}
+                        onChange={(e) => {
+                          // Allow only digits and formatting characters
+                          const value = e.target.value;
+                          const filtered = value.replace(/[^\d\-\s().+]/g, "");
+                          field.onChange(filtered);
+                        }}
                       />
                       <FormMessage />
                     </FormItem>
