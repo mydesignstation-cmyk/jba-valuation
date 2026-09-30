@@ -1004,8 +1004,8 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   // Expanded report fields — only surface those that are populated so a
   // basic-version row (all new columns null) maps back to just the originals.
   if (row.visit_date != null) visit.visitDate = row.visit_date;
-  if (row.gps_latitude != null) visit.gpsLatitude = row.gps_latitude;
-  if (row.gps_longitude != null) visit.gpsLongitude = row.gps_longitude;
+  if (row.gps_latitude != null) visit.gpsLatitude = String(row.gps_latitude);
+  if (row.gps_longitude != null) visit.gpsLongitude = String(row.gps_longitude);
 
   if (row.person_met != null) visit.personMet = row.person_met;
   if (row.person_phone != null) visit.personPhone = row.person_phone;
@@ -1048,8 +1048,8 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.width_of_approach_road != null) visit.widthOfApproachRoad = row.width_of_approach_road;
   if (row.remarks_approach_road != null) visit.remarksApproachRoad = row.remarks_approach_road;
   if (row.society_name_board != null) visit.societyNameBoard = row.society_name_board;
-  if (row.area_sqft != null) visit.areaSqFt = row.area_sqft;
-  if (row.rate_per_sqft != null) visit.ratePerSqFt = row.rate_per_sqft;
+  if (row.area_sqft != null) visit.areaSqFt = String(row.area_sqft);
+  if (row.rate_per_sqft != null) visit.ratePerSqFt = String(row.rate_per_sqft);
   if (row.rate_basis != null) visit.rateBasis = row.rate_basis;
   if (row.negative_points != null) visit.negativePoints = row.negative_points;
   if (row.agent_opinion != null) visit.agentOpinion = row.agent_opinion;
