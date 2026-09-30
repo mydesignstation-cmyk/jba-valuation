@@ -1194,11 +1194,16 @@ export async function api_submitFieldVisit(
         // STEP 2
         landmark: data.landmark,
         property_type: data.propertyType,
+        property_type_remarks: data.propertyTypeRemarks ? data.propertyTypeRemarks : null,
         locality_type: data.localityType,
         occupancy_status: data.occupancyStatus,
+        occupancy_status_remarks: data.occupancyStatusRemarks ? data.occupancyStatusRemarks : null,
+        occupancy_with_name: data.occupancyWithName ? data.occupancyWithName : null,
 
         // STEP 3
         structure_type: data.structureType,
+        structure_type_remarks: data.structureTypeRemarks ? data.structureTypeRemarks : null,
+        year_of_living: data.yearOfLiving ? data.yearOfLiving : null,
         occupancy_level: data.occupancyLevel,
         floors_in_building: data.floorsInBuilding,
         located_on_floor: data.locatedOnFloor,
@@ -1210,6 +1215,10 @@ export async function api_submitFieldVisit(
         year_of_construction: Number(data.yearOfConstruction),
         construction_stage: data.constructionStage,
         work_description: data.workDescription ? data.workDescription : null,
+        flat_identification: data.flatIdentification ? data.flatIdentification : null,
+        plot_demarcation: data.plotDemarcation ? data.plotDemarcation : null,
+        no_of_labor: data.noOfLabor ? data.noOfLabor : null,
+        material_at_site: data.materialAtSite ? data.materialAtSite : null,
 
         // STEP 5
         boundary_east: data.boundaryEast,
@@ -1219,8 +1228,12 @@ export async function api_submitFieldVisit(
 
         // STEP 6
         approach_road_condition: data.approachRoadCondition,
+        width_of_approach_road: data.widthOfApproachRoad ? data.widthOfApproachRoad : null,
+        remarks_approach_road: data.remarksApproachRoad ? data.remarksApproachRoad : null,
+        society_name_board: data.societyNameBoard ? data.societyNameBoard : null,
         area_sqft: data.areaSqFt,
         rate_per_sqft: data.ratePerSqFt,
+        rate_basis: data.rateBasis,
         negative_points: data.negativePoints ? data.negativePoints : null,
         agent_opinion: data.agentOpinion ? data.agentOpinion : null,
 
@@ -1370,11 +1383,16 @@ export async function api_updateFieldVisit(
         // STEP 2
         landmark: data.landmark,
         property_type: data.propertyType,
+        property_type_remarks: data.propertyTypeRemarks ? data.propertyTypeRemarks : null,
         locality_type: data.localityType,
         occupancy_status: data.occupancyStatus,
+        occupancy_status_remarks: data.occupancyStatusRemarks ? data.occupancyStatusRemarks : null,
+        occupancy_with_name: data.occupancyWithName ? data.occupancyWithName : null,
 
         // STEP 3
         structure_type: data.structureType,
+        structure_type_remarks: data.structureTypeRemarks ? data.structureTypeRemarks : null,
+        year_of_living: data.yearOfLiving ? data.yearOfLiving : null,
         occupancy_level: data.occupancyLevel,
         floors_in_building: data.floorsInBuilding,
         located_on_floor: data.locatedOnFloor,
@@ -1386,6 +1404,10 @@ export async function api_updateFieldVisit(
         year_of_construction: Number(data.yearOfConstruction),
         construction_stage: data.constructionStage,
         work_description: data.workDescription ? data.workDescription : null,
+        flat_identification: data.flatIdentification ? data.flatIdentification : null,
+        plot_demarcation: data.plotDemarcation ? data.plotDemarcation : null,
+        no_of_labor: data.noOfLabor ? data.noOfLabor : null,
+        material_at_site: data.materialAtSite ? data.materialAtSite : null,
 
         // STEP 5
         boundary_east: data.boundaryEast,
@@ -1395,8 +1417,12 @@ export async function api_updateFieldVisit(
 
         // STEP 6
         approach_road_condition: data.approachRoadCondition,
+        width_of_approach_road: data.widthOfApproachRoad ? data.widthOfApproachRoad : null,
+        remarks_approach_road: data.remarksApproachRoad ? data.remarksApproachRoad : null,
+        society_name_board: data.societyNameBoard ? data.societyNameBoard : null,
         area_sqft: data.areaSqFt,
         rate_per_sqft: data.ratePerSqFt,
+        rate_basis: data.rateBasis,
         negative_points: data.negativePoints ? data.negativePoints : null,
         agent_opinion: data.agentOpinion ? data.agentOpinion : null,
 

@@ -835,11 +835,12 @@ export function FieldVisitWizard({
                   placeholder="e.g. Near City Hospital"
                   maxLength={500}
                 />
-                <ChipField
+                <DropdownField
                   form={form}
                   name="propertyType"
                   label="Type of Property"
                   options={propertyTypeOptions}
+                  placeholder="Select property type"
                 />
                 {v.propertyType === "Other" && (
                   <TextField
@@ -884,11 +885,12 @@ export function FieldVisitWizard({
             {/* STEP 3 — Building information */}
             {stepIndex === 2 && (
               <div className="space-y-6">
-                <ChipField
+                <DropdownField
                   form={form}
                   name="structureType"
                   label="Type of Structure"
                   options={structureTypeOptions}
+                  placeholder="Select structure type"
                 />
                 {v.structureType === "Other" && (
                   <TextField

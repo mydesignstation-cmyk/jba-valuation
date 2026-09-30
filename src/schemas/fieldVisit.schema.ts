@@ -31,9 +31,11 @@ export const propertyTypeOptions = [
   "Duplex",
   "Other",
 ] as const;
+
+export const structureTypeOptions = ["RCC", "Brick", "Wood", "Mixed", "Load Bearing", "Other"] as const;
 export const localityTypeOptions = ["Good", "Average", "Poor"] as const;
 export const occupancyStatusOptions = ["Seller", "Rented", "Purchaser", "Owner", "Other"] as const;
-export const structureTypeOptions = ["Load Bearing", "Other"] as const;
+
 export const approachRoadOptions = ["Good", "Average", "Poor", "No Access"] as const;
 export const rateBasisOptions = [
   "Carpet Area",
