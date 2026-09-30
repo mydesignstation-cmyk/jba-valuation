@@ -190,25 +190,29 @@ export function CaseForm({
                 <FormField
                   control={form.control}
                   name="customerContact"
-                  render={({ field }) => (
-                    <FormItem className="mb-4">
-                      <FormLabel>Contact</FormLabel>
-                      <Input
-                        {...field}
-                        placeholder="Enter contact number (10 digits)"
-                        maxLength={14}
-                        type="tel"
-                        disabled={finalIsSubmitting}
-                        onChange={(e) => {
-                          // Allow only digits and formatting characters
-                          const value = e.target.value;
-                          const filtered = value.replace(/[^\d\-\s().+]/g, "");
-                          field.onChange(filtered);
-                        }}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  render={({ field }) => {
+                    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                      // Allow only digits and formatting characters
+                      const value = e.target.value;
+                      const filtered = value.replace(/[^\d\-\s().+]/g, "");
+                      field.onChange(filtered);
+                    };
+                    
+                    return (
+                      <FormItem className="mb-4">
+                        <FormLabel>Contact</FormLabel>
+                        <Input
+                          {...field}
+                          placeholder="Enter contact number (10 digits)"
+                          maxLength={14}
+                          type="tel"
+                          disabled={finalIsSubmitting}
+                          onChange={handlePhoneChange}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 {/* Customer Email */}
