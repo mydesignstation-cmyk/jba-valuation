@@ -99,14 +99,7 @@ export function CaseForm({
     },
   });
 
-  const handleFormError = (errors: any) => {
-    console.error("Form validation errors:", errors);
-    const firstError = Object.entries(errors)[0];
-    if (firstError) {
-      const [field, error]: any = firstError;
-      toast.error(`${field}: ${error?.message || "Validation error"}`);
-    }
-  };
+  const handleSubmit = async (values: any) => {
     console.log("Form submitted with values:", {
       customerName: values.customerName,
       customerContact: values.customerContact,
@@ -160,7 +153,7 @@ export function CaseForm({
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(handleSubmit, handleFormError)} className="flex min-h-0 flex-1 flex-col">
+      <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
           {/* Customer Fields — shown when creating a new case */}
           {isNewCase && (
@@ -194,10 +187,8 @@ export function CaseForm({
                       <FormLabel>Contact</FormLabel>
                       <Input
                         {...field}
-                        placeholder="Enter contact number (10 digits)"
-                        maxLength={14}
+                        placeholder="Enter contact number"
                         disabled={finalIsSubmitting}
-                        type="tel"
                       />
                       <FormMessage />
                     </FormItem>
