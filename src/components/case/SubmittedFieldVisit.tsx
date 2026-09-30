@@ -211,21 +211,31 @@ export function SubmittedFieldVisit({
       <SectionCard title="Property" icon={Home}>
         <ReadOnlyField label="Landmark" value={visit.landmark ?? "—"} />
         <ReadOnlyField label="Property Type" value={visit.propertyType ?? "—"} />
+        {visit.propertyType === "Other" && (
+          <ReadOnlyField label="Property Type Remarks" value={visit.propertyTypeRemarks ?? "—"} />
+        )}
         <ReadOnlyField label="Locality" value={visit.localityType ?? "—"} />
-        <ReadOnlyField label="Occupancy" value={visit.occupancyStatus ?? "—"} />
+        <ReadOnlyField label="Occupancy Status" value={visit.occupancyStatus ?? "—"} />
+        {visit.occupancyStatus === "Other" && (
+          <ReadOnlyField label="Occupancy Status Remarks" value={visit.occupancyStatusRemarks ?? "—"} />
+        )}
+        <ReadOnlyField label="Occupancy with Name" value={visit.occupancyWithName ?? "—"} />
       </SectionCard>
 
       <SectionCard title="Building" icon={Building2}>
-        <ReadOnlyField label="Structure" value={visit.structureType ?? "—"} />
+        <ReadOnlyField label="Structure Type" value={visit.structureType ?? "—"} />
+        {visit.structureType === "Other" && (
+          <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
+        )}
+        {visit.occupancyStatus === "Rented" && (
+          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
+        )}
         <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
-        <ReadOnlyField
-          label="Floors in Building"
-          value={visit.floorsInBuilding?.toString() ?? "—"}
-        />
+        <ReadOnlyField label="Floors in Building" value={visit.floorsInBuilding ?? "—"} />
         <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
-        <ReadOnlyField label="Flats on Floor" value={visit.flatsOnFloor?.toString() ?? "—"} />
-        <ReadOnlyField label="Wings" value={visit.wingsInBuilding?.toString() ?? "—"} />
-        <ReadOnlyField label="Lifts/Staircases" value={visit.liftsStaircases?.toString() ?? "—"} />
+        <ReadOnlyField label="Flats on Floor" value={visit.flatsOnFloor ?? "—"} />
+        <ReadOnlyField label="Wings" value={visit.wingsInBuilding ?? "—"} />
+        <ReadOnlyField label="Lifts/Staircases" value={visit.liftsStaircases ?? "—"} />
       </SectionCard>
 
       <SectionCard title="Construction" icon={Hammer}>
@@ -235,6 +245,10 @@ export function SubmittedFieldVisit({
         />
         <ReadOnlyField label="Construction Stage (%)" value={visit.constructionStage ?? "—"} />
         <ReadOnlyField label="Work Description" value={visit.workDescription ?? "—"} />
+        <ReadOnlyField label="Flat Identification" value={visit.flatIdentification ?? "—"} />
+        <ReadOnlyField label="Plot Demarcation" value={visit.plotDemarcation ?? "—"} />
+        <ReadOnlyField label="No. of Labor" value={visit.noOfLabor ?? "—"} />
+        <ReadOnlyField label="Material at Site" value={visit.materialAtSite ?? "—"} />
       </SectionCard>
 
       <SectionCard title="Boundaries" icon={Compass}>
@@ -246,8 +260,12 @@ export function SubmittedFieldVisit({
 
       <SectionCard title="Assessment" icon={RouteIcon}>
         <ReadOnlyField label="Approach Road" value={visit.approachRoadCondition ?? "—"} />
+        <ReadOnlyField label="Width of Approach Road" value={visit.widthOfApproachRoad ?? "—"} />
+        <ReadOnlyField label="Remarks Approach Road" value={visit.remarksApproachRoad ?? "—"} />
+        <ReadOnlyField label="Society Name Board" value={visit.societyNameBoard ?? "—"} />
         <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
         <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
+        <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
         <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
         <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
       </SectionCard>
