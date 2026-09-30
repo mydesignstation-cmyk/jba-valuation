@@ -20,11 +20,29 @@ export const fieldVisitStatusSchema = z.enum(["DRAFT", "SUBMITTED"]);
 // --- Enumerated option sets (single source of truth for UI + validation) ---
 
 export const relationshipOptions = ["Owner", "Tenant", "Banker", "Agent", "Other"] as const;
-export const propertyTypeOptions = ["Flat", "House", "Bungalow", "Land", "Commercial"] as const;
+export const propertyTypeOptions = [
+  "Industrial",
+  "Godown",
+  "Row House",
+  "Bungalow",
+  "Commercial Shop",
+  "Commercial Office",
+  "Penthouse",
+  "Duplex",
+  "Other",
+] as const;
 export const localityTypeOptions = ["Good", "Average", "Poor"] as const;
-export const occupancyStatusOptions = ["Occupied", "Vacant", "Under Construction"] as const;
-export const structureTypeOptions = ["RCC", "Brick", "Wood", "Mixed"] as const;
+export const occupancyStatusOptions = ["Seller", "Rented", "Purchaser", "Owner", "Other"] as const;
+export const structureTypeOptions = ["Load Bearing", "Other"] as const;
 export const approachRoadOptions = ["Good", "Average", "Poor", "No Access"] as const;
+export const rateBasisOptions = [
+  "Carpet Area",
+  "Built Up Area",
+  "Super Built Up Area",
+  "RERA Carpet Area",
+  "Lumpsum Rate",
+  "Floorwise Rate",
+] as const;
 
 export const relationshipSchema = z.enum(relationshipOptions);
 export const propertyTypeSchema = z.enum(propertyTypeOptions);
@@ -32,6 +50,7 @@ export const localityTypeSchema = z.enum(localityTypeOptions);
 export const occupancyStatusSchema = z.enum(occupancyStatusOptions);
 export const structureTypeSchema = z.enum(structureTypeOptions);
 export const approachRoadSchema = z.enum(approachRoadOptions);
+export const rateBasisSchema = z.enum(rateBasisOptions);
 
 // --- Reusable field helpers ---
 
@@ -114,8 +133,11 @@ export const step1Schema = z
 export const step2Schema = z.object({
   landmark: requiredText("Landmark", 500, 3),
   propertyType: propertyTypeSchema,
+  propertyTypeRemarks: optionalText(500), // Remarks if "Other" selected
   localityType: localityTypeSchema,
   occupancyStatus: occupancyStatusSchema,
+  occupancyStatusRemarks: optionalText(500), // Remarks if "Other" selected
+  occupancyWithName: optionalText(500), // Name of occupant
 });
 
 /**
@@ -127,12 +149,14 @@ export const step2Schema = z.object({
  */
 const step3Shape = {
   structureType: structureTypeSchema,
-  occupancyLevel: percentString("Occupancy level"),
-  floorsInBuilding: integerString("No. of floors in building", { min: 1 }),
-  locatedOnFloor: integerString("Located on floor no.", { min: 0 }),
-  flatsOnFloor: integerString("No. of flats on the floor", { min: 0 }),
-  wingsInBuilding: integerString("No. of wings in building", { min: 0 }),
-  liftsStaircases: integerString("No. of lifts/staircases", { min: 0 }),
+  structureTypeRemarks: optionalText(500), // Remarks if "Other" selected
+  yearOfLiving: optionalText(100), // Conditional: only if "Rented" selected
+  occupancyLevel: optionalText(100), // Made optional, keep as open text
+  floorsInBuilding: optionalText(100), // Changed to open text field
+  locatedOnFloor: optionalText(100), // Changed to open text field
+  flatsOnFloor: optionalText(100), // Changed to open text field
+  wingsInBuilding: optionalText(100), // Changed to open text field
+  liftsStaircases: optionalText(100), // Changed to open text field
 };
 
 /**
@@ -160,16 +184,14 @@ const refineLocatedFloor = (
   }
 };
 
-export const step3Schema = z.object(step3Shape).superRefine(refineLocatedFloor);
+export const step3Schema = z.object(step3Shape);
 
 /**
  * STEP 4 — Construction details.
  *
  * Year of construction is kept (it exists in the actual report) and is NOT
- * replaced by age of building. Construction stage is a percentage. When the
- * property is not "Under Construction" a completed build is implied, so we
- * default the stage to "100" client-side rather than forcing manual entry —
- * but the column is never silently dropped.
+ * replaced by age of building. Construction stage is now an open text field.
+ * Added new open text fields for construction details.
  */
 const currentYear = new Date().getFullYear();
 export const step4Schema = z.object({
@@ -177,8 +199,12 @@ export const step4Schema = z.object({
     min: 1800,
     max: currentYear,
   }),
-  constructionStage: percentString("Construction stage"),
+  constructionStage: optionalText(100), // Changed to open text field
   workDescription: optionalText(2000),
+  flatIdentification: optionalText(500),
+  plotDemarcation: optionalText(500),
+  noOfLabor: optionalText(100),
+  materialAtSite: optionalText(500),
 });
 
 /** STEP 5 — Property boundaries (all required). */
@@ -192,8 +218,12 @@ export const step5Schema = z.object({
 /** STEP 6 — Assessment details. */
 export const step6Schema = z.object({
   approachRoadCondition: approachRoadSchema,
-  areaSqFt: numericString("Area of property", { min: 0 }),
+  widthOfApproachRoad: optionalText(500),
+  remarksApproachRoad: optionalText(500),
+  societyNameBoard: optionalText(500),
+  areaSqFt: optionalText(100), // Made optional
   ratePerSqFt: numericString("Rate per sq. ft.", { min: 0 }),
+  rateBasis: rateBasisSchema, // New: basis for rate calculation
   negativePoints: optionalText(2000),
   agentOpinion: optionalText(2000),
 });
@@ -216,8 +246,7 @@ export const fieldVisitFormSchema = step1Schema
   .merge(step4Schema)
   .merge(step5Schema)
   .merge(step6Schema)
-  .merge(step7Schema)
-  .superRefine(refineLocatedFloor);
+  .merge(step7Schema);
 
 export type FieldVisitFormValues = z.infer<typeof fieldVisitFormSchema>;
 

@@ -156,22 +156,31 @@ export const fieldVisits = pgTable(
     // STEP 2 — Property details
     landmark: text("landmark"),
     property_type: varchar("property_type", { length: 50 }),
+    property_type_remarks: text("property_type_remarks"), // Remarks if "Other"
     locality_type: varchar("locality_type", { length: 50 }),
     occupancy_status: varchar("occupancy_status", { length: 50 }),
+    occupancy_status_remarks: text("occupancy_status_remarks"), // Remarks if "Other"
+    occupancy_with_name: text("occupancy_with_name"), // Name of occupant
 
     // STEP 3 — Building information
     structure_type: varchar("structure_type", { length: 50 }),
-    occupancy_level: numeric("occupancy_level", { precision: 5, scale: 2 }),
-    floors_in_building: integer("floors_in_building"),
+    structure_type_remarks: text("structure_type_remarks"), // Remarks if "Other"
+    year_of_living: varchar("year_of_living", { length: 100 }), // Conditional: only if "Rented"
+    occupancy_level: varchar("occupancy_level", { length: 100 }), // Changed to allow open text
+    floors_in_building: varchar("floors_in_building", { length: 100 }),
     located_on_floor: varchar("located_on_floor", { length: 100 }),
-    flats_on_floor: integer("flats_on_floor"),
-    wings_in_building: integer("wings_in_building"),
-    lifts_staircases: integer("lifts_staircases"),
+    flats_on_floor: varchar("flats_on_floor", { length: 100 }),
+    wings_in_building: varchar("wings_in_building", { length: 100 }),
+    lifts_staircases: varchar("lifts_staircases", { length: 100 }),
 
     // STEP 4 — Construction details
     year_of_construction: integer("year_of_construction"),
-    construction_stage: numeric("construction_stage", { precision: 5, scale: 2 }),
+    construction_stage: varchar("construction_stage", { length: 100 }), // Changed to open text
     work_description: text("work_description"),
+    flat_identification: text("flat_identification"),
+    plot_demarcation: text("plot_demarcation"),
+    no_of_labor: varchar("no_of_labor", { length: 100 }),
+    material_at_site: text("material_at_site"),
 
     // STEP 5 — Property boundaries
     boundary_east: text("boundary_east"),
@@ -181,8 +190,12 @@ export const fieldVisits = pgTable(
 
     // STEP 6 — Assessment details
     approach_road_condition: varchar("approach_road_condition", { length: 50 }),
+    width_of_approach_road: text("width_of_approach_road"),
+    remarks_approach_road: text("remarks_approach_road"),
+    society_name_board: text("society_name_board"),
     area_sqft: numeric("area_sqft", { precision: 12, scale: 2 }),
     rate_per_sqft: numeric("rate_per_sqft", { precision: 12, scale: 2 }),
+    rate_basis: varchar("rate_basis", { length: 50 }), // New: basis for rate calculation
     negative_points: text("negative_points"),
     agent_opinion: text("agent_opinion"),
 

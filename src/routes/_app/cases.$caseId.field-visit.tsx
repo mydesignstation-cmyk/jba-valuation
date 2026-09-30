@@ -60,6 +60,7 @@ import {
   occupancyStatusOptions,
   structureTypeOptions,
   approachRoadOptions,
+  rateBasisOptions,
 } from "@/schemas/fieldVisit.schema";
 import {
   api_getMyFieldVisit,
@@ -147,25 +148,25 @@ const OPTION_ICONS: Record<string, IconType> = {
   Agent: UserCog,
   Other: UserIcon,
   // Property type
-  Flat: Building,
-  House: Home,
+  Industrial: Factory,
+  Godown: Building2,
+  "Row House": Home,
   Bungalow: Hotel,
-  Land: Trees,
-  Commercial: Factory,
+  "Commercial Shop": Factory,
+  "Commercial Office": Building,
+  Penthouse: Castle,
+  Duplex: Building2,
   // Locality + approach road + occupancy share Good/Average/Poor etc.
   Good: ShieldCheck,
   Average: ShieldAlert,
   Poor: TriangleAlert,
   "No Access": Minus,
   // Occupancy status
-  Occupied: Users,
-  Vacant: Home,
-  "Under Construction": Hammer,
+  Seller: UserCheck,
+  Rented: Users,
+  Purchaser: UserCheck,
   // Structure type
-  RCC: Building2,
-  Brick: Castle,
-  Wood: Trees,
-  Mixed: Wrench,
+  "Load Bearing": Building2,
 };
 
 /** The 7 wizard steps, in order. Index 6 (Review) collects nothing new. */
@@ -182,9 +183,19 @@ const STEPS = [
 /** Which form fields belong to (and must validate before leaving) each step. */
 const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
   ["personMet", "personPhone", "relationship", "gpsLatitude", "gpsLongitude"],
-  ["landmark", "propertyType", "localityType", "occupancyStatus"],
+  [
+    "landmark",
+    "propertyType",
+    "propertyTypeRemarks",
+    "localityType",
+    "occupancyStatus",
+    "occupancyStatusRemarks",
+    "occupancyWithName",
+  ],
   [
     "structureType",
+    "structureTypeRemarks",
+    "yearOfLiving",
     "occupancyLevel",
     "floorsInBuilding",
     "locatedOnFloor",
@@ -192,9 +203,27 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "wingsInBuilding",
     "liftsStaircases",
   ],
-  ["yearOfConstruction", "constructionStage", "workDescription"],
+  [
+    "yearOfConstruction",
+    "constructionStage",
+    "workDescription",
+    "flatIdentification",
+    "plotDemarcation",
+    "noOfLabor",
+    "materialAtSite",
+  ],
   ["boundaryEast", "boundaryWest", "boundaryNorth", "boundarySouth"],
-  ["approachRoadCondition", "areaSqFt", "ratePerSqFt", "negativePoints", "agentOpinion"],
+  [
+    "approachRoadCondition",
+    "widthOfApproachRoad",
+    "remarksApproachRoad",
+    "societyNameBoard",
+    "areaSqFt",
+    "ratePerSqFt",
+    "rateBasis",
+    "negativePoints",
+    "agentOpinion",
+  ],
   [], // Review
 ];
 
@@ -368,6 +397,50 @@ function ChipField({
   );
 }
 
+/**
+ * A single-select dropdown field for options like rate basis.
+ * Rendered as a native HTML select element.
+ */
+function DropdownField({
+  form,
+  name,
+  label,
+  options,
+  placeholder,
+}: {
+  form: FormType;
+  name: Path<FieldVisitFormValues>;
+  label: string;
+  options: readonly string[];
+  placeholder?: string;
+}) {
+  return (
+    <FormField
+      control={form.control}
+      name={name}
+      render={({ field }) => (
+        <FormItem>
+          <FormLabel>{label}</FormLabel>
+          <select
+            {...field}
+            value={(field.value as string | undefined) ?? ""}
+            onChange={(e) => field.onChange(e.target.value || undefined)}
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+          >
+            {placeholder && <option value="">{placeholder}</option>}
+            {options.map((opt) => (
+              <option key={opt} value={opt}>
+                {opt}
+              </option>
+            ))}
+          </select>
+          <FormMessage />
+        </FormItem>
+      )}
+    />
+  );
+}
+
 // ---------------------------------------------------------------------------
 // GPS panel
 // ---------------------------------------------------------------------------
@@ -443,25 +516,38 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     gpsLongitude: visit.gpsLongitude != null ? Number(visit.gpsLongitude) : undefined,
     landmark: visit.landmark ?? "",
     propertyType: visit.propertyType,
+    propertyTypeRemarks: visit.propertyTypeRemarks ?? "",
     localityType: visit.localityType,
     occupancyStatus: visit.occupancyStatus,
+    occupancyStatusRemarks: visit.occupancyStatusRemarks ?? "",
+    occupancyWithName: visit.occupancyWithName ?? "",
     structureType: visit.structureType,
+    structureTypeRemarks: visit.structureTypeRemarks ?? "",
+    yearOfLiving: visit.yearOfLiving ?? "",
     occupancyLevel: visit.occupancyLevel ?? "",
-    floorsInBuilding: num(visit.floorsInBuilding),
+    floorsInBuilding: visit.floorsInBuilding ?? "",
     locatedOnFloor: visit.locatedOnFloor ?? "",
-    flatsOnFloor: num(visit.flatsOnFloor),
-    wingsInBuilding: num(visit.wingsInBuilding),
-    liftsStaircases: num(visit.liftsStaircases),
+    flatsOnFloor: visit.flatsOnFloor ?? "",
+    wingsInBuilding: visit.wingsInBuilding ?? "",
+    liftsStaircases: visit.liftsStaircases ?? "",
     yearOfConstruction: num(visit.yearOfConstruction),
     constructionStage: visit.constructionStage ?? "",
     workDescription: visit.workDescription ?? "",
+    flatIdentification: visit.flatIdentification ?? "",
+    plotDemarcation: visit.plotDemarcation ?? "",
+    noOfLabor: visit.noOfLabor ?? "",
+    materialAtSite: visit.materialAtSite ?? "",
     boundaryEast: visit.boundaryEast ?? "",
     boundaryWest: visit.boundaryWest ?? "",
     boundaryNorth: visit.boundaryNorth ?? "",
     boundarySouth: visit.boundarySouth ?? "",
     approachRoadCondition: visit.approachRoadCondition,
+    widthOfApproachRoad: visit.widthOfApproachRoad ?? "",
+    remarksApproachRoad: visit.remarksApproachRoad ?? "",
+    societyNameBoard: visit.societyNameBoard ?? "",
     areaSqFt: visit.areaSqFt ?? "",
     ratePerSqFt: visit.ratePerSqFt ?? "",
+    rateBasis: visit.rateBasis,
     negativePoints: visit.negativePoints ?? "",
     agentOpinion: visit.agentOpinion ?? "",
     finalRemarks: visit.finalRemarks ?? "",
@@ -476,9 +562,14 @@ const EMPTY_FORM_VALUES = {
   gpsLongitude: undefined,
   landmark: "",
   propertyType: undefined,
+  propertyTypeRemarks: "",
   localityType: undefined,
   occupancyStatus: undefined,
+  occupancyStatusRemarks: "",
+  occupancyWithName: "",
   structureType: undefined,
+  structureTypeRemarks: "",
+  yearOfLiving: "",
   occupancyLevel: "",
   floorsInBuilding: "",
   locatedOnFloor: "",
@@ -488,13 +579,21 @@ const EMPTY_FORM_VALUES = {
   yearOfConstruction: "",
   constructionStage: "",
   workDescription: "",
+  flatIdentification: "",
+  plotDemarcation: "",
+  noOfLabor: "",
+  materialAtSite: "",
   boundaryEast: "",
   boundaryWest: "",
   boundaryNorth: "",
   boundarySouth: "",
   approachRoadCondition: undefined,
+  widthOfApproachRoad: "",
+  remarksApproachRoad: "",
+  societyNameBoard: "",
   areaSqFt: "",
   ratePerSqFt: "",
+  rateBasis: undefined,
   negativePoints: "",
   agentOpinion: "",
   finalRemarks: "",
@@ -742,6 +841,15 @@ export function FieldVisitWizard({
                   label="Type of Property"
                   options={propertyTypeOptions}
                 />
+                {v.propertyType === "Other" && (
+                  <TextField
+                    form={form}
+                    name="propertyTypeRemarks"
+                    label="Property Type Remarks"
+                    placeholder="Please specify other property type"
+                    maxLength={500}
+                  />
+                )}
                 <ChipField
                   form={form}
                   name="localityType"
@@ -753,6 +861,22 @@ export function FieldVisitWizard({
                   name="occupancyStatus"
                   label="Occupancy Status"
                   options={occupancyStatusOptions}
+                />
+                {v.occupancyStatus === "Other" && (
+                  <TextField
+                    form={form}
+                    name="occupancyStatusRemarks"
+                    label="Occupancy Status Remarks"
+                    placeholder="Please specify other occupancy status"
+                    maxLength={500}
+                  />
+                )}
+                <TextField
+                  form={form}
+                  name="occupancyWithName"
+                  label="Occupancy with Name of Occupant"
+                  placeholder="e.g. John Doe"
+                  maxLength={500}
                 />
               </div>
             )}
@@ -766,48 +890,66 @@ export function FieldVisitWizard({
                   label="Type of Structure"
                   options={structureTypeOptions}
                 />
+                {v.structureType === "Other" && (
+                  <TextField
+                    form={form}
+                    name="structureTypeRemarks"
+                    label="Structure Type Remarks (required)"
+                    placeholder="Please specify other structure type"
+                    maxLength={500}
+                  />
+                )}
+                {v.occupancyStatus === "Rented" && (
+                  <TextField
+                    form={form}
+                    name="yearOfLiving"
+                    label="Year of Living"
+                    placeholder="e.g. 2020"
+                    maxLength={100}
+                  />
+                )}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <TextField
                     form={form}
                     name="occupancyLevel"
                     label="Occupancy Level (%)"
-                    inputMode="numeric"
                     placeholder="0 - 100"
+                    maxLength={100}
                   />
-                  <NumberField
+                  <TextField
                     form={form}
                     name="floorsInBuilding"
-                    label="No. of Floors in Building"
+                    label="No. of Floors"
                     placeholder="e.g. 12"
-                    maxLength={3}
+                    maxLength={100}
                   />
-                  <NumberField
+                  <TextField
                     form={form}
                     name="locatedOnFloor"
                     label="Located on Floor No."
                     placeholder="e.g. 3"
-                    maxLength={3}
+                    maxLength={100}
                   />
-                  <NumberField
+                  <TextField
                     form={form}
                     name="flatsOnFloor"
                     label="No. of Flats on the Floor"
                     placeholder="e.g. 4"
-                    maxLength={3}
+                    maxLength={100}
                   />
-                  <NumberField
+                  <TextField
                     form={form}
                     name="wingsInBuilding"
-                    label="No. of Wings in Building"
+                    label="No. of Wings"
                     placeholder="e.g. 2"
-                    maxLength={2}
+                    maxLength={100}
                   />
-                  <NumberField
+                  <TextField
                     form={form}
                     name="liftsStaircases"
                     label="No. of Lifts/Staircases"
                     placeholder="e.g. 2"
-                    maxLength={2}
+                    maxLength={100}
                   />
                 </div>
               </div>
@@ -828,21 +970,44 @@ export function FieldVisitWizard({
                     form={form}
                     name="constructionStage"
                     label="Construction Stage (%)"
-                    inputMode="numeric"
                     placeholder="0 - 100"
+                    maxLength={100}
                   />
                 </div>
-                {v.occupancyStatus !== "Under Construction" && (
-                  <p className="text-xs text-muted-foreground">
-                    Occupancy status is “{v.occupancyStatus ?? "—"}”. For a completed property the
-                    construction stage is typically 100%.
-                  </p>
-                )}
+                
                 <TextAreaField
                   form={form}
                   name="workDescription"
                   label="Description of Work (optional)"
                   placeholder="Any notes about the construction/work in progress"
+                />
+                <TextField
+                  form={form}
+                  name="flatIdentification"
+                  label="Flat Identification"
+                  placeholder="e.g. 301A"
+                  maxLength={500}
+                />
+                <TextField
+                  form={form}
+                  name="plotDemarcation"
+                  label="Plot Demarcation"
+                  placeholder="Describe plot boundaries"
+                  maxLength={500}
+                />
+                <TextField
+                  form={form}
+                  name="noOfLabor"
+                  label="No. of Labor"
+                  placeholder="e.g. 5"
+                  maxLength={100}
+                />
+                <TextField
+                  form={form}
+                  name="materialAtSite"
+                  label="Material at Site"
+                  placeholder="Describe materials present"
+                  maxLength={500}
                 />
               </div>
             )}
@@ -866,6 +1031,27 @@ export function FieldVisitWizard({
                   label="Condition of Approach Road"
                   options={approachRoadOptions}
                 />
+                <TextField
+                  form={form}
+                  name="widthOfApproachRoad"
+                  label="Width of Approach Road"
+                  placeholder="e.g. 30 ft"
+                  maxLength={500}
+                />
+                <TextField
+                  form={form}
+                  name="remarksApproachRoad"
+                  label="Remarks for Approach Road"
+                  placeholder="Any additional remarks"
+                  maxLength={500}
+                />
+                <TextField
+                  form={form}
+                  name="societyNameBoard"
+                  label="Name or Society Name Board"
+                  placeholder="e.g. Green Valley Apartments"
+                  maxLength={500}
+                />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <TextField
                     form={form}
@@ -874,12 +1060,35 @@ export function FieldVisitWizard({
                     inputMode="decimal"
                     placeholder="e.g. 1450"
                   />
-                  <TextField
+                  <div>
+                    <FormField
+                      control={form.control}
+                      name="ratePerSqFt"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Rate per Sq. Ft.</FormLabel>
+                          <div className="flex gap-2">
+                            <Input
+                              {...field}
+                              value={(field.value as string | undefined) ?? ""}
+                              inputMode="decimal"
+                              placeholder="e.g. 5200"
+                              className="flex-1"
+                            />
+                          </div>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                  <DropdownField
                     form={form}
-                    name="ratePerSqFt"
-                    label="Rate per Sq. Ft."
-                    inputMode="decimal"
-                    placeholder="e.g. 5200"
+                    name="rateBasis"
+                    label="Rate Basis (required)"
+                    options={rateBasisOptions}
+                    placeholder="Select rate basis"
                   />
                 </div>
                 <TextAreaField
@@ -947,37 +1156,61 @@ export function FieldVisitWizard({
                 <ReviewSection title="Property">
                   <ReadOnlyField label="Landmark" value={v.landmark} />
                   <ReadOnlyField label="Property Type" value={v.propertyType ?? ""} />
+                  {v.propertyType === "Other" && (
+                    <ReadOnlyField label="Property Type Remarks" value={v.propertyTypeRemarks ?? ""} />
+                  )}
                   <ReadOnlyField label="Locality" value={v.localityType ?? ""} />
-                  <ReadOnlyField label="Occupancy" value={v.occupancyStatus ?? ""} />
+                  <ReadOnlyField label="Occupancy Status" value={v.occupancyStatus ?? ""} />
+                  {v.occupancyStatus === "Other" && (
+                    <ReadOnlyField
+                      label="Occupancy Status Remarks"
+                      value={v.occupancyStatusRemarks ?? ""}
+                    />
+                  )}
+                  <ReadOnlyField label="Occupancy with Name" value={v.occupancyWithName ?? ""} />
                 </ReviewSection>
 
                 <ReviewSection title="Building">
                   <ReadOnlyField label="Structure" value={v.structureType ?? ""} />
-                  <ReadOnlyField label="Occupancy Level (%)" value={v.occupancyLevel} />
-                  <ReadOnlyField label="Floors in Building" value={v.floorsInBuilding} />
-                  <ReadOnlyField label="Located on Floor" value={v.locatedOnFloor} />
-                  <ReadOnlyField label="Flats on Floor" value={v.flatsOnFloor} />
-                  <ReadOnlyField label="Wings" value={v.wingsInBuilding} />
-                  <ReadOnlyField label="Lifts/Staircases" value={v.liftsStaircases} />
+                  {v.structureType === "Other" && (
+                    <ReadOnlyField label="Structure Remarks" value={v.structureTypeRemarks ?? ""} />
+                  )}
+                  {v.occupancyStatus === "Rented" && (
+                    <ReadOnlyField label="Year of Living" value={v.yearOfLiving ?? ""} />
+                  )}
+                  <ReadOnlyField label="Occupancy Level (%)" value={v.occupancyLevel ?? ""} />
+                  <ReadOnlyField label="Floors in Building" value={v.floorsInBuilding ?? ""} />
+                  <ReadOnlyField label="Located on Floor" value={v.locatedOnFloor ?? ""} />
+                  <ReadOnlyField label="Flats on Floor" value={v.flatsOnFloor ?? ""} />
+                  <ReadOnlyField label="Wings" value={v.wingsInBuilding ?? ""} />
+                  <ReadOnlyField label="Lifts/Staircases" value={v.liftsStaircases ?? ""} />
                 </ReviewSection>
 
                 <ReviewSection title="Construction">
-                  <ReadOnlyField label="Year of Construction" value={v.yearOfConstruction} />
-                  <ReadOnlyField label="Construction Stage (%)" value={v.constructionStage} />
+                  <ReadOnlyField label="Year of Construction" value={v.yearOfConstruction ?? ""} />
+                  <ReadOnlyField label="Construction Stage (%)" value={v.constructionStage ?? ""} />
                   <ReadOnlyField label="Work Description" value={v.workDescription ?? ""} />
+                  <ReadOnlyField label="Flat Identification" value={v.flatIdentification ?? ""} />
+                  <ReadOnlyField label="Plot Demarcation" value={v.plotDemarcation ?? ""} />
+                  <ReadOnlyField label="No. of Labor" value={v.noOfLabor ?? ""} />
+                  <ReadOnlyField label="Material at Site" value={v.materialAtSite ?? ""} />
                 </ReviewSection>
 
                 <ReviewSection title="Boundaries">
-                  <ReadOnlyField label="East" value={v.boundaryEast} />
-                  <ReadOnlyField label="West" value={v.boundaryWest} />
-                  <ReadOnlyField label="North" value={v.boundaryNorth} />
-                  <ReadOnlyField label="South" value={v.boundarySouth} />
+                  <ReadOnlyField label="East" value={v.boundaryEast ?? ""} />
+                  <ReadOnlyField label="West" value={v.boundaryWest ?? ""} />
+                  <ReadOnlyField label="North" value={v.boundaryNorth ?? ""} />
+                  <ReadOnlyField label="South" value={v.boundarySouth ?? ""} />
                 </ReviewSection>
 
                 <ReviewSection title="Assessment">
                   <ReadOnlyField label="Approach Road" value={v.approachRoadCondition ?? ""} />
-                  <ReadOnlyField label="Area (Sq. Ft.)" value={v.areaSqFt} />
-                  <ReadOnlyField label="Rate per Sq. Ft." value={v.ratePerSqFt} />
+                  <ReadOnlyField label="Width of Approach Road" value={v.widthOfApproachRoad ?? ""} />
+                  <ReadOnlyField label="Remarks Approach Road" value={v.remarksApproachRoad ?? ""} />
+                  <ReadOnlyField label="Society Name Board" value={v.societyNameBoard ?? ""} />
+                  <ReadOnlyField label="Area (Sq. Ft.)" value={v.areaSqFt ?? ""} />
+                  <ReadOnlyField label="Rate per Sq. Ft." value={v.ratePerSqFt ?? ""} />
+                  <ReadOnlyField label="Rate Basis" value={v.rateBasis ?? ""} />
                   <ReadOnlyField label="Negative Points" value={v.negativePoints ?? ""} />
                   <ReadOnlyField label="Agent Opinion" value={v.agentOpinion ?? ""} />
                 </ReviewSection>
@@ -1171,3 +1404,6 @@ function Page() {
     </div>
   );
 }
+
+
+

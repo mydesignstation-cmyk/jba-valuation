@@ -102,22 +102,31 @@ export interface FieldVisit {
   // STEP 2 — Property details
   landmark?: string;
   propertyType?: string;
+  propertyTypeRemarks?: string; // Remarks if "Other"
   localityType?: string;
   occupancyStatus?: string;
+  occupancyStatusRemarks?: string; // Remarks if "Other"
+  occupancyWithName?: string; // Name of occupant
 
   // STEP 3 — Building information
   structureType?: string;
+  structureTypeRemarks?: string; // Remarks if "Other"
+  yearOfLiving?: string; // Conditional: only if "Rented"
   occupancyLevel?: string;
-  floorsInBuilding?: number;
+  floorsInBuilding?: string;
   locatedOnFloor?: string;
-  flatsOnFloor?: number;
-  wingsInBuilding?: number;
-  liftsStaircases?: number;
+  flatsOnFloor?: string;
+  wingsInBuilding?: string;
+  liftsStaircases?: string;
 
   // STEP 4 — Construction details
   yearOfConstruction?: number;
   constructionStage?: string;
   workDescription?: string;
+  flatIdentification?: string;
+  plotDemarcation?: string;
+  noOfLabor?: string;
+  materialAtSite?: string;
 
   // STEP 5 — Property boundaries
   boundaryEast?: string;
@@ -127,8 +136,12 @@ export interface FieldVisit {
 
   // STEP 6 — Assessment details
   approachRoadCondition?: string;
+  widthOfApproachRoad?: string;
+  remarksApproachRoad?: string;
+  societyNameBoard?: string;
   areaSqFt?: string;
   ratePerSqFt?: string;
+  rateBasis?: string; // New: basis for rate calculation
   negativePoints?: string;
   agentOpinion?: string;
 

@@ -1200,11 +1200,11 @@ export async function api_submitFieldVisit(
         // STEP 3
         structure_type: data.structureType,
         occupancy_level: data.occupancyLevel,
-        floors_in_building: Number(data.floorsInBuilding),
+        floors_in_building: data.floorsInBuilding,
         located_on_floor: data.locatedOnFloor,
-        flats_on_floor: Number(data.flatsOnFloor),
-        wings_in_building: Number(data.wingsInBuilding),
-        lifts_staircases: Number(data.liftsStaircases),
+        flats_on_floor: data.flatsOnFloor,
+        wings_in_building: data.wingsInBuilding,
+        lifts_staircases: data.liftsStaircases,
 
         // STEP 4
         year_of_construction: Number(data.yearOfConstruction),
@@ -1376,11 +1376,11 @@ export async function api_updateFieldVisit(
         // STEP 3
         structure_type: data.structureType,
         occupancy_level: data.occupancyLevel,
-        floors_in_building: Number(data.floorsInBuilding),
+        floors_in_building: data.floorsInBuilding,
         located_on_floor: data.locatedOnFloor,
-        flats_on_floor: Number(data.flatsOnFloor),
-        wings_in_building: Number(data.wingsInBuilding),
-        lifts_staircases: Number(data.liftsStaircases),
+        flats_on_floor: data.flatsOnFloor,
+        wings_in_building: data.wingsInBuilding,
+        lifts_staircases: data.liftsStaircases,
 
         // STEP 4
         year_of_construction: Number(data.yearOfConstruction),
@@ -1705,3 +1705,4 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
     throw new Error("Failed to generate field visit PDF");
   }
 }
+
