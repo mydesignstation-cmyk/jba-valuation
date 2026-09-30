@@ -358,8 +358,8 @@ export function CaseWithCustomerTabs({
                   )}
                 />
 
-                {/* Use Existing Customer Checkbox */}
-                <div className="pt-2">
+                {/* Use Existing Customer Checkbox - Hidden for now */}
+                <div className="hidden pt-2">
                   <div className="flex items-center space-x-2">
                     <Checkbox
                       id="useExisting"
@@ -377,9 +377,9 @@ export function CaseWithCustomerTabs({
                   </div>
                 </div>
 
-                {/* Existing Customer Dropdown (only shown when checkbox is checked) */}
+                {/* Existing Customer Dropdown (only shown when checkbox is checked) - Hidden for now */}
                 {useExisting && (
-                  <div className="space-y-2">
+                  <div className="hidden space-y-2">
                     <FormLabel>Select Customer</FormLabel>
                     {customers.length === 0 ? (
                       <p className="text-sm text-muted-foreground">No customers found</p>
