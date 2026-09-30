@@ -2,19 +2,12 @@ import { z } from "zod";
 
 /** Zod schemas for form validation and data parsing. */
 
-// Phone number validation: exactly 10 digits with flexible formatting
+// Phone number validation: exactly 10 digits, no formatting
 const phoneSchema = z
   .string()
-  .min(1, "Phone number is required")
-  .regex(/^[+]?[(]?[0-9]{1,3}[)]?[-\s.]?[0-9]{3}[-\s.]?[0-9]{4}$/, "Phone number must be exactly 10 digits (e.g., 555-123-4567)")
-  .refine(
-    (val) => {
-      // Extract only digits to count
-      const digitsOnly = val.replace(/\D/g, "");
-      return digitsOnly.length === 10;
-    },
-    "Phone number must contain exactly 10 digits"
-  );
+  .min(10, "Phone number must be exactly 10 digits")
+  .max(10, "Phone number must be exactly 10 digits")
+  .regex(/^\d{10}$/, "Phone number must be exactly 10 digits with no spaces or special characters");
 
 export const createCustomerSchema = z.object({
   name: z.string().min(1, "Name is required"),

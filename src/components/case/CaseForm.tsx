@@ -192,10 +192,9 @@ export function CaseForm({
                   name="customerContact"
                   render={({ field }) => {
                     const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                      // Allow only digits and formatting characters
-                      const value = e.target.value;
-                      const filtered = value.replace(/[^\d\-\s().+]/g, "");
-                      field.onChange(filtered);
+                      // Only allow digits, remove everything else
+                      const value = e.target.value.replace(/\D/g, "");
+                      field.onChange(value);
                     };
                     
                     return (
@@ -203,11 +202,12 @@ export function CaseForm({
                         <FormLabel>Contact</FormLabel>
                         <Input
                           {...field}
-                          placeholder="Enter contact number (10 digits)"
-                          maxLength={14}
+                          placeholder="10 digit phone number"
+                          maxLength={10}
                           type="tel"
                           disabled={finalIsSubmitting}
                           onChange={handlePhoneChange}
+                          inputMode="numeric"
                         />
                         <FormMessage />
                       </FormItem>
