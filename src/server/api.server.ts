@@ -1013,10 +1013,16 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
 
   if (row.landmark != null) visit.landmark = row.landmark;
   if (row.property_type != null) visit.propertyType = row.property_type;
+  if (row.property_type_remarks != null) visit.propertyTypeRemarks = row.property_type_remarks;
   if (row.locality_type != null) visit.localityType = row.locality_type;
   if (row.occupancy_status != null) visit.occupancyStatus = row.occupancy_status;
+  if (row.occupancy_status_remarks != null)
+    visit.occupancyStatusRemarks = row.occupancy_status_remarks;
+  if (row.occupancy_with_name != null) visit.occupancyWithName = row.occupancy_with_name;
 
   if (row.structure_type != null) visit.structureType = row.structure_type;
+  if (row.structure_type_remarks != null) visit.structureTypeRemarks = row.structure_type_remarks;
+  if (row.year_of_living != null) visit.yearOfLiving = row.year_of_living;
   if (row.occupancy_level != null) visit.occupancyLevel = row.occupancy_level;
   if (row.floors_in_building != null) visit.floorsInBuilding = row.floors_in_building;
   if (row.located_on_floor != null) visit.locatedOnFloor = row.located_on_floor;
@@ -1027,6 +1033,10 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.year_of_construction != null) visit.yearOfConstruction = row.year_of_construction;
   if (row.construction_stage != null) visit.constructionStage = row.construction_stage;
   if (row.work_description != null) visit.workDescription = row.work_description;
+  if (row.flat_identification != null) visit.flatIdentification = row.flat_identification;
+  if (row.plot_demarcation != null) visit.plotDemarcation = row.plot_demarcation;
+  if (row.no_of_labor != null) visit.noOfLabor = row.no_of_labor;
+  if (row.material_at_site != null) visit.materialAtSite = row.material_at_site;
 
   if (row.boundary_east != null) visit.boundaryEast = row.boundary_east;
   if (row.boundary_west != null) visit.boundaryWest = row.boundary_west;
@@ -1035,8 +1045,12 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
 
   if (row.approach_road_condition != null)
     visit.approachRoadCondition = row.approach_road_condition;
+  if (row.width_of_approach_road != null) visit.widthOfApproachRoad = row.width_of_approach_road;
+  if (row.remarks_approach_road != null) visit.remarksApproachRoad = row.remarks_approach_road;
+  if (row.society_name_board != null) visit.societyNameBoard = row.society_name_board;
   if (row.area_sqft != null) visit.areaSqFt = row.area_sqft;
   if (row.rate_per_sqft != null) visit.ratePerSqFt = row.rate_per_sqft;
+  if (row.rate_basis != null) visit.rateBasis = row.rate_basis;
   if (row.negative_points != null) visit.negativePoints = row.negative_points;
   if (row.agent_opinion != null) visit.agentOpinion = row.agent_opinion;
 

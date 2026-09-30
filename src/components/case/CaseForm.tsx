@@ -163,96 +163,94 @@ export function CaseForm({
     <Form {...form}>
       <form onSubmit={form.handleSubmit(handleSubmit)} className="flex min-h-0 flex-1 flex-col">
         <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
-          {/* Customer Fields — shown when creating a new case */}
+          {/* Customer Fields — shown ONLY when creating a new case */}
           {isNewCase && (
-            <>
-              <div className="border-b pb-6">
-                <h3 className="mb-4 font-semibold text-sm">Customer Information</h3>
+            <div className="border-b pb-6">
+              <h3 className="mb-4 font-semibold text-sm">Customer Information</h3>
 
-                {/* Customer Name */}
-                <FormField
-                  control={form.control}
-                  name="customerName"
-                  render={({ field }) => (
+              {/* Customer Name */}
+              <FormField
+                control={form.control}
+                name="customerName"
+                render={({ field }) => (
+                  <FormItem className="mb-4">
+                    <FormLabel>Name</FormLabel>
+                    <Input
+                      {...field}
+                      placeholder="Enter customer name"
+                      disabled={finalIsSubmitting}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Customer Contact */}
+              <FormField
+                control={form.control}
+                name="customerContact"
+                render={({ field }) => {
+                  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                    // Only allow digits, remove everything else
+                    const value = e.target.value.replace(/\D/g, "");
+                    field.onChange(value);
+                  };
+                  
+                  return (
                     <FormItem className="mb-4">
-                      <FormLabel>Name</FormLabel>
+                      <FormLabel>Contact</FormLabel>
                       <Input
                         {...field}
-                        placeholder="Enter customer name"
+                        placeholder="10 digit phone number"
+                        maxLength={10}
+                        type="tel"
                         disabled={finalIsSubmitting}
+                        onChange={handlePhoneChange}
+                        inputMode="numeric"
                       />
                       <FormMessage />
                     </FormItem>
-                  )}
-                />
+                  );
+                }}
+              />
 
-                {/* Customer Contact */}
-                <FormField
-                  control={form.control}
-                  name="customerContact"
-                  render={({ field }) => {
-                    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                      // Only allow digits, remove everything else
-                      const value = e.target.value.replace(/\D/g, "");
-                      field.onChange(value);
-                    };
-                    
-                    return (
-                      <FormItem className="mb-4">
-                        <FormLabel>Contact</FormLabel>
-                        <Input
-                          {...field}
-                          placeholder="10 digit phone number"
-                          maxLength={10}
-                          type="tel"
-                          disabled={finalIsSubmitting}
-                          onChange={handlePhoneChange}
-                          inputMode="numeric"
-                        />
-                        <FormMessage />
-                      </FormItem>
-                    );
-                  }}
-                />
+              {/* Customer Email */}
+              <FormField
+                control={form.control}
+                name="customerEmail"
+                render={({ field }) => (
+                  <FormItem className="mb-4">
+                    <FormLabel>Email</FormLabel>
+                    <Input
+                      {...field}
+                      placeholder="Enter email address"
+                      type="email"
+                      disabled={finalIsSubmitting}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-                {/* Customer Email */}
-                <FormField
-                  control={form.control}
-                  name="customerEmail"
-                  render={({ field }) => (
-                    <FormItem className="mb-4">
-                      <FormLabel>Email</FormLabel>
-                      <Input
-                        {...field}
-                        placeholder="Enter email address"
-                        type="email"
-                        disabled={finalIsSubmitting}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                {/* Customer Address */}
-                <FormField
-                  control={form.control}
-                  name="customerAddress"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Address</FormLabel>
-                      <Textarea
-                        {...field}
-                        placeholder="Enter address"
-                        className="resize-none"
-                        rows={3}
-                        disabled={finalIsSubmitting}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-              </div>
-            </>
+              {/* Customer Address */}
+              <FormField
+                control={form.control}
+                name="customerAddress"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <Textarea
+                      {...field}
+                      placeholder="Enter address"
+                      className="resize-none"
+                      rows={3}
+                      disabled={finalIsSubmitting}
+                    />
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
           )}
 
           {/* Request Number — required, first field */}
