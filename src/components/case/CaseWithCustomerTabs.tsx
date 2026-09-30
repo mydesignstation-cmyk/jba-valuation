@@ -17,6 +17,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 import { createCaseSchema } from "@/schemas/case.schema";
 import { createCustomerSchema } from "@/schemas/customer.schema";
 import { api_createCustomer, api_listCustomers } from "@/data/customer.functions";
@@ -54,15 +56,14 @@ export function CaseWithCustomerTabs({
   isNewCase = false,
 }: CaseWithCustomerTabsProps) {
   const queryClient = useQueryClient();
-  const [activeTab, setActiveTab] = useState<"select" | "create" | "details">(
-    initialData?.customerId ? "details" : "select"
-  );
+  const [activeTab, setActiveTab] = useState<"customer" | "case">("customer");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>(
     initialData?.customerId ?? ""
   );
+  const [useExisting, setUseExisting] = useState(false);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
 
-  // Load data
+  // Load data - all at top level (no conditional hooks)
   const { data: customers = [] } = useQuery({
     queryKey: ["customers"],
     queryFn: api_listCustomers,
@@ -74,13 +75,9 @@ export function CaseWithCustomerTabs({
     queryFn: listSiteEngineers,
   });
 
-  // All form schemas defined at top level (no conditional hooks)
-  const customerFormSchema = createCustomerSchema;
-  const caseFormSchema = createCaseSchema;
-
   // All forms created at top level (no conditional hooks)
   const customerForm = useForm<CustomerFormValues>({
-    resolver: zodResolver(customerFormSchema),
+    resolver: zodResolver(createCustomerSchema),
     defaultValues: {
       name: "",
       contact: "",
@@ -90,7 +87,7 @@ export function CaseWithCustomerTabs({
   });
 
   const caseForm = useForm<CaseFormValues>({
-    resolver: zodResolver(caseFormSchema),
+    resolver: zodResolver(createCaseSchema),
     defaultValues: {
       customerId: selectedCustomerId,
       requestNumber: initialData?.requestNumber ?? "",
@@ -107,15 +104,11 @@ export function CaseWithCustomerTabs({
       const newCustomer = await api_createCustomer(values);
       console.log("Customer created:", newCustomer.id);
 
-      // Update case form with new customer ID
       setSelectedCustomerId(newCustomer.id);
       caseForm.setValue("customerId", newCustomer.id, { shouldValidate: true });
-
-      // Refresh customers list
       await queryClient.invalidateQueries({ queryKey: ["customers"] });
 
-      // Move to case details tab
-      setActiveTab("details");
+      setActiveTab("case");
       toast.success("Customer created successfully");
       customerForm.reset();
     } catch (err) {
@@ -127,10 +120,17 @@ export function CaseWithCustomerTabs({
     }
   };
 
-  const handleSelectCustomer = (customerId: string) => {
+  const handleSelectExisting = (customerId: string) => {
     setSelectedCustomerId(customerId);
     caseForm.setValue("customerId", customerId, { shouldValidate: true });
-    setActiveTab("details");
+  };
+
+  const handleProceedToCaseDetails = () => {
+    if (!selectedCustomerId) {
+      toast.error("Please create or select a customer first");
+      return;
+    }
+    setActiveTab("case");
   };
 
   const handleCreateCase = async (values: CaseFormValues) => {
@@ -160,7 +160,6 @@ export function CaseWithCustomerTabs({
       <Form {...caseForm}>
         <form onSubmit={caseForm.handleSubmit(handleCreateCase)} className="flex min-h-0 flex-1 flex-col">
           <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
-            {/* Request Number */}
             <FormField
               control={caseForm.control}
               name="requestNumber"
@@ -179,7 +178,6 @@ export function CaseWithCustomerTabs({
               )}
             />
 
-            {/* Bank & Branch */}
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <FormField
                 control={caseForm.control}
@@ -265,142 +263,191 @@ export function CaseWithCustomerTabs({
     );
   }
 
-  // Tabbed interface for new cases
+  // 2-Tab interface: Customer (default create) + Case Details
   return (
     <div className="flex min-h-0 flex-1 flex-col">
       <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="flex flex-1 flex-col">
-        <TabsList className="grid w-full grid-cols-3 px-4 pt-4">
-          <TabsTrigger value="select">Select Customer</TabsTrigger>
-          <TabsTrigger value="create">Create Customer</TabsTrigger>
-          <TabsTrigger value="details" disabled={!selectedCustomerId}>
+        <TabsList className="grid w-full grid-cols-2 px-4 pt-4">
+          <TabsTrigger value="customer">Customer</TabsTrigger>
+          <TabsTrigger value="case" disabled={!selectedCustomerId}>
             Case Details
           </TabsTrigger>
         </TabsList>
 
-        {/* Tab 1: Select Existing Customer */}
-        <TabsContent value="select" className="flex-1 overflow-y-auto px-4 py-4">
-          <div className="space-y-4">
-            <p className="text-sm text-muted-foreground">Select an existing customer</p>
-            <div className="space-y-2">
-              {customers.length === 0 ? (
-                <p className="text-sm text-muted-foreground">No customers found. Create one first.</p>
-              ) : (
-                customers.map((customer) => (
-                  <Button
-                    key={customer.id}
-                    variant={selectedCustomerId === customer.id ? "default" : "outline"}
-                    onClick={() => handleSelectCustomer(customer.id)}
-                    className="w-full justify-start"
-                  >
-                    <div className="flex flex-col items-start">
-                      <span className="font-medium">{customer.name}</span>
-                      <span className="text-xs text-muted-foreground">{customer.contact}</span>
-                    </div>
-                  </Button>
-                ))
-              )}
-            </div>
-          </div>
-        </TabsContent>
-
-        {/* Tab 2: Create New Customer */}
-        <TabsContent value="create" className="flex-1 overflow-y-auto">
+        {/* Tab 1: Customer (Create by default, with option to use existing) */}
+        <TabsContent value="customer" className="flex flex-1 flex-col">
           <Form {...customerForm}>
-            <form onSubmit={customerForm.handleSubmit(handleCreateCustomer)} className="space-y-6 px-4 py-4">
-              <FormField
-                control={customerForm.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Name</FormLabel>
-                    <Input {...field} placeholder="Enter customer name" disabled={isCreatingCustomer} />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <form onSubmit={customerForm.handleSubmit(handleCreateCustomer)} className="flex flex-1 flex-col">
+              <div className="flex-1 space-y-6 overflow-y-auto px-4 py-4 sm:px-6">
+                <div>
+                  <h3 className="mb-4 font-semibold text-sm">Create New Customer</h3>
 
-              <FormField
-                control={customerForm.control}
-                name="contact"
-                render={({ field }) => {
-                  const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                    const value = e.target.value.replace(/\D/g, "");
-                    field.onChange(value);
-                  };
+                  <FormField
+                    control={customerForm.control}
+                    name="name"
+                    render={({ field }) => (
+                      <FormItem className="mb-4">
+                        <FormLabel>Name</FormLabel>
+                        <Input
+                          {...field}
+                          placeholder="Enter customer name"
+                          disabled={isCreatingCustomer || useExisting}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
 
-                  return (
-                    <FormItem>
-                      <FormLabel>Contact</FormLabel>
-                      <Input
-                        {...field}
-                        placeholder="10 digit phone number"
-                        maxLength={10}
-                        type="tel"
-                        disabled={isCreatingCustomer}
-                        onChange={handlePhoneChange}
-                        inputMode="numeric"
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  );
-                }}
-              />
+                  <FormField
+                    control={customerForm.control}
+                    name="contact"
+                    render={({ field }) => {
+                      const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                        const value = e.target.value.replace(/\D/g, "");
+                        field.onChange(value);
+                      };
 
-              <FormField
-                control={customerForm.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <Input
-                      {...field}
-                      placeholder="Enter email address (optional)"
-                      type="email"
-                      disabled={isCreatingCustomer}
+                      return (
+                        <FormItem className="mb-4">
+                          <FormLabel>Contact</FormLabel>
+                          <Input
+                            {...field}
+                            placeholder="10 digit phone number"
+                            maxLength={10}
+                            type="tel"
+                            disabled={isCreatingCustomer || useExisting}
+                            onChange={handlePhoneChange}
+                            inputMode="numeric"
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+
+                  <FormField
+                    control={customerForm.control}
+                    name="email"
+                    render={({ field }) => (
+                      <FormItem className="mb-4">
+                        <FormLabel>Email</FormLabel>
+                        <Input
+                          {...field}
+                          placeholder="Enter email address (optional)"
+                          type="email"
+                          disabled={isCreatingCustomer || useExisting}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <FormField
+                    control={customerForm.control}
+                    name="address"
+                    render={({ field }) => (
+                      <FormItem className="mb-4">
+                        <FormLabel>Address</FormLabel>
+                        <Textarea
+                          {...field}
+                          placeholder="Enter address"
+                          className="resize-none"
+                          rows={3}
+                          disabled={isCreatingCustomer || useExisting}
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <Button
+                    type="submit"
+                    disabled={isCreatingCustomer || useExisting}
+                    className="w-full"
+                  >
+                    {isCreatingCustomer ? "Creating..." : "Create Customer"}
+                  </Button>
+                </div>
+
+                {/* Divider */}
+                <div className="relative">
+                  <div className="absolute inset-0 flex items-center">
+                    <div className="w-full border-t border-gray-300" />
+                  </div>
+                  <div className="relative flex justify-center text-sm">
+                    <span className="bg-white px-2 text-muted-foreground">or</span>
+                  </div>
+                </div>
+
+                {/* Use Existing Customer Option */}
+                <div>
+                  <div className="mb-4 flex items-center space-x-2">
+                    <Checkbox
+                      id="useExisting"
+                      checked={useExisting}
+                      onCheckedChange={(checked) => {
+                        setUseExisting(checked as boolean);
+                        if (!checked) {
+                          setSelectedCustomerId("");
+                        }
+                      }}
                     />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                    <Label htmlFor="useExisting" className="text-sm font-medium cursor-pointer">
+                      Use Existing Customer
+                    </Label>
+                  </div>
 
-              <FormField
-                control={customerForm.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Address</FormLabel>
-                    <Textarea
-                      {...field}
-                      placeholder="Enter address"
-                      className="resize-none"
-                      rows={3}
-                      disabled={isCreatingCustomer}
-                    />
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  {useExisting && (
+                    <div className="space-y-2">
+                      <FormLabel>Select Customer</FormLabel>
+                      {customers.length === 0 ? (
+                        <p className="text-sm text-muted-foreground">No customers found</p>
+                      ) : (
+                        <Select value={selectedCustomerId} onValueChange={handleSelectExisting}>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select a customer" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {customers.map((customer) => (
+                              <SelectItem key={customer.id} value={customer.id}>
+                                {customer.name} ({customer.contact})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </div>
 
-              <div className="flex gap-2">
-                <Button type="submit" disabled={isCreatingCustomer} className="flex-1">
-                  {isCreatingCustomer ? "Creating..." : "Create & Continue"}
+              <div className="border-t px-4 py-4 sm:px-6">
+                <Button
+                  type="button"
+                  onClick={handleProceedToCaseDetails}
+                  disabled={!selectedCustomerId}
+                  className="w-full"
+                >
+                  Next: Case Details
                 </Button>
               </div>
             </form>
           </Form>
         </TabsContent>
 
-        {/* Tab 3: Case Details */}
-        <TabsContent value="details" className="flex flex-1 flex-col">
+        {/* Tab 2: Case Details */}
+        <TabsContent value="case" className="flex flex-1 flex-col">
           <Form {...caseForm}>
             <form onSubmit={caseForm.handleSubmit(handleCreateCase)} className="flex flex-1 flex-col">
               <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
                 {/* Selected Customer Display */}
-                <div className="rounded-md bg-blue-50 p-3">
-                  <p className="text-sm font-medium text-blue-900">
-                    Selected Customer: <span className="font-bold">{selectedCustomerName}</span>
-                  </p>
-                </div>
+                {selectedCustomerName && (
+                  <div className="rounded-md bg-blue-50 p-3">
+                    <p className="text-sm font-medium text-blue-900">
+                      Selected Customer: <span className="font-bold">{selectedCustomerName}</span>
+                    </p>
+                  </div>
+                )}
 
                 {/* Request Number */}
                 <FormField
@@ -421,7 +468,7 @@ export function CaseWithCustomerTabs({
                   )}
                 />
 
-                {/* Bank & Branch */}
+                {/* Bank & Branch & Engineer */}
                 <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                   <FormField
                     control={caseForm.control}
