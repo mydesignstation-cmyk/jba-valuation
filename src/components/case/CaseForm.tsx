@@ -107,7 +107,7 @@ export function CaseForm({
         const newCustomer = await api_createCustomer({
           name: values.customerName,
           contact: values.customerContact,
-          email: values.customerEmail,
+          email: values.customerEmail || undefined,
           address: values.customerAddress,
         });
 
@@ -121,7 +121,6 @@ export function CaseForm({
         });
       } catch (err) {
         toast.error("Failed to create customer");
-      } finally {
         setIsCreatingCustomer(false);
       }
     } else {
@@ -244,8 +243,8 @@ export function CaseForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Bank</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={finalIsSubmitting}>
-                    <SelectTrigger className="w-full">
+                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full" disabled={finalIsSubmitting}>
                       <SelectValue placeholder="Select bank" />
                     </SelectTrigger>
                     <SelectContent>
@@ -268,8 +267,8 @@ export function CaseForm({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Branch</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={finalIsSubmitting}>
-                    <SelectTrigger className="w-full">
+                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full" disabled={finalIsSubmitting}>
                       <SelectValue placeholder="Select branch" />
                     </SelectTrigger>
                     <SelectContent>
@@ -292,8 +291,8 @@ export function CaseForm({
               render={({ field }) => (
                 <FormItem className="sm:col-span-2">
                   <FormLabel>Site Engineer</FormLabel>
-                  <Select value={field.value} onValueChange={field.onChange} disabled={finalIsSubmitting}>
-                    <SelectTrigger className="w-full">
+                  <Select value={field.value || ""} onValueChange={field.onChange}>
+                    <SelectTrigger className="w-full" disabled={finalIsSubmitting}>
                       <SelectValue placeholder="Select site engineer" />
                     </SelectTrigger>
                     <SelectContent>
