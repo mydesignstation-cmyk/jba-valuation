@@ -766,6 +766,66 @@ export function FieldVisitWizard({
       <CardContent>
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
+            {/* DEV: Auto-fill button for testing */}
+            {process.env.NODE_ENV === "development" && (
+              <div className="mb-4 flex gap-2">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => {
+                    form.setValue("personMet", "John Doe");
+                    form.setValue("personPhone", "9876543210");
+                    form.setValue("relationship", "Owner");
+                    form.setValue("gpsLatitude", 19.0760);
+                    form.setValue("gpsLongitude", 72.8777);
+                    form.setValue("landmark", "Near Metro Station");
+                    form.setValue("propertyType", "Industrial");
+                    form.setValue("propertyTypeRemarks", "Modern facility");
+                    form.setValue("localityType", "Good");
+                    form.setValue("occupancyStatus", "Owner");
+                    form.setValue("occupancyStatusRemarks", "");
+                    form.setValue("occupancyWithName", "Self");
+                    form.setValue("structureType", "RCC");
+                    form.setValue("structureTypeRemarks", "");
+                    form.setValue("yearOfLiving", "");
+                    form.setValue("occupancyLevel", "85");
+                    form.setValue("floorsInBuilding", "5");
+                    form.setValue("locatedOnFloor", "2");
+                    form.setValue("flatsOnFloor", "4");
+                    form.setValue("wingsInBuilding", "2");
+                    form.setValue("liftsStaircases", "1");
+                    form.setValue("yearOfConstruction", "2015");
+                    form.setValue("constructionStage", "95");
+                    form.setValue("workDescription", "");
+                    form.setValue("flatIdentification", "A-201");
+                    form.setValue("plotDemarcation", "Well marked");
+                    form.setValue("noOfLabor", "0");
+                    form.setValue("materialAtSite", "None");
+                    form.setValue("boundaryEast", "Street");
+                    form.setValue("boundaryWest", "Open");
+                    form.setValue("boundaryNorth", "Apartment");
+                    form.setValue("boundarySouth", "Park");
+                    form.setValue("approachRoadCondition", "Good");
+                    form.setValue("widthOfApproachRoad", "20ft");
+                    form.setValue("remarksApproachRoad", "Well maintained");
+                    form.setValue("societyNameBoard", "Golden Heights Society");
+                    form.setValue("areaSqFt", "1500");
+                    form.setValue("ratePerSqFt", "5000");
+                    form.setValue("rateBasis", "Built Up Area");
+                    form.setValue("negativePoints", "None observed");
+                    form.setValue("agentOpinion", "Good investment");
+                    form.setValue("finalRemarks", "Property in excellent condition");
+                    toast.success("Form auto-filled for testing");
+                  }}
+                  className="text-xs"
+                >
+                  🧪 Dev: Auto-Fill Form
+                </Button>
+              </div>
+            )}
+
+            {/* Main form content */}
             {/* STEP 1 — Visit details */}
             {stepIndex === 0 && (
               <div className="space-y-6">

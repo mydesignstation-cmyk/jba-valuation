@@ -1283,8 +1283,12 @@ export async function api_submitFieldVisit(
     if (error instanceof Error && error.message.includes("field_visits_case_id")) {
       throw new Error("A field visit has already been submitted for this case");
     }
-    console.error("Failed to submit field visit:", error);
-    throw new Error("Failed to submit field visit to database");
+    console.error("Failed to submit field visit - Full error:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    throw new Error(`Failed to submit field visit to database: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
@@ -1461,8 +1465,12 @@ export async function api_updateFieldVisit(
     return mapFieldVisitRow(row);
   } catch (error) {
     if (error instanceof Error) throw error;
-    console.error("Failed to update field visit:", error);
-    throw new Error("Failed to update field visit in database");
+    console.error("Failed to update field visit - Full error:", error);
+    if (error instanceof Error) {
+      console.error("Error message:", error.message);
+      console.error("Error stack:", error.stack);
+    }
+    throw new Error(`Failed to update field visit in database: ${error instanceof Error ? error.message : String(error)}`);
   }
 }
 
