@@ -127,31 +127,43 @@ export function SubmittedFieldVisit({
   autoFill,
   engineerName,
   updatedByName,
+  checkerUpdatedByName,
   headerAction,
 }: {
   visit: FieldVisit;
   autoFill: FieldVisitAutoFill | null;
   /** Name of the site engineer who originally submitted the visit. */
   engineerName?: string | undefined;
-  /**
-   * Name of the Maker/admin who last edited the visit (for the audit line).
-   * When set — and the visit was actually edited after submission — a
-   * "Last updated by … on …" line is shown beneath the submission line.
-   */
+  /** Name of the Maker who edited the visit (audit line 2). */
   updatedByName?: string | undefined;
+  /** Name of the Checker who edited the visit (audit line 3). */
+  checkerUpdatedByName?: string | undefined;
   /** Optional action rendered in the header (e.g. an "Edit" button). */
   headerAction?: ReactNode | undefined;
 }) {
   const gpsText =
     visit.gpsLatitude && visit.gpsLongitude ? `${visit.gpsLatitude}, ${visit.gpsLongitude}` : "—";
-  const submittedOn = visit.submittedAt ? new Date(visit.submittedAt).toLocaleString() : null;
-  // Show the edit-audit line only when the visit was genuinely edited after
-  // submission: an updater is recorded and the edit time differs from the
-  // submission time (submission also stamps updated_at).
-  const wasEdited =
+
+  /** Formats a date string as e.g. "1 Jan 2026, 03:47 PM" */
+  const fmt = (iso: string) =>
+    new Date(iso).toLocaleString("en-GB", {
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+    });
+
+  const submittedOn = visit.submittedAt ? fmt(visit.submittedAt) : null;
+
+  // Show the Maker edit-audit line only when a maker actually edited after submission.
+  const makerEdited =
     !!visit.updatedById &&
     (!visit.submittedAt || new Date(visit.updatedAt) > new Date(visit.submittedAt));
-  const updatedOn = wasEdited ? new Date(visit.updatedAt).toLocaleString() : null;
+  const makerUpdatedOn = makerEdited ? fmt(visit.updatedAt) : null;
+
+  // Checker attribution: show independently of maker edit.
+  const checkerUpdatedOn = visit.checkerUpdatedById ? fmt(visit.updatedAt) : null;
 
   return (
     <div>
@@ -169,11 +181,18 @@ export function SubmittedFieldVisit({
                 <span className="font-medium text-foreground">{engineerName || "—"}</span>
                 {submittedOn ? ` on ${submittedOn}` : ""}
               </p>
-              {updatedOn && (
+              {makerUpdatedOn && (
                 <p className="text-sm text-muted-foreground">
-                  Last updated by{" "}
+                  Updated by{" "}
                   <span className="font-medium text-foreground">{updatedByName || "—"}</span>
-                  {` on ${updatedOn}`}
+                  {` on ${makerUpdatedOn}`}
+                </p>
+              )}
+              {checkerUpdatedOn && (
+                <p className="text-sm text-muted-foreground">
+                  Reviewed by{" "}
+                  <span className="font-medium text-foreground">{checkerUpdatedByName || "—"}</span>
+                  {` on ${checkerUpdatedOn}`}
                 </p>
               )}
             </div>

@@ -16,6 +16,7 @@ export type Permission =
   | "cases.reassignMaker"
   | "fieldVisit.access"
   | "fieldVisit.edit"
+  | "fieldVisit.checkerEdit"
   | "myCases.view"
   | "maker.access"
   | "checker.access"
@@ -62,6 +63,9 @@ export const permissionRoles: Record<Permission, Role[]> = {
   // and stage server-side. Admins are included for UI parity but the server
   // guard currently limits writes to the assigned MAKER.
   "fieldVisit.edit": [...ADMINS, "MAKER"],
+  // Checker can edit a submitted field visit during their review (CHECKER_PENDING).
+  // UI gate only; api_updateFieldVisitByChecker is the server authority.
+  "fieldVisit.checkerEdit": [...ADMINS, "CHECKER"],
   "myCases.view": ["SITE_ENGINEER"],
   "maker.access": ["MAKER"],
   "checker.access": ["CHECKER"],

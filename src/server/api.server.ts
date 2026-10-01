@@ -1077,6 +1077,7 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
     visit.submittedAt = typeof v === 'string' ? v : (v instanceof Date ? v.toISOString() : new Date(String(v)).toISOString());
   }
   if (row.updated_by_id) visit.updatedById = row.updated_by_id;
+  if (row.checker_updated_by_id) visit.checkerUpdatedById = row.checker_updated_by_id;
 
   // Expanded report fields — only surface those that are populated so a
   // basic-version row (all new columns null) maps back to just the originals.
@@ -1548,6 +1549,127 @@ export async function api_updateFieldVisit(
       console.error("Error stack:", error.stack);
     }
     throw new Error(`Failed to update field visit in database: ${error instanceof Error ? error.message : String(error)}`);
+  }
+}
+
+/**
+ * Edit an already-submitted Field Visit as the assigned Checker during their
+ * review stage (CHECKER_PENDING only).
+ *
+ * Mirrors api_updateFieldVisit exactly except:
+ *  - Caller must be CHECKER (requireServerUser rejects everyone else).
+ *  - Case must be at CHECKER_PENDING — the Checker's review window.
+ *  - Writes checker_updated_by_id instead of updated_by_id, so the Maker's
+ *    attribution is never overwritten. Both columns are preserved permanently.
+ *  - Does NOT touch updated_by_id, engineer_id, created_at, submitted_at,
+ *    status, visit_date, or GPS.
+ * Re-validates with the same fieldVisitFormSchema so all rules are respected.
+ */
+export async function api_updateFieldVisitByChecker(
+  token: string | null | undefined,
+  caseId: string,
+  input: unknown,
+): Promise<FieldVisit> {
+  const checker = await requireServerUser(token, "CHECKER");
+
+  // Verify the case is at CHECKER_PENDING — the only stage where the Checker
+  // may edit. Do not use requireMakerCase (that's MAKER-scoped).
+  const caseRows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const caseRow = caseRows[0];
+  if (!caseRow) throw new Error("Case not found");
+  if (caseRow.stage !== "CHECKER_PENDING") {
+    throw new Error("Field visit can only be edited by the Checker during their review stage");
+  }
+
+  // Re-validate with the same schema used at submission and Maker edit.
+  const data = fieldVisitFormSchema.parse(input);
+
+  const existingRows = await getDb()
+    .select()
+    .from(fieldVisits)
+    .where(eq(fieldVisits.case_id, caseId))
+    .limit(1);
+  const existing = existingRows[0];
+  if (!existing) throw new Error("No field visit exists for this case");
+  if (existing.status !== "SUBMITTED") throw new Error("Field visit has not been submitted yet");
+
+  try {
+    const now = new Date();
+
+    const legacyFloor = data.locatedOnFloor;
+    const legacyBuilding = data.landmark.slice(0, 255);
+    const legacyAge =
+      data.yearOfConstruction && Number(data.yearOfConstruction) > 0
+        ? String(Math.max(0, now.getFullYear() - Number(data.yearOfConstruction)))
+        : "0";
+    const legacySqFeet = data.areaSqFt;
+
+    const rows = await getDb()
+      .update(fieldVisits)
+      .set({
+        floor: legacyFloor,
+        building: legacyBuilding,
+        age_of_building: legacyAge,
+        sq_feet: legacySqFeet,
+
+        // STEP 1 (GPS not editable)
+        person_met: data.personMet,
+        person_phone: data.personPhone,
+        relationship: data.relationship,
+
+        // STEP 2
+        landmark: data.landmark,
+        property_type: data.propertyType,
+        locality_type: data.localityType,
+        occupancy_status: data.occupancyStatus,
+
+        // STEP 3
+        structure_type: data.structureType,
+        occupancy_level: data.occupancyLevel,
+        floors_in_building: data.floorsInBuilding,
+        located_on_floor: data.locatedOnFloor,
+        flats_on_floor: data.flatsOnFloor,
+        wings_in_building: data.wingsInBuilding,
+        lifts_staircases: data.liftsStaircases,
+
+        // STEP 4
+        year_of_construction: Number(data.yearOfConstruction),
+        construction_stage: data.constructionStage,
+        work_description: data.workDescription ? data.workDescription : null,
+
+        // STEP 5
+        boundary_east: data.boundaryEast,
+        boundary_west: data.boundaryWest,
+        boundary_north: data.boundaryNorth,
+        boundary_south: data.boundarySouth,
+
+        // STEP 6
+        approach_road_condition: data.approachRoadCondition,
+        area_sqft: data.areaSqFt,
+        rate_per_sqft: data.ratePerSqFt,
+        negative_points: data.negativePoints ? data.negativePoints : null,
+        agent_opinion: data.agentOpinion ? data.agentOpinion : null,
+
+        // STEP 7
+        final_remarks: data.finalRemarks ? data.finalRemarks : null,
+
+        // Checker-specific attribution — never touches updated_by_id (Maker's).
+        updated_at: now,
+        checker_updated_by_id: checker.id,
+      })
+      .where(eq(fieldVisits.case_id, caseId))
+      .returning();
+
+    const row = rows[0];
+    if (!row) throw new Error("Failed to retrieve updated field visit");
+
+    await getDb().update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
+
+    return mapFieldVisitRow(row);
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to update field visit by checker:", error);
+    throw new Error("Failed to update field visit in database");
   }
 }
 

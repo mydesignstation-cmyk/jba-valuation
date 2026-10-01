@@ -15,6 +15,7 @@ import {
   api_getCaseFieldVisit as db_getCaseFieldVisit,
   api_submitFieldVisit as db_submitFieldVisit,
   api_updateFieldVisit as db_updateFieldVisit,
+  api_updateFieldVisitByChecker as db_updateFieldVisitByChecker,
   api_getFieldVisitPdf as db_getFieldVisitPdf,
   type FieldVisitPdfResult,
 } from "@/server/api.server";
@@ -45,6 +46,10 @@ const submitFieldVisitFn = createServerFn({ method: "POST" })
 const updateFieldVisitFn = createServerFn({ method: "POST" })
   .validator((input: SubmitFieldVisitInput) => input)
   .handler(({ data }) => db_updateFieldVisit(data.token, data.caseId, data.data));
+
+const updateFieldVisitByCheckerFn = createServerFn({ method: "POST" })
+  .validator((input: SubmitFieldVisitInput) => input)
+  .handler(({ data }) => db_updateFieldVisitByChecker(data.token, data.caseId, data.data));
 
 const getFieldVisitPdfFn = createServerFn({ method: "GET" })
   .validator((input: GetFieldVisitPdfInput) => input)
@@ -98,6 +103,19 @@ export function api_updateFieldVisit(
   data: FieldVisitFormValues,
 ): Promise<FieldVisit> {
   return updateFieldVisitFn({ data: { token, caseId, data } });
+}
+
+/**
+ * Edit an already-submitted Field Visit as the Checker during their review
+ * stage (CHECKER_PENDING only). Writes checker_updated_by_id independently of
+ * updated_by_id so the Maker's attribution is never overwritten.
+ */
+export function api_updateFieldVisitByChecker(
+  token: string,
+  caseId: string,
+  data: FieldVisitFormValues,
+): Promise<FieldVisit> {
+  return updateFieldVisitByCheckerFn({ data: { token, caseId, data } });
 }
 
 /**

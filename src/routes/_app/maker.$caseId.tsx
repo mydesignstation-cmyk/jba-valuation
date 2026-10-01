@@ -26,7 +26,7 @@ import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { FieldVisitWizard, useAutoFill } from "@/routes/_app/cases.$caseId.field-visit";
 import { api_getCase, api_submitToChecker } from "@/data/case.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
-import { api_getSiteEngineer, api_getMaker } from "@/data/user.functions";
+import { api_getSiteEngineer, api_getMaker, api_getChecker } from "@/data/user.functions";
 
 export const Route = createFileRoute("/_app/maker/$caseId")({
   head: () => pageMeta("Maker Review", "Review and edit the submitted field visit."),
@@ -79,6 +79,11 @@ function Page() {
     queryKey: ["maker", fieldVisit?.updatedById],
     queryFn: () => api_getMaker(fieldVisit!.updatedById!),
     enabled: !!fieldVisit?.updatedById,
+  });
+  const { data: checkerEditor } = useQuery({
+    queryKey: ["checker", fieldVisit?.checkerUpdatedById],
+    queryFn: () => api_getChecker(fieldVisit!.checkerUpdatedById!),
+    enabled: !!fieldVisit?.checkerUpdatedById,
   });
 
   const canEdit = !!valuationCase && isMakerCasePending(valuationCase.stage);
@@ -190,6 +195,7 @@ function Page() {
           autoFill={autoFill}
           engineerName={engineer?.name ?? "—"}
           updatedByName={updater?.name ?? undefined}
+          checkerUpdatedByName={checkerEditor?.name ?? undefined}
           headerAction={
             canEdit ? (
               <div className="flex flex-col gap-2 sm:flex-row">

@@ -60,7 +60,7 @@ import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
-import { getSiteEngineer, getMaker, getAssigner, getUser } from "@/services/user.service";
+import { getSiteEngineer, getMaker, getAssigner, getUser, getChecker } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
   head: () => pageMeta("Case Detail", "Case information, customer, assignment and history."),
@@ -286,6 +286,19 @@ function Page() {
     queryKey: ["case-field-visit", caseId],
     queryFn: async () => (await api_getCaseFieldVisit(caseId)) ?? null,
     enabled: !!caseId,
+  });
+
+  // Resolve the Maker editor name (for the attribution banner in the Field Visit tab).
+  const { data: fieldVisitMakerEditor } = useQuery({
+    queryKey: ["maker-editor", fieldVisit?.updatedById],
+    queryFn: () => getMaker(fieldVisit!.updatedById!),
+    enabled: !!fieldVisit?.updatedById,
+  });
+  // Resolve the Checker editor name independently.
+  const { data: fieldVisitCheckerEditor } = useQuery({
+    queryKey: ["checker-editor", fieldVisit?.checkerUpdatedById],
+    queryFn: () => getChecker(fieldVisit!.checkerUpdatedById!),
+    enabled: !!fieldVisit?.checkerUpdatedById,
   });
 
   if (isLoading) {
@@ -569,9 +582,8 @@ function Page() {
         </Card>
       )}
 
-      {/* Primary CTA for the Checker: hand the case to the Uploader once the
-          Maker's work has been reviewed. Shown while the case is under Checker
-          review (CHECKER_PENDING). */}
+      {/* Primary CTA for the Checker: review/edit the field visit and hand the
+          case to the Uploader. Shown while the case is under Checker review. */}
       {isChecker && valuationCase.stage === "CHECKER_PENDING" && (
         <Card className="border-primary/40 bg-primary/5">
           <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
@@ -580,20 +592,28 @@ function Page() {
                 <ShieldCheck className="h-5 w-5 text-primary" />
               </div>
               <div className="space-y-0.5">
-                <p className="text-sm font-semibold">Ready for the Uploader</p>
+                <p className="text-sm font-semibold">Checker review</p>
                 <p className="text-sm text-muted-foreground">
-                  Once your review is done, submit the case to the Uploader for the final upload.
+                  Review or edit the field visit, then submit to the Uploader when ready.
                 </p>
               </div>
             </div>
-            <Button
-              type="button"
-              className="w-full sm:w-auto"
-              onClick={() => setConfirmSubmitToUploader(true)}
-            >
-              <Send className="mr-2 h-4 w-4" />
-              Submit to Uploader
-            </Button>
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center">
+              <Button asChild variant="outline" className="w-full sm:w-auto">
+                <Link to="/checker/$caseId" params={{ caseId: valuationCase.id }}>
+                  <ShieldCheck className="mr-2 h-4 w-4" />
+                  Open Checker Review
+                </Link>
+              </Button>
+              <Button
+                type="button"
+                className="w-full sm:w-auto"
+                onClick={() => setConfirmSubmitToUploader(true)}
+              >
+                <Send className="mr-2 h-4 w-4" />
+                Submit to Uploader
+              </Button>
+            </div>
           </CardContent>
         </Card>
       )}
@@ -796,7 +816,8 @@ function Page() {
                 <SubmittedFieldVisit
                   visit={fieldVisit}
                   engineerName={engineerName}
-                  updatedByName={makerName}
+                  updatedByName={fieldVisitMakerEditor?.name ?? makerName}
+                  checkerUpdatedByName={fieldVisitCheckerEditor?.name ?? undefined}
                   autoFill={{
                     caseNumber: valuationCase.caseNumber,
                     requestNumber: valuationCase.requestNumber,

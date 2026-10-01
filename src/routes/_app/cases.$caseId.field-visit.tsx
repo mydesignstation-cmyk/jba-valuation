@@ -606,15 +606,21 @@ export function FieldVisitWizard({
   onSubmitted,
   mode = "create",
   initialVisit,
+  updateFn,
 }: {
   caseId: string;
   autoFill: AutoFill | null;
   engineerName: string;
   onSubmitted: (visit: FieldVisit) => void;
-  /** "create" = site engineer's first submission; "edit" = Maker correction. */
+  /** "create" = site engineer's first submission; "edit" = Maker/Checker correction. */
   mode?: "create" | "edit";
   /** The existing visit to seed the form with when mode === "edit". */
   initialVisit?: FieldVisit | undefined;
+  /**
+   * Override the edit mutation. Defaults to api_updateFieldVisit (Maker).
+   * Pass api_updateFieldVisitByChecker for the Checker review page.
+   */
+  updateFn?: (token: string, caseId: string, data: FieldVisitFormValues) => Promise<FieldVisit>;
 }) {
   const isEdit = mode === "edit";
   const [stepIndex, setStepIndex] = useState(0);
@@ -652,7 +658,7 @@ export function FieldVisitWizard({
       const token = await getSessionToken();
       if (!token) throw new Error("Not authenticated");
       return isEdit
-        ? api_updateFieldVisit(token, caseId, values)
+        ? (updateFn ?? api_updateFieldVisit)(token, caseId, values)
         : api_submitFieldVisit(token, caseId, values);
     },
     onSuccess: (visit) => {

@@ -159,6 +159,12 @@ export interface FieldVisit {
    * original-creation record; `updatedAt` is the edit timestamp.
    */
   updatedById?: string;
+  /**
+   * Neon Auth UUID of the Checker who edited this visit during their review
+   * (CHECKER_PENDING stage). Independent of `updatedById` (the Maker's edit)
+   * so both attributions are preserved permanently.
+   */
+  checkerUpdatedById?: string;
 }
 
 export interface CaseHistoryEntry {
