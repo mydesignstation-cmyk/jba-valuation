@@ -251,6 +251,8 @@ export async function buildFieldVisitPdf(
     { label: "Person Met", value: show(visit.personMet) },
     { label: "Phone Number", value: show(visit.personPhone) },
     { label: "Relationship with Property", value: show(visit.relationship) },
+    { label: "Other Relationship", value: show(visit.otherRelationship) },
+    { label: "Other Relationship Remarks", value: show(visit.otherRelationshipRemarks) },
   ]);
 
   writer.drawSection("Property Details", [
@@ -296,7 +298,7 @@ export async function buildFieldVisitPdf(
     { label: "Approach Road Condition", value: show(visit.approachRoadCondition) },
     { label: "Width of Approach Road", value: show(visit.widthOfApproachRoad) },
     { label: "Remarks on Approach Road", value: show(visit.remarksApproachRoad) },
-    { label: "Society Name Board", value: show(visit.societyNameBoard) },
+    { label: "Name on Society Notice Board", value: show(visit.societyNameBoard) },
     { label: "Area of Property", value: show(visit.areaSqFt) },
     { label: "Rate per Sq. Ft.", value: show(visit.ratePerSqFt) },
     { label: "Rate Basis", value: show(visit.rateBasis) },

@@ -128,19 +128,50 @@ export const step1Schema = z
       "Enter a valid 10-digit phone number",
     ),
     relationship: relationshipSchema,
+    otherRelationship: z.string().optional(),
+    otherRelationshipRemarks: z.string().optional(),
   })
-  .merge(gpsSchema);
+  .merge(gpsSchema)
+  .refine(
+    (data) => data.relationship !== "Other" || (data.otherRelationship && data.otherRelationship.trim()),
+    {
+      message: "Other relationship is required when selecting 'Other'",
+      path: ["otherRelationship"],
+    },
+  )
+  .refine(
+    (data) => data.relationship !== "Other" || (data.otherRelationshipRemarks && data.otherRelationshipRemarks.trim()),
+    {
+      message: "Remarks are required when selecting 'Other'",
+      path: ["otherRelationshipRemarks"],
+    },
+  );
 
 /** STEP 2 — Property details. */
-export const step2Schema = z.object({
-  landmark: requiredText("Landmark", 500, 3),
-  propertyType: propertyTypeSchema,
-  propertyTypeRemarks: optionalText(500), // Remarks if "Other" selected
-  localityType: localityTypeSchema,
-  occupancyStatus: occupancyStatusSchema,
-  occupancyStatusRemarks: optionalText(500), // Remarks if "Other" selected
-  occupancyWithName: optionalText(500), // Name of occupant
-});
+export const step2Schema = z
+  .object({
+    landmark: requiredText("Landmark", 500, 3),
+    propertyType: propertyTypeSchema,
+    propertyTypeRemarks: optionalText(500), // Remarks if "Other" selected
+    localityType: localityTypeSchema,
+    occupancyStatus: occupancyStatusSchema,
+    occupancyStatusRemarks: optionalText(500), // Remarks if "Other" selected
+    occupancyWithName: requiredText("Occupancy with Name of Occupant", 500),
+  })
+  .refine(
+    (data) => data.propertyType !== "Other" || (data.propertyTypeRemarks && data.propertyTypeRemarks.trim()),
+    {
+      message: "Property type remarks are required when selecting 'Other'",
+      path: ["propertyTypeRemarks"],
+    },
+  )
+  .refine(
+    (data) => data.occupancyStatus !== "Other" || (data.occupancyStatusRemarks && data.occupancyStatusRemarks.trim()),
+    {
+      message: "Occupancy status remarks are required when selecting 'Other'",
+      path: ["occupancyStatusRemarks"],
+    },
+  );
 
 /**
  * STEP 3 — Building information.
@@ -152,13 +183,13 @@ export const step2Schema = z.object({
 const step3Shape = {
   structureType: structureTypeSchema,
   structureTypeRemarks: optionalText(500), // Remarks if "Other" selected
-  yearOfLiving: optionalText(100), // Conditional: only if "Rented" selected
-  occupancyLevel: optionalText(100), // Made optional, keep as open text
-  floorsInBuilding: optionalText(100), // Changed to open text field
-  locatedOnFloor: optionalText(100), // Changed to open text field
-  flatsOnFloor: optionalText(100), // Changed to open text field
-  wingsInBuilding: optionalText(100), // Changed to open text field
-  liftsStaircases: optionalText(100), // Changed to open text field
+  yearOfLiving: requiredText("Year of living", 100), // Compulsory for all occupancy statuses
+  occupancyLevel: requiredText("Occupancy level", 100), // Made required
+  floorsInBuilding: requiredText("No. of floors", 100), // Made required
+  locatedOnFloor: requiredText("Located on floor", 100), // Made required
+  flatsOnFloor: requiredText("No. of flats on floor", 100), // Made required
+  wingsInBuilding: requiredText("No. of wings", 100), // Made required
+  liftsStaircases: requiredText("No. of lifts/staircases", 100), // Made required
 };
 
 /**
@@ -201,12 +232,12 @@ export const step4Schema = z.object({
     min: 1800,
     max: currentYear,
   }),
-  constructionStage: optionalText(100), // Changed to open text field
-  workDescription: optionalText(2000),
-  flatIdentification: optionalText(500),
-  plotDemarcation: optionalText(500),
-  noOfLabor: optionalText(100),
-  materialAtSite: optionalText(500),
+  constructionStage: requiredText("Construction stage", 100), // Made required
+  workDescription: requiredText("Work description", 2000), // Made required
+  flatIdentification: requiredText("Flat identification", 500), // Made required
+  plotDemarcation: requiredText("Plot demarcation", 500), // Made required
+  noOfLabor: requiredText("No. of labor", 100), // Made required
+  materialAtSite: requiredText("Material at site", 500), // Made required
 });
 
 /** STEP 5 — Property boundaries (all required). */
@@ -218,21 +249,29 @@ export const step5Schema = z.object({
 });
 
 /** STEP 6 — Assessment details. */
-export const step6Schema = z.object({
-  approachRoadCondition: approachRoadSchema,
-  widthOfApproachRoad: optionalText(500),
-  remarksApproachRoad: optionalText(500),
-  societyNameBoard: optionalText(500),
-  areaSqFt: optionalText(100), // Made optional
-  ratePerSqFt: numericString("Rate per sq. ft.", { min: 0 }),
-  rateBasis: rateBasisSchema, // New: basis for rate calculation
-  negativePoints: optionalText(2000),
-  agentOpinion: optionalText(2000),
-});
+export const step6Schema = z
+  .object({
+    approachRoadCondition: approachRoadSchema,
+    widthOfApproachRoad: requiredText("Width of approach road", 500), // Made required
+    remarksApproachRoad: requiredText("Remarks on approach road", 500), // Made required
+    societyNameBoard: requiredText("Name on society notice board", 500), // Made required, label updated
+    areaSqFt: requiredText("Area of property", 100), // Made required
+    ratePerSqFt: numericString("Rate per sq. ft.", { min: 0 }),
+    rateBasis: rateBasisSchema, // New: basis for rate calculation
+    negativePoints: requiredText("Negative points", 2000), // Made required
+    agentOpinion: requiredText("Agent opinion", 2000), // Made required
+  })
+  .refine(
+    (data) => data.approachRoadCondition !== "No Access" || (data.remarksApproachRoad && data.remarksApproachRoad.trim()),
+    {
+      message: "Remarks are required when approach road is 'No Access'",
+      path: ["remarksApproachRoad"],
+    },
+  );
 
-/** STEP 7 — Final remarks (optional; GPS is re-confirmed in the UI). */
+/** STEP 7 — Final remarks (compulsory). */
 export const step7Schema = z.object({
-  finalRemarks: optionalText(2000),
+  finalRemarks: requiredText("Final remarks", 2000),
 });
 
 /**

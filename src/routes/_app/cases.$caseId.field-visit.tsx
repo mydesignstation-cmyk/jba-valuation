@@ -182,7 +182,7 @@ const STEPS = [
 
 /** Which form fields belong to (and must validate before leaving) each step. */
 const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
-  ["personMet", "personPhone", "relationship", "gpsLatitude", "gpsLongitude"],
+  ["personMet", "personPhone", "relationship", "otherRelationship", "otherRelationshipRemarks", "gpsLatitude", "gpsLongitude"],
   [
     "landmark",
     "propertyType",
@@ -224,7 +224,7 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "negativePoints",
     "agentOpinion",
   ],
-  [], // Review
+  ["finalRemarks"], // Review
 ];
 
 // ---------------------------------------------------------------------------
@@ -512,6 +512,8 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     personMet: visit.personMet ?? "",
     personPhone: visit.personPhone ?? "",
     relationship: visit.relationship,
+    otherRelationship: visit.otherRelationship ?? "",
+    otherRelationshipRemarks: visit.otherRelationshipRemarks ?? "",
     gpsLatitude: visit.gpsLatitude != null ? Number(visit.gpsLatitude) : undefined,
     gpsLongitude: visit.gpsLongitude != null ? Number(visit.gpsLongitude) : undefined,
     landmark: visit.landmark ?? "",
@@ -558,6 +560,8 @@ const EMPTY_FORM_VALUES = {
   personMet: "",
   personPhone: "",
   relationship: undefined,
+  otherRelationship: "",
+  otherRelationshipRemarks: "",
   gpsLatitude: undefined,
   gpsLongitude: undefined,
   landmark: "",
@@ -782,6 +786,8 @@ export function FieldVisitWizard({
                   form.setValue("personMet", "John Doe");
                   form.setValue("personPhone", "9876543210");
                   form.setValue("relationship", "Owner");
+                  form.setValue("otherRelationship", "");
+                  form.setValue("otherRelationshipRemarks", "");
                   form.setValue("gpsLatitude", 19.0760);
                   form.setValue("gpsLongitude", 72.8777);
                   form.setValue("landmark", "Near Metro Station");
@@ -793,7 +799,7 @@ export function FieldVisitWizard({
                   form.setValue("occupancyWithName", "Self");
                   form.setValue("structureType", "RCC");
                   form.setValue("structureTypeRemarks", "");
-                  form.setValue("yearOfLiving", "");
+                  form.setValue("yearOfLiving", "2020");
                   form.setValue("occupancyLevel", "85");
                   form.setValue("floorsInBuilding", "5");
                   form.setValue("locatedOnFloor", "2");
@@ -801,8 +807,8 @@ export function FieldVisitWizard({
                   form.setValue("wingsInBuilding", "2");
                   form.setValue("liftsStaircases", "1");
                   form.setValue("yearOfConstruction", "2015");
-                  form.setValue("constructionStage", "95");
-                  form.setValue("workDescription", "");
+                  form.setValue("constructionStage", "Completed");
+                  form.setValue("workDescription", "Modern construction with quality materials");
                   form.setValue("flatIdentification", "A-201");
                   form.setValue("plotDemarcation", "Well marked");
                   form.setValue("noOfLabor", "0");
@@ -880,6 +886,24 @@ export function FieldVisitWizard({
                   label="Relationship with Property"
                   options={relationshipOptions}
                 />
+                {v.relationship === "Other" && (
+                  <>
+                    <TextField
+                      form={form}
+                      name="otherRelationship"
+                      label="Other Relationship"
+                      placeholder="e.g. Family member, Friend"
+                      maxLength={255}
+                    />
+                    <TextField
+                      form={form}
+                      name="otherRelationshipRemarks"
+                      label="Remarks"
+                      placeholder="Please specify other relationship details"
+                      maxLength={500}
+                    />
+                  </>
+                )}
               </div>
             )}
 
@@ -965,15 +989,13 @@ export function FieldVisitWizard({
                     maxLength={500}
                   />
                 )}
-                {v.occupancyStatus === "Rented" && (
-                  <TextField
-                    form={form}
-                    name="yearOfLiving"
-                    label="Year of Living"
-                    placeholder="e.g. 2020"
-                    maxLength={100}
-                  />
-                )}
+                <TextField
+                  form={form}
+                  name="yearOfLiving"
+                  label="Year of Living"
+                  placeholder="e.g. 2020"
+                  maxLength={100}
+                />
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   <TextField
                     form={form}
@@ -1114,7 +1136,7 @@ export function FieldVisitWizard({
                 <TextField
                   form={form}
                   name="societyNameBoard"
-                  label="Name or Society Name Board"
+                  label="Name on Society Notice Board"
                   placeholder="e.g. Green Valley Apartments"
                   maxLength={500}
                 />

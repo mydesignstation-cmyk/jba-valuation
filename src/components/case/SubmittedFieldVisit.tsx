@@ -225,6 +225,12 @@ export function SubmittedFieldVisit({
         <ReadOnlyField label="Person Met" value={visit.personMet ?? "—"} />
         <ReadOnlyField label="Phone" value={visit.personPhone ?? "—"} />
         <ReadOnlyField label="Relationship" value={visit.relationship ?? "—"} />
+        {visit.relationship === "Other" && (
+          <>
+            <ReadOnlyField label="Other Relationship" value={visit.otherRelationship ?? "—"} />
+            <ReadOnlyField label="Other Relationship Remarks" value={visit.otherRelationshipRemarks ?? "—"} />
+          </>
+        )}
       </SectionCard>
 
       <SectionCard title="Property" icon={Home}>
@@ -246,9 +252,7 @@ export function SubmittedFieldVisit({
         {visit.structureType === "Other" && (
           <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
         )}
-        {visit.occupancyStatus === "Rented" && (
-          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
-        )}
+        <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
         <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
         <ReadOnlyField label="Floors in Building" value={visit.floorsInBuilding ?? "—"} />
         <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
@@ -281,7 +285,7 @@ export function SubmittedFieldVisit({
         <ReadOnlyField label="Approach Road" value={visit.approachRoadCondition ?? "—"} />
         <ReadOnlyField label="Width of Approach Road" value={visit.widthOfApproachRoad ?? "—"} />
         <ReadOnlyField label="Remarks Approach Road" value={visit.remarksApproachRoad ?? "—"} />
-        <ReadOnlyField label="Society Name Board" value={visit.societyNameBoard ?? "—"} />
+        <ReadOnlyField label="Name on Society Notice Board" value={visit.societyNameBoard ?? "—"} />
         <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
         <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
         <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
