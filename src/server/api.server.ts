@@ -1034,6 +1034,86 @@ export async function api_assignMaker(
   }
 }
 
+/**
+ * Reassign the Site Engineer for a case that has not started a Field Visit.
+ * Only admins may perform this action; the verified token is the authority.
+ * The original field_visits.engineer_id is intentionally never changed.
+ *
+ * The case row is locked for the whole decision/update. Field-visit submission
+ * takes the same lock before checking ownership and inserting its visit, so
+ * exactly one operation wins when submission and reassignment overlap.
+ */
+export async function api_reassignSiteEngineer(
+  token: string | null | undefined,
+  caseId: string,
+  engineerId: string,
+): Promise<ValuationCase> {
+  await requireServerUser(token, "ADMIN", "SUPER_ADMIN");
+
+  // Validate the target against the authoritative Neon Auth table, including
+  // active status. The picker is only a convenience and can be stale.
+  const targetRows = await getDb().execute(
+    sql`SELECT id
+        FROM neon_auth."user"
+        WHERE id = ${engineerId}
+          AND role = 'SITE_ENGINEER'
+          AND banned IS NOT TRUE
+        LIMIT 1`,
+  );
+  if (!(targetRows as unknown as { id: string }[])[0]) {
+    throw new Error("Selected user is not an active Site Engineer");
+  }
+
+  try {
+    const row = await getDb().transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM cases WHERE id = ${caseId} FOR UPDATE`);
+
+      const visit = await tx
+        .select({ id: fieldVisits.id })
+        .from(fieldVisits)
+        .where(eq(fieldVisits.case_id, caseId))
+        .limit(1);
+      if (visit[0]) {
+        throw new Error("Site Engineer reassignment is unavailable after field visit submission");
+      }
+
+      const now = new Date();
+      const rows = await tx
+        .update(cases)
+        .set({ assigned_engineer_id: engineerId, updated_at: now })
+        .where(
+          and(
+            eq(cases.id, caseId),
+            inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"]),
+            sql`${cases.assigned_engineer_id} IS NOT NULL`,
+            sql`${cases.assigned_engineer_id} <> ${engineerId}`,
+          ),
+        )
+        .returning();
+
+      const updated = rows[0];
+      if (updated) return updated;
+
+      const current = await tx.select().from(cases).where(eq(cases.id, caseId)).limit(1);
+      const caseRow = current[0];
+      if (!caseRow) throw new Error("Case not found");
+      if (!("ASSIGNED" === caseRow.stage || "FIELD_VISIT_PENDING" === caseRow.stage)) {
+        throw new Error("Site Engineer reassignment is unavailable after field visit submission");
+      }
+      if (caseRow.assigned_engineer_id === engineerId) {
+        throw new Error("The selected Site Engineer is already assigned");
+      }
+      throw new Error("Site Engineer reassignment conflicted with another case update");
+    });
+
+    return mapCaseRow(row);
+  } catch (error) {
+    if (error instanceof Error) throw error;
+    console.error("Failed to reassign site engineer:", error);
+    throw new Error("Failed to reassign Site Engineer in database");
+  }
+}
+
 // ============================================================================
 // FIELD VISITS
 // ============================================================================
@@ -1230,23 +1310,39 @@ export async function api_submitFieldVisit(
   caseId: string,
   input: unknown,
 ): Promise<FieldVisit> {
-  const { engineerId } = await requireOwnedCase(token, caseId);
+  const user = await requireServerUser(token, "SITE_ENGINEER");
+  const engineerId = user.id;
 
   // Re-validate on the server: the browser is never the only gatekeeper.
   const data = fieldVisitFormSchema.parse(input);
 
-  // Reject a second submission for the same Case (idempotency / no duplicates).
-  const existing = await getDb()
-    .select()
-    .from(fieldVisits)
-    .where(eq(fieldVisits.case_id, caseId))
-    .limit(1);
-  if (existing[0]) {
-    throw new Error("A field visit has already been submitted for this case");
-  }
-
+  // Lock the case until both the visit insert and case-stage update complete.
+  // Reassignment takes this same lock, preventing either operation from
+  // observing a partially completed submission.
   try {
-    const now = new Date();
+    const visit = await getDb().transaction(async (tx) => {
+      await tx.execute(sql`SELECT id FROM cases WHERE id = ${caseId} FOR UPDATE`);
+
+      const ownedCase = await tx
+        .select({ assigned_engineer_id: cases.assigned_engineer_id })
+        .from(cases)
+        .where(eq(cases.id, caseId))
+        .limit(1);
+      const caseRow = ownedCase[0];
+      if (!caseRow) throw new Error("Case not found");
+      if (caseRow.assigned_engineer_id !== engineerId) throw new Error("Forbidden");
+
+      // Reject a second submission for the same Case (idempotency / no duplicates).
+      const existing = await tx
+        .select()
+        .from(fieldVisits)
+        .where(eq(fieldVisits.case_id, caseId))
+        .limit(1);
+      if (existing[0]) {
+        throw new Error("A field visit has already been submitted for this case");
+      }
+
+      const now = new Date();
 
     // Date of visit is device/server time, not client-supplied. Store as a
     // YYYY-MM-DD date string for the `date` column.
@@ -1263,7 +1359,7 @@ export async function api_submitFieldVisit(
         : "0";
     const legacySqFeet = data.areaSqFt;
 
-    const rows = await getDb()
+    const rows = await tx
       .insert(fieldVisits)
       .values({
         case_id: caseId,
@@ -1349,17 +1445,18 @@ export async function api_submitFieldVisit(
     // Advance the case stage now that the field visit is in. Only move forward
     // from the pre-submission stages so we never drag a case that has already
     // progressed (maker/checker/etc.) back to FIELD_VISIT_SUBMITTED.
-    await getDb()
+    await tx
       .update(cases)
       .set({ stage: "FIELD_VISIT_SUBMITTED", updated_at: now })
       .where(and(eq(cases.id, caseId), inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"])));
 
     // Always refresh the case's "last updated" timestamp on submission, even if
     // the stage guard above didn't match (e.g. the case had already advanced).
-    // This keeps the case's last-updated time in sync with the field visit.
-    await getDb().update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
+    await tx.update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
 
-    return mapFieldVisitRow(row);
+      return mapFieldVisitRow(row);
+    });
+    return visit;
   } catch (error) {
     // A race that slips past the pre-check still hits the UNIQUE constraint.
     if (error instanceof Error && error.message.includes("field_visits_case_id")) {

@@ -14,6 +14,7 @@ export type Permission =
   | "cases.detail"
   | "cases.assignMaker"
   | "cases.reassignMaker"
+  | "cases.reassignSiteEngineer"
   | "fieldVisit.access"
   | "fieldVisit.edit"
   | "fieldVisit.checkerEdit"
@@ -57,6 +58,7 @@ export const permissionRoles: Record<Permission, Role[]> = {
   // These are UI gates only; api_assignMaker is the server-side authority.
   "cases.assignMaker": [...ADMINS, "CHECKER"],
   "cases.reassignMaker": ADMINS,
+  "cases.reassignSiteEngineer": ADMINS,
   "fieldVisit.access": [...ADMINS, "SITE_ENGINEER"],
   // Editing a submitted field visit is the assigned Maker's review-time
   // correction. UI gate only; api_updateFieldVisit enforces the assignment

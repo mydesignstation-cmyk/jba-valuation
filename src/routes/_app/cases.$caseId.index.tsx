@@ -301,6 +301,72 @@ function Page() {
     enabled: !!fieldVisit?.checkerUpdatedById,
   });
 
+  // Keep mutation hooks above the loading/error returns so every render uses
+  // the same hook order. The route id is stable before the case query resolves.
+  const mutationCaseId = valuationCase?.id ?? caseId;
+
+  // Maker action: hand the case to the Checker for review. Advances the stage
+  // to CHECKER_PENDING; the server enforces the assigned-maker + stage rules.
+  const submitToChecker = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_submitToChecker(token, mutationCaseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["maker-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
+      setConfirmSubmitToChecker(false);
+      toast.success("Case submitted to the checker for review");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Failed to submit case to checker");
+    },
+  });
+
+  // Checker action: hand the case to the Uploader. Advances to UPLOADER_PENDING.
+  const submitToUploader = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_submitToUploader(token, mutationCaseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-dashboard-cases"] });
+      setConfirmSubmitToUploader(false);
+      toast.success("Case submitted to the uploader");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Failed to submit case to uploader");
+    },
+  });
+
+  // Uploader action: close the case. Advances to COMPLETED (terminal stage).
+  const markUploaded = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_markUploadCompleted(token, mutationCaseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
+      queryClient.invalidateQueries({ queryKey: ["uploader-dashboard-cases"] });
+      setConfirmMarkUploaded(false);
+      toast.success("Case marked as upload completed");
+    },
+    onError: (error) => {
+      toast.error((error as Error).message || "Failed to mark upload completed");
+    },
+  });
+
   if (isLoading) {
     return <DetailSkeleton />;
   }
@@ -392,68 +458,6 @@ function Page() {
     }
   };
 
-  // Maker action: hand the case to the Checker for review. Advances the stage
-  // to CHECKER_PENDING; the server enforces the assigned-maker + stage rules.
-  const submitToChecker = useMutation({
-    mutationFn: async () => {
-      const token = await getSessionToken();
-      if (!token) throw new Error("Not authenticated");
-      return api_submitToChecker(token, valuationCase.id);
-    },
-    onSuccess: (updatedCase) => {
-      queryClient.setQueryData(["cases", caseId], updatedCase);
-      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
-      queryClient.invalidateQueries({ queryKey: ["maker-cases"] });
-      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
-      setConfirmSubmitToChecker(false);
-      toast.success("Case submitted to the checker for review");
-    },
-    onError: (error) => {
-      toast.error((error as Error).message || "Failed to submit case to checker");
-    },
-  });
-
-  // Checker action: hand the case to the Uploader. Advances to UPLOADER_PENDING.
-  const submitToUploader = useMutation({
-    mutationFn: async () => {
-      const token = await getSessionToken();
-      if (!token) throw new Error("Not authenticated");
-      return api_submitToUploader(token, valuationCase.id);
-    },
-    onSuccess: (updatedCase) => {
-      queryClient.setQueryData(["cases", caseId], updatedCase);
-      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
-      queryClient.invalidateQueries({ queryKey: ["checker-cases"] });
-      queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
-      queryClient.invalidateQueries({ queryKey: ["uploader-dashboard-cases"] });
-      setConfirmSubmitToUploader(false);
-      toast.success("Case submitted to the uploader");
-    },
-    onError: (error) => {
-      toast.error((error as Error).message || "Failed to submit case to uploader");
-    },
-  });
-
-  // Uploader action: close the case. Advances to COMPLETED (terminal stage).
-  const markUploaded = useMutation({
-    mutationFn: async () => {
-      const token = await getSessionToken();
-      if (!token) throw new Error("Not authenticated");
-      return api_markUploadCompleted(token, valuationCase.id);
-    },
-    onSuccess: (updatedCase) => {
-      queryClient.setQueryData(["cases", caseId], updatedCase);
-      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
-      queryClient.invalidateQueries({ queryKey: ["uploader-cases"] });
-      queryClient.invalidateQueries({ queryKey: ["uploader-dashboard-cases"] });
-      setConfirmMarkUploaded(false);
-      toast.success("Case marked as upload completed");
-    },
-    onError: (error) => {
-      toast.error((error as Error).message || "Failed to mark upload completed");
-    },
-  });
-
   return (
     <div className="space-y-6">
       {/* Header: back button sits immediately before the case number title so
@@ -496,6 +500,12 @@ function Page() {
               <Button variant="outline" onClick={() => setAssignOpen(true)}>
                 <UserCog className="mr-2 h-4 w-4" />
                 Reassign Maker
+              </Button>
+            )}
+            {showReassignSiteEngineer && (
+              <Button variant="outline" onClick={() => setReassignEngineerOpen(true)}>
+                <UserCog className="mr-2 h-4 w-4" />
+                Reassign Site Engineer
               </Button>
             )}
           </div>

@@ -16,6 +16,7 @@ import {
   api_listCheckerCases as db_listCheckerCases,
   api_listMakerCases as db_listMakerCases,
   api_assignMaker as db_assignMaker,
+  api_reassignSiteEngineer as db_reassignSiteEngineer,
   api_submitToChecker as db_submitToChecker,
   api_submitToUploader as db_submitToUploader,
   api_listUploaderCases as db_listUploaderCases,
@@ -45,6 +46,7 @@ type UpdateCaseData = {
 type UpdateCaseInput = { id: string; data: UpdateCaseData };
 
 type AssignMakerInput = { token: string; caseId: string; makerId: string };
+type ReassignSiteEngineerInput = { token: string; caseId: string; engineerId: string };
 type SubmitToCheckerInput = { token: string; caseId: string };
 type SubmitToUploaderInput = { token: string; caseId: string };
 type MarkUploadCompletedInput = { token: string; caseId: string };
@@ -73,6 +75,10 @@ const listMakerCasesFn = createServerFn({ method: "GET" })
 const assignMakerFn = createServerFn({ method: "POST" })
   .validator((input: AssignMakerInput) => input)
   .handler(({ data }) => db_assignMaker(data.token, data.caseId, data.makerId));
+
+const reassignSiteEngineerFn = createServerFn({ method: "POST" })
+  .validator((input: ReassignSiteEngineerInput) => input)
+  .handler(({ data }) => db_reassignSiteEngineer(data.token, data.caseId, data.engineerId));
 
 const submitToCheckerFn = createServerFn({ method: "POST" })
   .validator((input: SubmitToCheckerInput) => input)
@@ -169,6 +175,15 @@ export function api_assignMaker(
   makerId: string,
 ): Promise<ValuationCase> {
   return assignMakerFn({ data: { token, caseId, makerId } });
+}
+
+/** Reassign the current Site Engineer while the case is pre-submission. */
+export function api_reassignSiteEngineer(
+  token: string,
+  caseId: string,
+  engineerId: string,
+): Promise<ValuationCase> {
+  return reassignSiteEngineerFn({ data: { token, caseId, engineerId } });
 }
 
 /**
