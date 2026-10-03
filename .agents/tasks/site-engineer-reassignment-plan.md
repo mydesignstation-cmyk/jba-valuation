@@ -1,5 +1,23 @@
 # Site Engineer Reassignment — Findings and Implementation Plan
 
+## Verification note (review iteration — race fix)
+
+- Reassignment and field-visit submission now serialize on the same `cases` row lock (`FOR UPDATE`) inside transactions. Submission rechecks ownership after locking, then inserts `field_visits` and advances the case before releasing the lock; reassignment checks for an existing visit and updates only the eligible assignment fields while holding that lock.
+- `npx tsc --noEmit` — **FAIL (baseline only):** the existing `src/components/case/CaseWithCustomerTabs.tsx:104` `exactOptionalPropertyTypes` error; no new errors from this feature.
+- `npm run build` — **PASS:** Vite/Nitro production build completed successfully.
+- `git diff --check` — **PASS**.
+- Focused race test — **NOT RUN:** `package.json` has no test script or test runner, and adding a database-backed test would violate the no-database-write requirement. The two lock orderings are covered by the shared transaction structure: reassignment-first causes submission's locked ownership check to reject; submission-first causes reassignment's locked visit check to reject.
+- No database command, migration, or database connection was performed. No `.env.local` change was made.
+
+## Verification note (implementation iteration)
+
+- `npx tsc --noEmit` — **FAIL (baseline only):** the existing `src/components/case/CaseWithCustomerTabs.tsx:104` `exactOptionalPropertyTypes` error; no new errors from this feature.
+- `npm run build` — **PASS:** Vite/Nitro production build completed successfully.
+- `npm run lint` — **FAIL (baseline only):** repository-wide Prettier CRLF errors (`10,681` errors, plus `7` warnings); no feature-specific lint issue was isolated.
+- `git diff --check` — **PASS**.
+- No database command, migration, or database connection was performed. No focused test script is defined in `package.json`.
+
+
 ## Summary answer
 
 The requested admin workflow is not implemented as a dedicated site-engineer reassignment action. The repository does, however, contain a close Maker analogue: `AssignMakerDialog`, the `api_assignMaker` server mutation, admin-only `cases.reassignMaker` permission, and case-detail header actions. That pattern should be copied with different lifecycle guards and a site-engineer picker.

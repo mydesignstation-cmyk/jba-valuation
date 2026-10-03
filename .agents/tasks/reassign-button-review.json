@@ -1,0 +1,7 @@
+{
+  "verdict": "APPROVED",
+  "findings": [
+    "Draft-row mutation cutoff (possible): the UI can open reassignment for a visit mapped as DRAFT while the server rejects any existing field_visits row; keep this contract aligned if a draft-save flow is introduced, or narrow the UI gate to the server's actual cutoff."
+  ],
+  "reviewDoc": "e:\\codefiles\\va2\\.agents\\tasks\\reassign-button-review.md"
+}
