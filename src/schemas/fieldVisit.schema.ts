@@ -131,7 +131,6 @@ export const step1Schema = z
     otherRelationship: z.string().optional(),
     otherRelationshipRemarks: z.string().optional(),
   })
-  .merge(gpsSchema)
   .refine(
     (data) => data.relationship !== "Other" || (data.otherRelationship && data.otherRelationship.trim()),
     {
@@ -145,7 +144,8 @@ export const step1Schema = z
       message: "Remarks are required when selecting 'Other'",
       path: ["otherRelationshipRemarks"],
     },
-  );
+  )
+  .merge(gpsSchema);
 
 /** STEP 2 — Property details. */
 export const step2Schema = z
