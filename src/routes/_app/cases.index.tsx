@@ -189,10 +189,12 @@ function Page() {
               View
             </Link>
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={() => openEdit(c)}>
-            <PenLine className="mr-2 h-4 w-4" />
-            Edit
-          </DropdownMenuItem>
+          {c.stage === "FIELD_VISIT_PENDING" && can(user?.role, "cases.update") && (
+            <DropdownMenuItem onClick={() => openEdit(c)}>
+              <PenLine className="mr-2 h-4 w-4" />
+              Edit
+            </DropdownMenuItem>
+          )}
           {canDelete && (
             <DropdownMenuItem
               onClick={() => {
