@@ -43,6 +43,7 @@ import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
 import { listSiteEngineers } from "@/services/user.service";
+import { formatDisplayDate } from "@/lib/date-format";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { PageHeader } from "@/components/app/PageHeader";
@@ -376,7 +377,7 @@ function Page() {
                         <TableCell>
                           <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
                         </TableCell>
-                        <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
                         <TableCell className="text-right">{renderActions(c)}</TableCell>
                       </TableRow>
                     ))}

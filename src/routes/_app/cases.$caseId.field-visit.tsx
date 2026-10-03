@@ -1,3 +1,4 @@
+import { formatDisplayDate } from "@/lib/date-format";
 import { createFileRoute, Link } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -844,8 +845,8 @@ export function FieldVisitWizard({
                     label="Date of Visit"
                     value={
                       isEdit
-                        ? (initialVisit?.visitDate ?? "—")
-                        : new Date().toLocaleDateString()
+                        ? (initialVisit?.visitDate ? formatDisplayDate(initialVisit.visitDate) : "—")
+                        : formatDisplayDate(new Date())
                     }
                   />
                   <ReadOnlyField label="Engineer Name" value={engineerName} />
@@ -1232,7 +1233,7 @@ export function FieldVisitWizard({
                   <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
                   <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
                   <ReadOnlyField label="Engineer" value={engineerName} />
-                  <ReadOnlyField label="Date of Visit" value={new Date().toLocaleDateString()} />
+                  <ReadOnlyField label="Date of Visit" value={formatDisplayDate(new Date())} />
                 </ReviewSection>
 
                 <ReviewSection title="Visit Details">

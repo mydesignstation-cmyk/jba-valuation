@@ -11,6 +11,7 @@ import {
   Route as RouteIcon,
   User as UserIcon,
 } from "lucide-react";
+import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
 import { useState, type ComponentType, type ReactNode } from "react";
 import { toast } from "sonner";
 
@@ -144,15 +145,7 @@ export function SubmittedFieldVisit({
   const gpsText =
     visit.gpsLatitude && visit.gpsLongitude ? `${visit.gpsLatitude}, ${visit.gpsLongitude}` : "—";
 
-  /** Formats a date string as e.g. "1 Jan 2026, 03:47 PM" */
-  const fmt = (iso: string) =>
-    new Date(iso).toLocaleString("en-GB", {
-      day: "numeric",
-      month: "short",
-      year: "numeric",
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+  const fmt = (iso: string) => formatDisplayDateTime(iso);
 
   const submittedOn = visit.submittedAt ? fmt(visit.submittedAt) : null;
 
@@ -217,7 +210,10 @@ export function SubmittedFieldVisit({
         <ReadOnlyField label="Bank" value={autoFill?.bankName ?? "—"} />
         <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
         <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
-        <ReadOnlyField label="Date of Visit" value={visit.visitDate ?? "—"} />
+        <ReadOnlyField
+          label="Date of Visit"
+          value={visit.visitDate ? formatDisplayDate(visit.visitDate) : "—"}
+        />
         <ReadOnlyField label="GPS Location" value={gpsText} />
       </SectionCard>
 

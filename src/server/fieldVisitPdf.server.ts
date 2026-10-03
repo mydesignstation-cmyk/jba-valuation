@@ -14,6 +14,7 @@
  */
 
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
+import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
 import type { FieldVisit } from "@/types";
 
 /** Case-derived header values (same shape the UI already builds). */
@@ -224,7 +225,7 @@ export async function buildFieldVisitPdf(
 ): Promise<Uint8Array> {
   const writer = await ReportWriter.create();
 
-  const generatedOn = new Date().toLocaleString();
+  const generatedOn = formatDisplayDateTime(new Date());
   writer.drawTitle(
     "Field Visit Report",
     `Case ${show(header.caseNumber)}  \u2022  Generated ${generatedOn}`,
@@ -234,7 +235,7 @@ export async function buildFieldVisitPdf(
     visit.gpsLatitude != null && visit.gpsLongitude != null
       ? `${visit.gpsLatitude}, ${visit.gpsLongitude}`
       : EM_DASH;
-  const submittedOn = visit.submittedAt ? new Date(visit.submittedAt).toLocaleString() : EM_DASH;
+  const submittedOn = visit.submittedAt ? formatDisplayDateTime(visit.submittedAt) : EM_DASH;
 
   writer.drawSection("Case Details", [
     { label: "Case Number", value: show(header.caseNumber) },
@@ -246,7 +247,7 @@ export async function buildFieldVisitPdf(
 
   writer.drawSection("Visit Details", [
     { label: "Submitted By", value: header.engineerName },
-    { label: "Date of Visit", value: show(visit.visitDate) },
+    { label: "Date of Visit", value: visit.visitDate ? formatDisplayDate(visit.visitDate) : EM_DASH },
     { label: "GPS Latitude", value: show(visit.gpsLatitude) },
     { label: "GPS Longitude", value: show(visit.gpsLongitude) },
     { label: "GPS Location", value: gps },

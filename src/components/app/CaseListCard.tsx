@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
+import { formatDisplayDate } from "@/lib/date-format";
 import { stageBadgeVariant, stageLabels } from "@/lib/case-format";
 import type { CaseStage } from "@/types";
 
@@ -40,7 +41,7 @@ export function CaseListCard({
   const supporting = [bankName, branchName, engineerName]
     .filter((v) => v && v !== "—")
     .join(" · ");
-  const created = new Date(createdAt).toLocaleDateString();
+  const created = formatDisplayDate(createdAt);
 
   return (
     <div

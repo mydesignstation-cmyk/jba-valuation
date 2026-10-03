@@ -19,6 +19,7 @@ import { CaseListCard } from "@/components/app/CaseListCard";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
 import { stageLabels, stageBadgeVariant, isUploaderCasePending } from "@/lib/case-format";
+import { formatDisplayDate } from "@/lib/date-format";
 import { getSessionToken } from "@/lib/auth-client";
 import { api_listUploaderDashboardCases } from "@/data/case.functions";
 import type { ValuationCase } from "@/types";
@@ -142,7 +143,7 @@ function Page() {
                   <TableCell>
                     <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
                   </TableCell>
-                  <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                  <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
                 </TableRow>
               ))}
             </TableBody>

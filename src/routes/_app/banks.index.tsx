@@ -33,6 +33,7 @@ import { SearchInput } from "@/components/app/SearchInput";
 import { requirePermission } from "@/lib/route-guard";
 import { can } from "@/lib/permissions";
 import { useCurrentUser } from "@/lib/auth-client";
+import { formatDisplayDate } from "@/lib/date-format";
 import { pageMeta } from "@/lib/page-meta";
 import type { Bank } from "@/types";
 
@@ -213,7 +214,7 @@ function Page() {
                       onClick={() => openEdit(bank)}
                     >
                       <TableCell className="font-medium">{bank.name}</TableCell>
-                      <TableCell>{new Date(bank.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDisplayDate(bank.createdAt)}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

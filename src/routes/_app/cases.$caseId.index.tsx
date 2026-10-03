@@ -1,3 +1,4 @@
+import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
 import { createFileRoute, Link, type LinkProps } from "@tanstack/react-router";
 import {
   Activity,
@@ -690,7 +691,9 @@ function Page() {
       <Tabs defaultValue="overview">
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
-          <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
+          <TabsTrigger value="field-visit" disabled={valuationCase.stage === "FIELD_VISIT_PENDING"}>
+            Field Visit
+          </TabsTrigger>
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
@@ -724,7 +727,7 @@ function Page() {
               />
               <OverviewItem
                 label="Created"
-                value={new Date(valuationCase.createdAt).toLocaleDateString()}
+                value={formatDisplayDate(valuationCase.createdAt)}
                 icon={<CalendarClock className="h-3.5 w-3.5" />}
               />
             </CardContent>
@@ -789,12 +792,12 @@ function Page() {
                 <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                   <Field
                     label="Created"
-                    value={new Date(valuationCase.createdAt).toLocaleString()}
+                    value={formatDisplayDateTime(valuationCase.createdAt)}
                     icon={<CalendarClock className="h-3.5 w-3.5" />}
                   />
                   <Field
                     label="Last Updated"
-                    value={new Date(valuationCase.updatedAt).toLocaleString()}
+                    value={formatDisplayDateTime(valuationCase.updatedAt)}
                     icon={<CalendarClock className="h-3.5 w-3.5" />}
                   />
                 </div>

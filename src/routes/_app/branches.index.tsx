@@ -33,6 +33,7 @@ import { SearchInput } from "@/components/app/SearchInput";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
 import type { Branch } from "@/types";
+import { formatDisplayDate } from "@/lib/date-format";
 
 export const Route = createFileRoute("/_app/branches/")({
   head: () => pageMeta("Branches", "Manage branch records."),
@@ -211,7 +212,7 @@ function Page() {
                       onClick={() => openEdit(branch)}
                     >
                       <TableCell className="font-medium">{branch.name}</TableCell>
-                      <TableCell>{new Date(branch.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDisplayDate(branch.createdAt)}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>

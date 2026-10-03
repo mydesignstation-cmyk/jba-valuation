@@ -33,6 +33,7 @@ import {
 import { PageHeader } from "@/components/app/PageHeader";
 import { SearchInput } from "@/components/app/SearchInput";
 import { CaseListCard } from "@/components/app/CaseListCard";
+import { formatDisplayDate } from "@/lib/date-format";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
@@ -254,7 +255,7 @@ function Page() {
                         <TableCell>
                           <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
                         </TableCell>
-                        <TableCell>{new Date(c.createdAt).toLocaleDateString()}</TableCell>
+                        <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
                         <TableCell className="text-right">{renderActions(c)}</TableCell>
                       </TableRow>
                     ))}

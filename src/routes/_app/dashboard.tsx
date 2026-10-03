@@ -1,3 +1,4 @@
+import { formatDisplayDate } from "@/lib/date-format";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
@@ -327,7 +328,7 @@ function Page() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-medium">{c.caseNumber}</p>
                         <p className="truncate text-xs text-muted-foreground">
-                          {new Date(c.createdAt).toLocaleDateString()}
+                          {formatDisplayDate(c.createdAt)}
                         </p>
                       </div>
                       <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>

@@ -33,6 +33,7 @@ import { SearchInput } from "@/components/app/SearchInput";
 import { requirePermission } from "@/lib/route-guard";
 import { can } from "@/lib/permissions";
 import { useCurrentUser } from "@/lib/auth-client";
+import { formatDisplayDate } from "@/lib/date-format";
 import { pageMeta } from "@/lib/page-meta";
 import type { Customer } from "@/types";
 
@@ -241,7 +242,7 @@ function Page() {
                       <TableCell className="max-w-[200px] truncate" title={customer.address}>
                         {customer.address}
                       </TableCell>
-                      <TableCell>{new Date(customer.createdAt).toLocaleDateString()}</TableCell>
+                      <TableCell>{formatDisplayDate(customer.createdAt)}</TableCell>
                       <TableCell className="text-right" onClick={(e) => e.stopPropagation()}>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
