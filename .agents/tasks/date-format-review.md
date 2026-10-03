@@ -1,53 +1,55 @@
-# Centralized DD/MM/YYYY display formatting
+# Standardize displayed dates to DD/MM/YYYY
 
-The change introduces shared date-only and date-time formatters and routes the identified case, entity, field-visit, audit, and PDF display sites through them. The formatter zero-pads day and month, preserves `YYYY-MM-DD` calendar dates without timezone drift, and leaves timestamp parsing and serialization in place. The source scan supports broad coverage: the remaining locale calls are calendar metadata or numeric chart formatting rather than user-facing dates. However, the diff also adds an unrelated field-visit-tab visibility change, and that new JSX wrapper is not closed, leaving the current route syntactically invalid; the recorded verification explicitly reports the resulting type-check/build failure.
+The date-display change centralizes presentation in `src/lib/date-format.ts` and routes the identified case, entity, dashboard, field-visit, submitted-report, and PDF displays through the shared helpers. Date-only values render with zero-padded day and month plus a four-digit year; existing date-time displays retain their time while using the same date portion. The final source scan reports no remaining user-facing locale date formatters, and the unrelated Field Visit tab-disable edit has been removed from the final source diff. **Watch for:** **confirmed** repository-wide type-checking remains limited by one pre-existing `exactOptionalPropertyTypes` error outside this change, although the recorded build passed and the focused formatter check passed.
 
-Watch for: **confirmed** blocking syntax failure in `src/routes/_app/cases.$caseId.index.tsx`; **confirmed** unrelated tab-gating behavior bundled into this date-only fix. Both must be removed or corrected before shipping.
-
-**Verdict**: NEEDS_CHANGES
+**Verdict**: APPROVED
 
 ## High-level view
 
-The shared formatter is a small, centralized implementation that produces unambiguous zero-padded day/month/year output and a `DD/MM/YYYY, HH:mm` variant for existing audit timestamps. The changed list, card, detail, field-visit, submitted-visit, and PDF sites consistently use those helpers; the recorded source scan found no remaining user-facing locale date formatter outside calendar metadata and numeric chart output.
+The shared formatter provides one presentation path for date-only and date-time values. It treats `YYYY-MM-DD` values as local calendar components, avoiding timezone drift, and produces unambiguous `DD/MM/YYYY` output such as `10/02/2026`; timestamp displays retain hours and minutes without changing their underlying values.
 
-The date changes stay within presentation: no database/API serialization, ISO timestamp generation, parsing, storage, sorting, or form input changes are present in the reviewed diff. The change is not currently shippable because `cases.$caseId.index.tsx` adds a conditional around the Field Visit tab/content without closing the JSX expression, and the same hunk changes tab visibility for `FIELD_VISIT_PENDING`, which is unrelated to date formatting.
+Coverage extends across created-date list/card displays, case detail audit timestamps, field-visit screens, submitted field-visit audit text, and PDF output. The final source scan found only intentionally non-display calendar metadata and numeric chart formatting as remaining locale-related uses, and the reviewed source changes do not alter parsing, input values, serialization, storage, or API/database behavior.
+
+The final route diff removes the previously bundled Field Visit tab behavior change, leaving the quick fix presentation-only. Recorded verification includes a passing build, a focused formatter spot-check, a clean `git diff --check`, and confirmation that no database commands were run. **confirmed** The repository-wide type check still reports one unrelated pre-existing error in `CaseWithCustomerTabs.tsx`; this limits global type-check evidence but does not identify a defect in the date-format change.
 
 <details>
-<summary>Issues (2)</summary>
+<summary>Issues (0)</summary>
 
-1. **Unclosed Field Visit JSX wrapper** — **confirmed**: the new `{valuationCase.stage !== "FIELD_VISIT_PENDING" && (` wrapper around the Field Visit tab content has no matching `)}` before `</Tabs>`, and the recorded verification reports the resulting syntax/build failure. Close the wrapper or remove the unrelated hunk, then rerun the coder’s required checks.
-2. **Unrelated Field Visit visibility behavior** — **confirmed**: the date-format diff additionally hides the Field Visit tab and content for `FIELD_VISIT_PENDING` cases. Remove this behavior change from the quick fix so the patch only standardizes displayed dates.
+No blocking concerns identified.
 
 </details>
 
 <details>
 <summary>Details</summary>
 
-### Shared formatter and date correctness
+### Centralized calendar formatting preserves the requested representation
 
-`src/lib/date-format.ts` centralizes the requested representation. `formatDisplayDate("2026-02-10")` constructs the local calendar date before reading its components, so the stored day is retained; `formatDisplayDate(new Date(2026, 1, 10))` produces `10/02/2026`, and the recorded narrow spot-check reports that result. Its `formatDisplayDateTime` variant retains hours and minutes while using the same date-only formatter, producing the intended `DD/MM/YYYY, HH:mm` shape. The changed sites therefore make a value such as 10 February 2026 render as `10/02/2026`, not a locale-dependent or month-name form.
+`formatDisplayDate` pads both date components and emits day/month/year in that order, so the representative value 10 February 2026 renders as `10/02/2026`, not `10/2/2026` or a month-first locale form. For a date-only string matching `YYYY-MM-DD`, the helper constructs the local calendar date from its numeric components before formatting; this preserves the stored calendar day across timezone offsets. Timestamp inputs continue through normal `Date` parsing, and `formatDisplayDateTime` retains the existing hour/minute information while using the shared date portion. **confirmed**
 
-### Coverage of displayed dates
+### User-facing coverage is centralized across the identified surfaces
 
-The shared helper is applied to created-date displays across cases, role queues, entity lists, dashboard results, and the mobile case card. It is also applied to case detail created/updated audit displays, field-visit review/edit displays, submitted field-visit audit text, and generated/submitted/date-of-visit PDF output. The final source scan recorded in the plan found only `calendar.tsx` month/dropdown and `data-day` metadata calls plus the numeric `chart.tsx` call; those are not date text displays requiring this fix. No remaining incorrect user-facing locale date formatter was identified in the reviewed source.
+The shared helpers are used for created dates in case, role-queue, entity, dashboard, and mobile-card views; Created and Last Updated values in case detail; field-visit review/edit displays; submitted field-visit audit lines; and generated, submitted, and visit dates in the PDF path. The final source scan found no remaining `toLocaleDateString()` or date-oriented `toLocaleString()` formatter in application source outside the documented calendar month/data metadata and numeric chart usage. **confirmed** No remaining incorrect display formatter was identified in the reviewed scope.
 
-### Scope and verification evidence
+### Presentation-only scope is preserved
 
-The reviewed hunks only change display formatting and imports, except for the Field Visit tab conditional described above. API ISO conversion code and data/input paths are untouched. No database commands were run, consistent with the display-only scope.
+The date changes replace display formatting and add/import the shared helper without changing API/database serialization, ISO timestamp generation, date parsing, sorting, schema fields, storage, or form input values. The final working-tree route hunk removes the unrelated `disabled` prop from the Field Visit tab, restoring the prior workflow behavior rather than bundling a feature change with this fix. **confirmed**
 
-The plan records an initial passing build, but its later review-iteration evidence records `npx tsc --noEmit` and `npm run build` blocked by the syntax error in this changed route, with lint blocked by the repository-wide CRLF/Prettier mismatch. Because the current diff is syntactically invalid and the task prohibits rerunning suites, the recorded evidence is sufficient to reject rather than validate a passing final state.
+### Verification evidence and residual limitation
+
+The plan records a passing `npm run build`, a focused formatter check producing `10/02/2026`, `10/02/2026`, and `10/02/2026, 09:05`, a passing `git diff --check`, and no database commands. **confirmed** The recorded `npx tsc --noEmit` result is blocked by the pre-existing `CaseWithCustomerTabs.tsx:104` optional-email typing error, and lint is blocked by the repository-wide CRLF/Prettier mismatch; neither recorded failure points to the date-format implementation. The available evidence is sufficient for this display-only review because the affected helper was directly spot-checked and the production build passed.
 
 </details>
 
 <details>
 <summary>File map</summary>
 
-- `src/lib/date-format.ts` — shared date-only and date-time display formatters.
-- `src/routes/_app/*.tsx` — case, role queue, entity, dashboard, detail, and field-visit display sites migrated to the helpers.
-- `src/components/app/CaseListCard.tsx` — mobile/card created-date display migrated.
-- `src/components/case/SubmittedFieldVisit.tsx` — submitted audit and visit date displays migrated.
-- `src/server/fieldVisitPdf.server.ts` — generated, submitted, and visit-date PDF output migrated.
+- `src/lib/date-format.ts` — shared zero-padded date-only and date-time display formatters.
+- `src/routes/_app/*.tsx` — list, dashboard, case-detail, and field-visit date displays migrated to the helpers.
+- `src/components/app/CaseListCard.tsx` — mobile created-date display migrated.
+- `src/components/case/SubmittedFieldVisit.tsx` — submitted audit and visit-date displays migrated.
+- `src/server/fieldVisitPdf.server.ts` — generated, submitted, and visit dates migrated for PDF output.
+- `src/routes/_app/cases.$caseId.index.tsx` — unrelated Field Visit tab-disable edit removed from the final working-tree diff.
 
-Full diff: `git diff main`.
+Full diff: `git diff` in the workspace.
 
 </details>

@@ -52,3 +52,13 @@
 - `npm run lint` — blocked by the repository-wide existing CRLF/Prettier mismatch (10,720 errors, primarily `Delete \\r`).
 - Final source scan for `toLocaleDateString(` / `toLocaleString(` — only the calendar month/data-attribute usages and numeric chart value remain; no user-facing date formatter remains outside the shared helpers.
 - No database commands were run.
+
+## Latest Review Fix Evidence
+
+- Removed the unrelated `disabled={valuationCase.stage === "FIELD_VISIT_PENDING"}` prop from `src/routes/_app/cases.$caseId.index.tsx`; Field Visit tab behavior is unchanged.
+- `npx tsx -e "import { formatDisplayDate, formatDisplayDateTime } from './src/lib/date-format.ts'; console.log(formatDisplayDate('2026-02-10')); console.log(formatDisplayDate(new Date(2026, 1, 10))); console.log(formatDisplayDateTime(new Date(2026, 1, 10, 9, 5)));"` — passed; output was `10/02/2026`, `10/02/2026`, and `10/02/2026, 09:05`.
+- `npx tsc --noEmit` — blocked by one pre-existing unrelated error in `src/components/case/CaseWithCustomerTabs.tsx:104` (`exactOptionalPropertyTypes` for `email`).
+- `npm run build` — passed.
+- `npm run lint` — blocked by the repository-wide existing CRLF/Prettier mismatch (`10,723` problems, primarily `Delete ␍`).
+- Final source scan for `toLocaleDateString(` / `toLocaleString(` — only calendar month/data-attribute usages and numeric chart formatting remain; no user-facing date formatter remains outside the shared helpers.
+- No database commands were run.

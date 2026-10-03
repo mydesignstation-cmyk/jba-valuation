@@ -691,7 +691,7 @@ function Page() {
       <Tabs defaultValue="overview">
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
-          <TabsTrigger value="field-visit" disabled={valuationCase.stage === "FIELD_VISIT_PENDING"}>
+          <TabsTrigger value="field-visit">
             Field Visit
           </TabsTrigger>
         </TabsList>
