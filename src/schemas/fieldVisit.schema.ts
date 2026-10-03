@@ -255,7 +255,7 @@ export const step6Schema = z
     widthOfApproachRoad: requiredText("Width of approach road", 500), // Made required
     remarksApproachRoad: requiredText("Remarks on approach road", 500), // Made required
     societyNameBoard: requiredText("Name on society notice board", 500), // Made required, label updated
-    areaSqFt: requiredText("Area of property", 100), // Made required
+    areaSqFt: numericString("Area of property", { min: 0 }), // Made required, must be numeric
     ratePerSqFt: numericString("Rate per sq. ft.", { min: 0 }),
     rateBasis: rateBasisSchema, // New: basis for rate calculation
     negativePoints: requiredText("Negative points", 2000), // Made required
