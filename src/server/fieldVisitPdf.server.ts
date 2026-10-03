@@ -23,6 +23,7 @@ export interface FieldVisitPdfHeader {
   bankName: string;
   customerName: string;
   address: string;
+  engineerName: string;
 }
 
 /** A single label/value pair rendered as a row within a section. */
@@ -244,6 +245,7 @@ export async function buildFieldVisitPdf(
   ]);
 
   writer.drawSection("Visit Details", [
+    { label: "Submitted By", value: header.engineerName },
     { label: "Date of Visit", value: show(visit.visitDate) },
     { label: "GPS Latitude", value: show(visit.gpsLatitude) },
     { label: "GPS Longitude", value: show(visit.gpsLongitude) },

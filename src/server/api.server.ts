@@ -1932,12 +1932,17 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
     const customerRow = customerRows[0];
     const bankRow = bankRows[0];
 
+    // Look up the engineer who submitted the visit for audit purposes.
+    const engineer = await api_getUser(visit.engineerId);
+    const engineerName = engineer?.name ?? "Unknown";
+
     const bytes = await buildFieldVisitPdf(visit, {
       caseNumber: caseRow.case_number,
       requestNumber: caseRow.request_number,
       bankName: bankRow?.name ?? "",
       customerName: customerRow?.name ?? "",
       address: customerRow?.address ?? "",
+      engineerName,
     });
 
     // Base64-encode for JSON transport (createServerFn is JSON-only).
