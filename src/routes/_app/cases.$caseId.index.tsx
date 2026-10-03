@@ -502,12 +502,6 @@ function Page() {
                 Reassign Maker
               </Button>
             )}
-            {showReassignSiteEngineer && (
-              <Button variant="outline" onClick={() => setReassignEngineerOpen(true)}>
-                <UserCog className="mr-2 h-4 w-4" />
-                Reassign Site Engineer
-              </Button>
-            )}
           </div>
         </div>
       </div>
