@@ -282,12 +282,12 @@ export const step7Schema = z.object({
  * working submission behaviour continue to be populated.
  */
 export const fieldVisitFormSchema = step1Schema
-  .merge(step2Schema)
-  .merge(z.object(step3Shape))
-  .merge(step4Schema)
-  .merge(step5Schema)
-  .merge(step6Schema)
-  .merge(step7Schema);
+  .and(step2Schema)
+  .and(z.object(step3Shape))
+  .and(step4Schema)
+  .and(step5Schema)
+  .and(step6Schema)
+  .and(step7Schema);
 
 export type FieldVisitFormValues = z.infer<typeof fieldVisitFormSchema>;
 
