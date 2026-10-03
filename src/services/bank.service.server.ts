@@ -2,7 +2,13 @@
  * Bank service: Client-safe wrapper around server API functions.
  */
 
-import { api_listBanks, api_getBank, api_createBank, api_updateBank, api_deleteBank } from "@/server/api.server";
+import {
+  api_listBanks,
+  api_getBank,
+  api_createBank,
+  api_updateBank,
+  api_deleteBank,
+} from "@/server/api.server";
 import type { Bank } from "@/types";
 
 export async function listBanks(): Promise<Bank[]> {

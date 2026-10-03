@@ -24,10 +24,7 @@ import { getSessionToken } from "@/lib/auth-client";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { FieldVisitWizard, useAutoFill } from "@/routes/_app/cases.$caseId.field-visit";
 import { api_getCase, api_submitToUploader } from "@/data/case.functions";
-import {
-  api_getCaseFieldVisit,
-  api_updateFieldVisitByChecker,
-} from "@/data/fieldVisit.functions";
+import { api_getCaseFieldVisit, api_updateFieldVisitByChecker } from "@/data/fieldVisit.functions";
 import { api_getSiteEngineer, api_getMaker, api_getChecker } from "@/data/user.functions";
 
 export const Route = createFileRoute("/_app/checker/$caseId")({
@@ -233,8 +230,8 @@ function Page() {
           <AlertDialogHeader>
             <AlertDialogTitle>Submit this case to the Uploader?</AlertDialogTitle>
             <AlertDialogDescription>
-              This sends the case forward to the Uploader for the final upload. After submitting
-              you will no longer be able to edit the field visit for this case.
+              This sends the case forward to the Uploader for the final upload. After submitting you
+              will no longer be able to edit the field visit for this case.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

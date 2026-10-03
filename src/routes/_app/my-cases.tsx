@@ -59,7 +59,10 @@ function Page() {
       return api_listMyCases(token);
     },
   });
-  const { data: customers = [] } = useQuery({ queryKey: ["customers"], queryFn: api_listCustomers });
+  const { data: customers = [] } = useQuery({
+    queryKey: ["customers"],
+    queryFn: api_listCustomers,
+  });
   const { data: banks = [] } = useQuery({ queryKey: ["banks"], queryFn: api_listBanks });
   const { data: branches = [] } = useQuery({ queryKey: ["branches"], queryFn: api_listBranches });
 
@@ -247,10 +250,7 @@ function Page() {
             </TabsList>
 
             <TabsContent value="pending" className="mt-4">
-              {renderTable(
-                pendingCases,
-                "Cases awaiting your field visit will appear here.",
-              )}
+              {renderTable(pendingCases, "Cases awaiting your field visit will appear here.")}
             </TabsContent>
 
             <TabsContent value="completed" className="mt-4">

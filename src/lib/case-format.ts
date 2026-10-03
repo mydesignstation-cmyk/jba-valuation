@@ -75,12 +75,7 @@ export function isUploaderCasePending(stage: CaseStage): boolean {
  * step 4). Both render as "Checker".
  */
 export type CaseMilestoneKey =
-  | "FIELD_VISIT"
-  | "CHECKER_ASSIGN"
-  | "MAKER"
-  | "CHECKER_REVIEW"
-  | "UPLOADER"
-  | "COMPLETED";
+  "FIELD_VISIT" | "CHECKER_ASSIGN" | "MAKER" | "CHECKER_REVIEW" | "UPLOADER" | "COMPLETED";
 
 export type MilestoneStatus = "done" | "current" | "upcoming";
 

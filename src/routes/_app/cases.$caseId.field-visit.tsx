@@ -183,7 +183,15 @@ const STEPS = [
 
 /** Which form fields belong to (and must validate before leaving) each step. */
 const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
-  ["personMet", "personPhone", "relationship", "otherRelationship", "otherRelationshipRemarks", "gpsLatitude", "gpsLongitude"],
+  [
+    "personMet",
+    "personPhone",
+    "relationship",
+    "otherRelationship",
+    "otherRelationshipRemarks",
+    "gpsLatitude",
+    "gpsLongitude",
+  ],
   [
     "landmark",
     "propertyType",
@@ -636,14 +644,14 @@ export function FieldVisitWizard({
   const form = useForm<FieldVisitFormValues>({
     resolver: zodResolver(fieldVisitFormSchema),
     mode: "onTouched",
-    defaultValues:
-      isEdit && initialVisit ? visitToFormValues(initialVisit) : EMPTY_FORM_VALUES,
+    defaultValues: isEdit && initialVisit ? visitToFormValues(initialVisit) : EMPTY_FORM_VALUES,
   });
 
   // GPS handling differs by mode:
   //  - create: track the live capture and mirror it into the form;
   //  - edit: keep the fixed stored coordinates already seeded above.
-  const storedLat = initialVisit?.gpsLatitude != null ? Number(initialVisit.gpsLatitude) : undefined;
+  const storedLat =
+    initialVisit?.gpsLatitude != null ? Number(initialVisit.gpsLatitude) : undefined;
   const storedLng =
     initialVisit?.gpsLongitude != null ? Number(initialVisit.gpsLongitude) : undefined;
   const gpsLat = isEdit ? storedLat : gps.coords?.latitude;
@@ -789,7 +797,7 @@ export function FieldVisitWizard({
                   form.setValue("relationship", "Owner");
                   form.setValue("otherRelationship", "");
                   form.setValue("otherRelationshipRemarks", "");
-                  form.setValue("gpsLatitude", 19.0760);
+                  form.setValue("gpsLatitude", 19.076);
                   form.setValue("gpsLongitude", 72.8777);
                   form.setValue("landmark", "Near Metro Station");
                   form.setValue("propertyType", "Industrial");
@@ -845,7 +853,9 @@ export function FieldVisitWizard({
                     label="Date of Visit"
                     value={
                       isEdit
-                        ? (initialVisit?.visitDate ? formatDisplayDate(initialVisit.visitDate) : "—")
+                        ? initialVisit?.visitDate
+                          ? formatDisplayDate(initialVisit.visitDate)
+                          : "—"
                         : formatDisplayDate(new Date())
                     }
                   />
@@ -855,11 +865,7 @@ export function FieldVisitWizard({
                 {isEdit ? (
                   <ReadOnlyField
                     label="GPS Location (captured on site — not editable)"
-                    value={
-                      gpsLat != null && gpsLng != null
-                        ? `${gpsLat}, ${gpsLng}`
-                        : "—"
-                    }
+                    value={gpsLat != null && gpsLng != null ? `${gpsLat}, ${gpsLng}` : "—"}
                   />
                 ) : (
                   <GpsPanel gps={gps} latitude={gpsLat} longitude={gpsLng} />
@@ -1063,7 +1069,7 @@ export function FieldVisitWizard({
                     maxLength={100}
                   />
                 </div>
-                
+
                 <TextAreaField
                   form={form}
                   name="workDescription"
@@ -1246,7 +1252,10 @@ export function FieldVisitWizard({
                   <ReadOnlyField label="Landmark" value={v.landmark} />
                   <ReadOnlyField label="Property Type" value={v.propertyType ?? ""} />
                   {v.propertyType === "Other" && (
-                    <ReadOnlyField label="Property Type Remarks" value={v.propertyTypeRemarks ?? ""} />
+                    <ReadOnlyField
+                      label="Property Type Remarks"
+                      value={v.propertyTypeRemarks ?? ""}
+                    />
                   )}
                   <ReadOnlyField label="Locality" value={v.localityType ?? ""} />
                   <ReadOnlyField label="Occupancy Status" value={v.occupancyStatus ?? ""} />
@@ -1294,8 +1303,14 @@ export function FieldVisitWizard({
 
                 <ReviewSection title="Assessment">
                   <ReadOnlyField label="Approach Road" value={v.approachRoadCondition ?? ""} />
-                  <ReadOnlyField label="Width of Approach Road" value={v.widthOfApproachRoad ?? ""} />
-                  <ReadOnlyField label="Remarks Approach Road" value={v.remarksApproachRoad ?? ""} />
+                  <ReadOnlyField
+                    label="Width of Approach Road"
+                    value={v.widthOfApproachRoad ?? ""}
+                  />
+                  <ReadOnlyField
+                    label="Remarks Approach Road"
+                    value={v.remarksApproachRoad ?? ""}
+                  />
                   <ReadOnlyField label="Society Name Board" value={v.societyNameBoard ?? ""} />
                   <ReadOnlyField label="Area (Sq. Ft.)" value={v.areaSqFt ?? ""} />
                   <ReadOnlyField label="Rate per Sq. Ft." value={v.ratePerSqFt ?? ""} />
@@ -1493,6 +1508,3 @@ function Page() {
     </div>
   );
 }
-
-
-

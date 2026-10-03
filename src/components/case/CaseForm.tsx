@@ -26,7 +26,12 @@ import { api_listBranches } from "@/data/branch.functions";
 import { listSiteEngineers } from "@/services/user.service";
 import { toast } from "sonner";
 
-export type CaseFormValues = z.infer<typeof createCaseSchema>;
+export type CaseFormValues = z.infer<typeof createCaseSchema> & {
+  customerName?: string;
+  customerContact?: string;
+  customerEmail?: string;
+  customerAddress?: string;
+};
 export type CustomerFormValues = z.infer<typeof createCustomerSchema>;
 
 // Extended form values that include both customer and case data
@@ -82,7 +87,7 @@ export function CaseForm({
       })
     : createCaseSchema;
 
-  const form = useForm<any>({
+  const form = useForm<CaseFormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       customerId: initialData?.customerId ?? "",
@@ -99,7 +104,7 @@ export function CaseForm({
     },
   });
 
-  const handleSubmit = async (values: any) => {
+  const handleSubmit = async (values: CaseFormValues) => {
     console.log("Form submitted with values:", {
       customerName: values.customerName,
       customerContact: values.customerContact,
@@ -121,9 +126,9 @@ export function CaseForm({
         });
         const newCustomer = await api_createCustomer({
           name: values.customerName,
-          contact: values.customerContact,
-          email: values.customerEmail || undefined,
-          address: values.customerAddress,
+          contact: values.customerContact ?? "",
+          email: values.customerEmail ?? "",
+          address: values.customerAddress ?? "",
         });
 
         console.log("Customer created successfully:", newCustomer.id);
@@ -136,7 +141,7 @@ export function CaseForm({
           branchId: values.branchId,
           assignedEngineerId: values.assignedEngineerId,
         });
-        
+
         console.log("Case submitted successfully");
       } catch (err) {
         console.error("Error creating customer or case:", err);
@@ -195,7 +200,7 @@ export function CaseForm({
                     const value = e.target.value.replace(/\D/g, "");
                     field.onChange(value);
                   };
-                  
+
                   return (
                     <FormItem className="mb-4">
                       <FormLabel>Contact</FormLabel>
@@ -351,11 +356,7 @@ export function CaseForm({
           </div>
         </div>
 
-        <FormActions
-          submitText={submitText}
-          isSubmitting={finalIsSubmitting}
-          onCancel={onCancel}
-        />
+        <FormActions submitText={submitText} isSubmitting={finalIsSubmitting} onCancel={onCancel} />
       </form>
     </Form>
   );

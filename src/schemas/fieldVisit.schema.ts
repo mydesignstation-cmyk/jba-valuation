@@ -32,7 +32,14 @@ export const propertyTypeOptions = [
   "Other",
 ] as const;
 
-export const structureTypeOptions = ["RCC", "Brick", "Wood", "Mixed", "Load Bearing", "Other"] as const;
+export const structureTypeOptions = [
+  "RCC",
+  "Brick",
+  "Wood",
+  "Mixed",
+  "Load Bearing",
+  "Other",
+] as const;
 export const localityTypeOptions = ["Good", "Average", "Poor"] as const;
 export const occupancyStatusOptions = ["Seller", "Rented", "Purchaser", "Owner", "Other"] as const;
 
@@ -133,14 +140,17 @@ export const step1Schema = z
   })
   .merge(gpsSchema)
   .refine(
-    (data) => data.relationship !== "Other" || (data.otherRelationship && data.otherRelationship.trim()),
+    (data) =>
+      data.relationship !== "Other" || (data.otherRelationship && data.otherRelationship.trim()),
     {
       message: "Other relationship is required when selecting 'Other'",
       path: ["otherRelationship"],
     },
   )
   .refine(
-    (data) => data.relationship !== "Other" || (data.otherRelationshipRemarks && data.otherRelationshipRemarks.trim()),
+    (data) =>
+      data.relationship !== "Other" ||
+      (data.otherRelationshipRemarks && data.otherRelationshipRemarks.trim()),
     {
       message: "Remarks are required when selecting 'Other'",
       path: ["otherRelationshipRemarks"],
@@ -159,14 +169,18 @@ export const step2Schema = z
     occupancyWithName: requiredText("Occupancy with Name of Occupant", 500),
   })
   .refine(
-    (data) => data.propertyType !== "Other" || (data.propertyTypeRemarks && data.propertyTypeRemarks.trim()),
+    (data) =>
+      data.propertyType !== "Other" ||
+      (data.propertyTypeRemarks && data.propertyTypeRemarks.trim()),
     {
       message: "Property type remarks are required when selecting 'Other'",
       path: ["propertyTypeRemarks"],
     },
   )
   .refine(
-    (data) => data.occupancyStatus !== "Other" || (data.occupancyStatusRemarks && data.occupancyStatusRemarks.trim()),
+    (data) =>
+      data.occupancyStatus !== "Other" ||
+      (data.occupancyStatusRemarks && data.occupancyStatusRemarks.trim()),
     {
       message: "Occupancy status remarks are required when selecting 'Other'",
       path: ["occupancyStatusRemarks"],
@@ -262,7 +276,9 @@ export const step6Schema = z
     agentOpinion: requiredText("Agent opinion", 2000), // Made required
   })
   .refine(
-    (data) => data.approachRoadCondition !== "No Access" || (data.remarksApproachRoad && data.remarksApproachRoad.trim()),
+    (data) =>
+      data.approachRoadCondition !== "No Access" ||
+      (data.remarksApproachRoad && data.remarksApproachRoad.trim()),
     {
       message: "Remarks are required when approach road is 'No Access'",
       path: ["remarksApproachRoad"],

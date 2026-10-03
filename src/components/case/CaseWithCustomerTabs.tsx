@@ -58,7 +58,7 @@ export function CaseWithCustomerTabs({
   const queryClient = useQueryClient();
   const [activeTab, setActiveTab] = useState<"customer" | "case">("customer");
   const [selectedCustomerId, setSelectedCustomerId] = useState<string>(
-    initialData?.customerId ?? ""
+    initialData?.customerId ?? "",
   );
   const [useExisting, setUseExisting] = useState(false);
   const [isCreatingCustomer, setIsCreatingCustomer] = useState(false);
@@ -101,7 +101,10 @@ export function CaseWithCustomerTabs({
     setIsCreatingCustomer(true);
     try {
       console.log("Creating customer:", values.name);
-      const newCustomer = await api_createCustomer(values);
+      const newCustomer = await api_createCustomer({
+        ...values,
+        email: values.email ?? "",
+      });
       console.log("Customer created:", newCustomer.id);
 
       setSelectedCustomerId(newCustomer.id);
@@ -158,7 +161,10 @@ export function CaseWithCustomerTabs({
   if (!isNewCase || initialData?.customerId) {
     return (
       <Form {...caseForm}>
-        <form onSubmit={caseForm.handleSubmit(handleCreateCase)} className="flex min-h-0 flex-1 flex-col">
+        <form
+          onSubmit={caseForm.handleSubmit(handleCreateCase)}
+          className="flex min-h-0 flex-1 flex-col"
+        >
           <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
             <FormField
               control={caseForm.control}
@@ -240,7 +246,9 @@ export function CaseWithCustomerTabs({
                           <SelectItem key={engineer.id} value={engineer.id}>
                             <span className="flex flex-col">
                               <span>{engineer.name}</span>
-                              <span className="text-xs text-muted-foreground">{engineer.email}</span>
+                              <span className="text-xs text-muted-foreground">
+                                {engineer.email}
+                              </span>
                             </span>
                           </SelectItem>
                         ))}
@@ -253,11 +261,7 @@ export function CaseWithCustomerTabs({
             </div>
           </div>
 
-          <FormActions
-            submitText={submitText}
-            isSubmitting={isSubmitting}
-            onCancel={onCancel}
-          />
+          <FormActions submitText={submitText} isSubmitting={isSubmitting} onCancel={onCancel} />
         </form>
       </Form>
     );
@@ -266,7 +270,11 @@ export function CaseWithCustomerTabs({
   // 2-Tab interface: Customer (default create) + Case Details
   return (
     <div className="flex min-h-0 flex-1 flex-col">
-      <Tabs value={activeTab} onValueChange={(v: any) => setActiveTab(v)} className="flex flex-1 flex-col">
+      <Tabs
+        value={activeTab}
+        onValueChange={(v) => setActiveTab(v as "customer" | "case")}
+        className="flex flex-1 flex-col"
+      >
         <TabsList className="grid w-full grid-cols-2 px-4 pt-4">
           <TabsTrigger value="customer">Customer</TabsTrigger>
           <TabsTrigger value="case" disabled={!selectedCustomerId}>
@@ -277,7 +285,10 @@ export function CaseWithCustomerTabs({
         {/* Tab 1: Customer (Create by default, with option to use existing) */}
         <TabsContent value="customer" className="flex flex-1 flex-col">
           <Form {...customerForm}>
-            <form onSubmit={customerForm.handleSubmit(handleCreateCustomer)} className="flex flex-1 flex-col">
+            <form
+              onSubmit={customerForm.handleSubmit(handleCreateCustomer)}
+              className="flex flex-1 flex-col"
+            >
               <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
                 {/* Create New Customer Form */}
                 <FormField
@@ -427,7 +438,10 @@ export function CaseWithCustomerTabs({
         {/* Tab 2: Case Details */}
         <TabsContent value="case" className="flex flex-1 flex-col">
           <Form {...caseForm}>
-            <form onSubmit={caseForm.handleSubmit(handleCreateCase)} className="flex flex-1 flex-col">
+            <form
+              onSubmit={caseForm.handleSubmit(handleCreateCase)}
+              className="flex flex-1 flex-col"
+            >
               <div className="flex-1 space-y-5 overflow-y-auto px-4 py-4 sm:px-6">
                 {/* Selected Customer Display */}
                 {selectedCustomerName && (
@@ -520,7 +534,9 @@ export function CaseWithCustomerTabs({
                               <SelectItem key={engineer.id} value={engineer.id}>
                                 <span className="flex flex-col">
                                   <span>{engineer.name}</span>
-                                  <span className="text-xs text-muted-foreground">{engineer.email}</span>
+                                  <span className="text-xs text-muted-foreground">
+                                    {engineer.email}
+                                  </span>
                                 </span>
                               </SelectItem>
                             ))}

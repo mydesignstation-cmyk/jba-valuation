@@ -72,11 +72,7 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      current
-                        ? "text-primary"
-                        : done
-                          ? "text-green-700"
-                          : "text-muted-foreground",
+                      current ? "text-primary" : done ? "text-green-700" : "text-muted-foreground",
                     )}
                   >
                     {m.label}
@@ -124,11 +120,7 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
                   <p
                     className={cn(
                       "text-sm font-medium",
-                      current
-                        ? "text-primary"
-                        : done
-                          ? "text-green-700"
-                          : "text-muted-foreground",
+                      current ? "text-primary" : done ? "text-green-700" : "text-muted-foreground",
                     )}
                   >
                     {m.label}
@@ -144,7 +136,6 @@ export function CasePipeline({ stage, people }: { stage: CaseStage; people?: Pip
             );
           })}
         </ol>
-
       </CardContent>
     </Card>
   );

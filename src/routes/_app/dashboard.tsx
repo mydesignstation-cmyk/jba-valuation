@@ -214,132 +214,130 @@ function Page() {
           it is only visually hidden via `.feature-hidden-dashboard`. Remove the
           class to release. */}
       <div className="feature-hidden-dashboard space-y-6">
-      {/* Case KPIs. For a Site Engineer, Maker or Uploader these count only
+        {/* Case KPIs. For a Site Engineer, Maker or Uploader these count only
           their own workload, and Pending/Completed reflect it. A personal
           dashboard drops the pipeline-wide "In Progress" card. */}
-      <div
-        className={
-          isPersonal
-            ? "grid gap-4 sm:grid-cols-3"
-            : "grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
-        }
-      >
-        <KpiCard
-          label={isPersonal ? "My Cases" : "Total Cases"}
-          value={stats.total}
-          icon={FolderKanban}
-          loading={casesLoading}
-        />
-        {!isPersonal && (
+        <div
+          className={
+            isPersonal ? "grid gap-4 sm:grid-cols-3" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-4"
+          }
+        >
           <KpiCard
-            label="In Progress"
-            value={stats.inProgress}
-            icon={Loader2}
+            label={isPersonal ? "My Cases" : "Total Cases"}
+            value={stats.total}
+            icon={FolderKanban}
             loading={casesLoading}
           />
-        )}
-        <KpiCard
-          label={isPersonal ? "Pending" : "Awaiting Action"}
-          value={stats.pending}
-          icon={Clock}
-          loading={casesLoading}
-        />
-        <KpiCard
-          label="Completed"
-          value={stats.completed}
-          icon={CheckCircle2}
-          loading={casesLoading}
-        />
-      </div>
-
-      {/* Reference totals — org-wide master data, admins only. */}
-      {!isPersonal && (
-        <div className="grid gap-4 sm:grid-cols-3">
+          {!isPersonal && (
+            <KpiCard
+              label="In Progress"
+              value={stats.inProgress}
+              icon={Loader2}
+              loading={casesLoading}
+            />
+          )}
           <KpiCard
-            label="Customers"
-            value={customers.length}
-            icon={Users}
-            loading={customersLoading}
+            label={isPersonal ? "Pending" : "Awaiting Action"}
+            value={stats.pending}
+            icon={Clock}
+            loading={casesLoading}
           />
-          <KpiCard label="Banks" value={banks.length} icon={Landmark} loading={banksLoading} />
           <KpiCard
-            label="Branches"
-            value={branches.length}
-            icon={Building2}
-            loading={branchesLoading}
+            label="Completed"
+            value={stats.completed}
+            icon={CheckCircle2}
+            loading={casesLoading}
           />
         </div>
-      )}
 
-      <div className={isPersonal ? "grid gap-6" : "grid gap-6 lg:grid-cols-2"}>
-        {/* Cases by stage — pipeline-wide breakdown, not meaningful for the
-            focused personal (Maker / Site Engineer) dashboards. */}
+        {/* Reference totals — org-wide master data, admins only. */}
         {!isPersonal && (
+          <div className="grid gap-4 sm:grid-cols-3">
+            <KpiCard
+              label="Customers"
+              value={customers.length}
+              icon={Users}
+              loading={customersLoading}
+            />
+            <KpiCard label="Banks" value={banks.length} icon={Landmark} loading={banksLoading} />
+            <KpiCard
+              label="Branches"
+              value={branches.length}
+              icon={Building2}
+              loading={branchesLoading}
+            />
+          </div>
+        )}
+
+        <div className={isPersonal ? "grid gap-6" : "grid gap-6 lg:grid-cols-2"}>
+          {/* Cases by stage — pipeline-wide breakdown, not meaningful for the
+            focused personal (Maker / Site Engineer) dashboards. */}
+          {!isPersonal && (
+            <Card className="shadow-card">
+              <CardHeader>
+                <CardTitle>Cases by Stage</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {casesLoading ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
+                  </div>
+                ) : stats.total === 0 ? (
+                  <p className="py-8 text-center text-sm text-muted-foreground">No cases yet.</p>
+                ) : (
+                  <ul className="divide-y">
+                    {STAGE_ORDER.filter((stage) => (stats.byStage.get(stage) ?? 0) > 0).map(
+                      (stage) => (
+                        <li key={stage} className="flex items-center justify-between py-2.5">
+                          <Badge variant={stageBadgeVariant[stage]}>{stageLabels[stage]}</Badge>
+                          <span className="text-sm font-medium tabular-nums">
+                            {stats.byStage.get(stage) ?? 0}
+                          </span>
+                        </li>
+                      ),
+                    )}
+                  </ul>
+                )}
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Recent cases */}
           <Card className="shadow-card">
             <CardHeader>
-              <CardTitle>Cases by Stage</CardTitle>
+              <CardTitle>Recent Cases</CardTitle>
             </CardHeader>
             <CardContent>
               {casesLoading ? (
                 <div className="flex items-center justify-center py-8">
                   <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
                 </div>
-              ) : stats.total === 0 ? (
+              ) : stats.recent.length === 0 ? (
                 <p className="py-8 text-center text-sm text-muted-foreground">No cases yet.</p>
               ) : (
                 <ul className="divide-y">
-                  {STAGE_ORDER.filter((stage) => (stats.byStage.get(stage) ?? 0) > 0).map(
-                    (stage) => (
-                      <li key={stage} className="flex items-center justify-between py-2.5">
-                        <Badge variant={stageBadgeVariant[stage]}>{stageLabels[stage]}</Badge>
-                        <span className="text-sm font-medium tabular-nums">
-                          {stats.byStage.get(stage) ?? 0}
-                        </span>
-                      </li>
-                    ),
-                  )}
+                  {stats.recent.map((c) => (
+                    <li key={c.id}>
+                      <button
+                        type="button"
+                        onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
+                        className="flex w-full items-center justify-between gap-3 py-2.5 text-left hover:bg-muted/50"
+                      >
+                        <div className="min-w-0">
+                          <p className="truncate text-sm font-medium">{c.caseNumber}</p>
+                          <p className="truncate text-xs text-muted-foreground">
+                            {formatDisplayDate(c.createdAt)}
+                          </p>
+                        </div>
+                        <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                      </button>
+                    </li>
+                  ))}
                 </ul>
               )}
             </CardContent>
           </Card>
-        )}
-
-        {/* Recent cases */}
-        <Card className="shadow-card">
-          <CardHeader>
-            <CardTitle>Recent Cases</CardTitle>
-          </CardHeader>
-          <CardContent>
-            {casesLoading ? (
-              <div className="flex items-center justify-center py-8">
-                <Loader2 className="h-5 w-5 animate-spin text-muted-foreground" />
-              </div>
-            ) : stats.recent.length === 0 ? (
-              <p className="py-8 text-center text-sm text-muted-foreground">No cases yet.</p>
-            ) : (
-              <ul className="divide-y">
-                {stats.recent.map((c) => (
-                  <li key={c.id}>
-                    <button
-                      type="button"
-                      onClick={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
-                      className="flex w-full items-center justify-between gap-3 py-2.5 text-left hover:bg-muted/50"
-                    >
-                      <div className="min-w-0">
-                        <p className="truncate text-sm font-medium">{c.caseNumber}</p>
-                        <p className="truncate text-xs text-muted-foreground">
-                          {formatDisplayDate(c.createdAt)}
-                        </p>
-                      </div>
-                      <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            )}
-          </CardContent>
-        </Card>
-      </div>
+        </div>
       </div>
     </div>
   );

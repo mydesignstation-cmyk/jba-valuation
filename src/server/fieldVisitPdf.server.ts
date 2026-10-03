@@ -247,7 +247,10 @@ export async function buildFieldVisitPdf(
 
   writer.drawSection("Visit Details", [
     { label: "Submitted By", value: header.engineerName },
-    { label: "Date of Visit", value: visit.visitDate ? formatDisplayDate(visit.visitDate) : EM_DASH },
+    {
+      label: "Date of Visit",
+      value: visit.visitDate ? formatDisplayDate(visit.visitDate) : EM_DASH,
+    },
     { label: "GPS Latitude", value: show(visit.gpsLatitude) },
     { label: "GPS Longitude", value: show(visit.gpsLongitude) },
     { label: "GPS Location", value: gps },

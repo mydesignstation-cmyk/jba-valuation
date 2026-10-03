@@ -86,7 +86,10 @@ function Page() {
     queryKey: ["cases"],
     queryFn: api_listCases,
   });
-  const { data: customers = [] } = useQuery({ queryKey: ["customers"], queryFn: api_listCustomers });
+  const { data: customers = [] } = useQuery({
+    queryKey: ["customers"],
+    queryFn: api_listCustomers,
+  });
   const { data: banks = [] } = useQuery({ queryKey: ["banks"], queryFn: api_listBanks });
   const { data: branches = [] } = useQuery({ queryKey: ["branches"], queryFn: api_listBranches });
   const { data: engineers = [] } = useQuery({
@@ -144,7 +147,11 @@ function Page() {
     } catch (err) {
       console.error("Error in case submission:", err);
       const errorMessage = err instanceof Error ? err.message : String(err);
-      toast.error(editingCase ? `Failed to update case: ${errorMessage}` : `Failed to create case: ${errorMessage}`);
+      toast.error(
+        editingCase
+          ? `Failed to update case: ${errorMessage}`
+          : `Failed to create case: ${errorMessage}`,
+      );
     } finally {
       setIsSubmitting(false);
     }

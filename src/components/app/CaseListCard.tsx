@@ -38,9 +38,7 @@ export function CaseListCard({
   onOpen,
   actions,
 }: CaseListCardProps) {
-  const supporting = [bankName, branchName, engineerName]
-    .filter((v) => v && v !== "—")
-    .join(" · ");
+  const supporting = [bankName, branchName, engineerName].filter((v) => v && v !== "—").join(" · ");
   const created = formatDisplayDate(createdAt);
 
   return (

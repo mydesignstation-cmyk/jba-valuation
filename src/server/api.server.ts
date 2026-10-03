@@ -255,9 +255,10 @@ export async function api_listCustomers(): Promise<Customer[]> {
 
     const toISO = (value: unknown) => {
       if (!value) return new Date().toISOString();
-      if (typeof value === 'string') return value;
+      if (typeof value === "string") return value;
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      if (typeof value === "object" && "toISOString" in value)
+        return (value as { toISOString: () => string }).toISOString();
       return new Date(String(value)).toISOString();
     };
 
@@ -295,9 +296,10 @@ export async function api_getCustomer(id: string): Promise<Customer | undefined>
     // Safe timestamp conversion
     const toISO = (value: unknown) => {
       if (!value) return new Date().toISOString();
-      if (typeof value === 'string') return value;
+      if (typeof value === "string") return value;
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      if (typeof value === "object" && "toISOString" in value)
+        return (value as { toISOString: () => string }).toISOString();
       return new Date(String(value)).toISOString();
     };
 
@@ -437,9 +439,10 @@ export async function api_listBanks(): Promise<Bank[]> {
 
     const toISO = (value: unknown) => {
       if (!value) return new Date().toISOString();
-      if (typeof value === 'string') return value;
+      if (typeof value === "string") return value;
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      if (typeof value === "object" && "toISOString" in value)
+        return (value as { toISOString: () => string }).toISOString();
       return new Date(String(value)).toISOString();
     };
 
@@ -466,9 +469,10 @@ export async function api_getBank(id: string): Promise<Bank | undefined> {
     // Safe timestamp conversion
     const toISO = (value: unknown) => {
       if (!value) return new Date().toISOString();
-      if (typeof value === 'string') return value;
+      if (typeof value === "string") return value;
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      if (typeof value === "object" && "toISOString" in value)
+        return (value as { toISOString: () => string }).toISOString();
       return new Date(String(value)).toISOString();
     };
 
@@ -561,9 +565,10 @@ export async function api_listBranches(): Promise<Branch[]> {
 
     const toISO = (value: unknown) => {
       if (!value) return new Date().toISOString();
-      if (typeof value === 'string') return value;
+      if (typeof value === "string") return value;
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      if (typeof value === "object" && "toISOString" in value)
+        return (value as { toISOString: () => string }).toISOString();
       return new Date(String(value)).toISOString();
     };
 
@@ -590,9 +595,10 @@ export async function api_getBranch(id: string): Promise<Branch | undefined> {
     // Safe timestamp conversion
     const toISO = (value: unknown) => {
       if (!value) return new Date().toISOString();
-      if (typeof value === 'string') return value;
+      if (typeof value === "string") return value;
       if (value instanceof Date) return value.toISOString();
-      if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+      if (typeof value === "object" && "toISOString" in value)
+        return (value as { toISOString: () => string }).toISOString();
       return new Date(String(value)).toISOString();
     };
 
@@ -684,9 +690,10 @@ function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
   // Safe timestamp conversion - handle Date objects, strings, or other types
   const toISO = (value: unknown) => {
     if (!value) return new Date().toISOString();
-    if (typeof value === 'string') return value;
+    if (typeof value === "string") return value;
     if (value instanceof Date) return value.toISOString();
-    if (typeof value === 'object' && 'toISOString' in value) return (value as any).toISOString();
+    if (typeof value === "object" && "toISOString" in value)
+      return (value as { toISOString: () => string }).toISOString();
     return new Date(String(value)).toISOString();
   };
 
@@ -1138,23 +1145,30 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
     createdAt: (() => {
       const v = row.created_at;
       if (!v) return new Date().toISOString();
-      if (typeof v === 'string') return v;
+      if (typeof v === "string") return v;
       if (v instanceof Date) return v.toISOString();
-      if (typeof v === 'object' && 'toISOString' in v) return (v as any).toISOString();
+      if (typeof v === "object" && "toISOString" in v)
+        return (v as { toISOString: () => string }).toISOString();
       return new Date(String(v)).toISOString();
     })(),
     updatedAt: (() => {
       const v = row.updated_at;
       if (!v) return new Date().toISOString();
-      if (typeof v === 'string') return v;
+      if (typeof v === "string") return v;
       if (v instanceof Date) return v.toISOString();
-      if (typeof v === 'object' && 'toISOString' in v) return (v as any).toISOString();
+      if (typeof v === "object" && "toISOString" in v)
+        return (v as { toISOString: () => string }).toISOString();
       return new Date(String(v)).toISOString();
     })(),
   };
   if (row.submitted_at) {
     const v = row.submitted_at;
-    visit.submittedAt = typeof v === 'string' ? v : (v instanceof Date ? v.toISOString() : new Date(String(v)).toISOString());
+    visit.submittedAt =
+      typeof v === "string"
+        ? v
+        : v instanceof Date
+          ? v.toISOString()
+          : new Date(String(v)).toISOString();
   }
   if (row.updated_by_id) visit.updatedById = row.updated_by_id;
   if (row.checker_updated_by_id) visit.checkerUpdatedById = row.checker_updated_by_id;
@@ -1169,7 +1183,8 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.person_phone != null) visit.personPhone = row.person_phone;
   if (row.relationship != null) visit.relationship = row.relationship;
   if (row.other_relationship != null) visit.otherRelationship = row.other_relationship;
-  if (row.other_relationship_remarks != null) visit.otherRelationshipRemarks = row.other_relationship_remarks;
+  if (row.other_relationship_remarks != null)
+    visit.otherRelationshipRemarks = row.other_relationship_remarks;
 
   if (row.landmark != null) visit.landmark = row.landmark;
   if (row.property_type != null) visit.propertyType = row.property_type;
@@ -1344,115 +1359,121 @@ export async function api_submitFieldVisit(
 
       const now = new Date();
 
-    // Date of visit is device/server time, not client-supplied. Store as a
-    // YYYY-MM-DD date string for the `date` column.
-    const visitDate = now.toISOString().slice(0, 10);
+      // Date of visit is device/server time, not client-supplied. Store as a
+      // YYYY-MM-DD date string for the `date` column.
+      const visitDate = now.toISOString().slice(0, 10);
 
-    // Populate the original NOT NULL columns from the expanded report so the
-    // existing schema and any consumers of those fields keep working. These
-    // are derived, never asked of the engineer twice.
-    const legacyFloor = data.locatedOnFloor;
-    const legacyBuilding = data.landmark.slice(0, 255);
-    const legacyAge =
-      data.yearOfConstruction && Number(data.yearOfConstruction) > 0
-        ? String(Math.max(0, now.getFullYear() - Number(data.yearOfConstruction)))
-        : "0";
-    const legacySqFeet = data.areaSqFt;
+      // Populate the original NOT NULL columns from the expanded report so the
+      // existing schema and any consumers of those fields keep working. These
+      // are derived, never asked of the engineer twice.
+      const legacyFloor = data.locatedOnFloor;
+      const legacyBuilding = data.landmark.slice(0, 255);
+      const legacyAge =
+        data.yearOfConstruction && Number(data.yearOfConstruction) > 0
+          ? String(Math.max(0, now.getFullYear() - Number(data.yearOfConstruction)))
+          : "0";
+      const legacySqFeet = data.areaSqFt;
 
-    const rows = await tx
-      .insert(fieldVisits)
-      .values({
-        case_id: caseId,
-        engineer_id: engineerId,
+      const rows = await tx
+        .insert(fieldVisits)
+        .values({
+          case_id: caseId,
+          engineer_id: engineerId,
 
-        // Preserved original columns (derived from the expanded fields).
-        floor: legacyFloor,
-        building: legacyBuilding,
-        age_of_building: legacyAge,
-        sq_feet: legacySqFeet,
+          // Preserved original columns (derived from the expanded fields).
+          floor: legacyFloor,
+          building: legacyBuilding,
+          age_of_building: legacyAge,
+          sq_feet: legacySqFeet,
 
-        // Device-captured (server-trusted date; client-captured GPS).
-        visit_date: visitDate,
-        gps_latitude: String(data.gpsLatitude),
-        gps_longitude: String(data.gpsLongitude),
+          // Device-captured (server-trusted date; client-captured GPS).
+          visit_date: visitDate,
+          gps_latitude: String(data.gpsLatitude),
+          gps_longitude: String(data.gpsLongitude),
 
-        // STEP 1
-        person_met: data.personMet,
-        person_phone: data.personPhone,
-        relationship: data.relationship,
-        other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.otherRelationshipRemarks ? data.otherRelationshipRemarks : null,
+          // STEP 1
+          person_met: data.personMet,
+          person_phone: data.personPhone,
+          relationship: data.relationship,
+          other_relationship: data.otherRelationship ? data.otherRelationship : null,
+          other_relationship_remarks: data.otherRelationshipRemarks
+            ? data.otherRelationshipRemarks
+            : null,
 
-        // STEP 2
-        landmark: data.landmark,
-        property_type: data.propertyType,
-        property_type_remarks: data.propertyTypeRemarks ? data.propertyTypeRemarks : null,
-        locality_type: data.localityType,
-        occupancy_status: data.occupancyStatus,
-        occupancy_status_remarks: data.occupancyStatusRemarks ? data.occupancyStatusRemarks : null,
-        occupancy_with_name: data.occupancyWithName ? data.occupancyWithName : null,
+          // STEP 2
+          landmark: data.landmark,
+          property_type: data.propertyType,
+          property_type_remarks: data.propertyTypeRemarks ? data.propertyTypeRemarks : null,
+          locality_type: data.localityType,
+          occupancy_status: data.occupancyStatus,
+          occupancy_status_remarks: data.occupancyStatusRemarks
+            ? data.occupancyStatusRemarks
+            : null,
+          occupancy_with_name: data.occupancyWithName ? data.occupancyWithName : null,
 
-        // STEP 3
-        structure_type: data.structureType,
-        structure_type_remarks: data.structureTypeRemarks ? data.structureTypeRemarks : null,
-        year_of_living: data.yearOfLiving ? data.yearOfLiving : null,
-        occupancy_level: data.occupancyLevel,
-        floors_in_building: data.floorsInBuilding,
-        located_on_floor: data.locatedOnFloor,
-        flats_on_floor: data.flatsOnFloor,
-        wings_in_building: data.wingsInBuilding,
-        lifts_staircases: data.liftsStaircases,
+          // STEP 3
+          structure_type: data.structureType,
+          structure_type_remarks: data.structureTypeRemarks ? data.structureTypeRemarks : null,
+          year_of_living: data.yearOfLiving ? data.yearOfLiving : null,
+          occupancy_level: data.occupancyLevel,
+          floors_in_building: data.floorsInBuilding,
+          located_on_floor: data.locatedOnFloor,
+          flats_on_floor: data.flatsOnFloor,
+          wings_in_building: data.wingsInBuilding,
+          lifts_staircases: data.liftsStaircases,
 
-        // STEP 4
-        year_of_construction: Number(data.yearOfConstruction),
-        construction_stage: data.constructionStage,
-        work_description: data.workDescription ? data.workDescription : null,
-        flat_identification: data.flatIdentification ? data.flatIdentification : null,
-        plot_demarcation: data.plotDemarcation ? data.plotDemarcation : null,
-        no_of_labor: data.noOfLabor ? data.noOfLabor : null,
-        material_at_site: data.materialAtSite ? data.materialAtSite : null,
+          // STEP 4
+          year_of_construction: Number(data.yearOfConstruction),
+          construction_stage: data.constructionStage,
+          work_description: data.workDescription ? data.workDescription : null,
+          flat_identification: data.flatIdentification ? data.flatIdentification : null,
+          plot_demarcation: data.plotDemarcation ? data.plotDemarcation : null,
+          no_of_labor: data.noOfLabor ? data.noOfLabor : null,
+          material_at_site: data.materialAtSite ? data.materialAtSite : null,
 
-        // STEP 5
-        boundary_east: data.boundaryEast,
-        boundary_west: data.boundaryWest,
-        boundary_north: data.boundaryNorth,
-        boundary_south: data.boundarySouth,
+          // STEP 5
+          boundary_east: data.boundaryEast,
+          boundary_west: data.boundaryWest,
+          boundary_north: data.boundaryNorth,
+          boundary_south: data.boundarySouth,
 
-        // STEP 6
-        approach_road_condition: data.approachRoadCondition,
-        width_of_approach_road: data.widthOfApproachRoad ? data.widthOfApproachRoad : null,
-        remarks_approach_road: data.remarksApproachRoad ? data.remarksApproachRoad : null,
-        society_name_board: data.societyNameBoard ? data.societyNameBoard : null,
-        area_sqft: data.areaSqFt && data.areaSqFt.trim() ? data.areaSqFt : null,
-        rate_per_sqft: data.ratePerSqFt && data.ratePerSqFt.trim() ? data.ratePerSqFt : null,
-        rate_basis: data.rateBasis ? data.rateBasis : null,
-        negative_points: data.negativePoints ? data.negativePoints : null,
-        agent_opinion: data.agentOpinion ? data.agentOpinion : null,
+          // STEP 6
+          approach_road_condition: data.approachRoadCondition,
+          width_of_approach_road: data.widthOfApproachRoad ? data.widthOfApproachRoad : null,
+          remarks_approach_road: data.remarksApproachRoad ? data.remarksApproachRoad : null,
+          society_name_board: data.societyNameBoard ? data.societyNameBoard : null,
+          area_sqft: data.areaSqFt && data.areaSqFt.trim() ? data.areaSqFt : null,
+          rate_per_sqft: data.ratePerSqFt && data.ratePerSqFt.trim() ? data.ratePerSqFt : null,
+          rate_basis: data.rateBasis ? data.rateBasis : null,
+          negative_points: data.negativePoints ? data.negativePoints : null,
+          agent_opinion: data.agentOpinion ? data.agentOpinion : null,
 
-        // STEP 7
-        final_remarks: data.finalRemarks ? data.finalRemarks : null,
+          // STEP 7
+          final_remarks: data.finalRemarks ? data.finalRemarks : null,
 
-        status: "SUBMITTED",
-        created_at: now,
-        updated_at: now,
-        submitted_at: now,
-      })
-      .returning();
+          status: "SUBMITTED",
+          created_at: now,
+          updated_at: now,
+          submitted_at: now,
+        })
+        .returning();
 
-    const row = rows[0];
-    if (!row) throw new Error("Failed to retrieve created field visit");
+      const row = rows[0];
+      if (!row) throw new Error("Failed to retrieve created field visit");
 
-    // Advance the case stage now that the field visit is in. Only move forward
-    // from the pre-submission stages so we never drag a case that has already
-    // progressed (maker/checker/etc.) back to FIELD_VISIT_SUBMITTED.
-    await tx
-      .update(cases)
-      .set({ stage: "FIELD_VISIT_SUBMITTED", updated_at: now })
-      .where(and(eq(cases.id, caseId), inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"])));
+      // Advance the case stage now that the field visit is in. Only move forward
+      // from the pre-submission stages so we never drag a case that has already
+      // progressed (maker/checker/etc.) back to FIELD_VISIT_SUBMITTED.
+      await tx
+        .update(cases)
+        .set({ stage: "FIELD_VISIT_SUBMITTED", updated_at: now })
+        .where(
+          and(eq(cases.id, caseId), inArray(cases.stage, ["ASSIGNED", "FIELD_VISIT_PENDING"])),
+        );
 
-    // Always refresh the case's "last updated" timestamp on submission, even if
-    // the stage guard above didn't match (e.g. the case had already advanced).
-    await tx.update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
+      // Always refresh the case's "last updated" timestamp on submission, even if
+      // the stage guard above didn't match (e.g. the case had already advanced).
+      await tx.update(cases).set({ updated_at: now }).where(eq(cases.id, caseId));
 
       return mapFieldVisitRow(row);
     });
@@ -1467,7 +1488,9 @@ export async function api_submitFieldVisit(
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
     }
-    throw new Error(`Failed to submit field visit to database: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to submit field visit to database: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -1577,7 +1600,9 @@ export async function api_updateFieldVisit(
         person_phone: data.personPhone,
         relationship: data.relationship,
         other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.otherRelationshipRemarks ? data.otherRelationshipRemarks : null,
+        other_relationship_remarks: data.otherRelationshipRemarks
+          ? data.otherRelationshipRemarks
+          : null,
 
         // STEP 2
         landmark: data.landmark,
@@ -1651,7 +1676,9 @@ export async function api_updateFieldVisit(
       console.error("Error message:", error.message);
       console.error("Error stack:", error.stack);
     }
-    throw new Error(`Failed to update field visit in database: ${error instanceof Error ? error.message : String(error)}`);
+    throw new Error(
+      `Failed to update field visit in database: ${error instanceof Error ? error.message : String(error)}`,
+    );
   }
 }
 
@@ -1720,7 +1747,9 @@ export async function api_updateFieldVisitByChecker(
         person_phone: data.personPhone,
         relationship: data.relationship,
         other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.otherRelationshipRemarks ? data.otherRelationshipRemarks : null,
+        other_relationship_remarks: data.otherRelationshipRemarks
+          ? data.otherRelationshipRemarks
+          : null,
 
         // STEP 2
         landmark: data.landmark,
@@ -1814,9 +1843,7 @@ export async function api_submitToChecker(
     const rows = await getDb()
       .update(cases)
       .set({ stage: "CHECKER_PENDING", updated_at: now })
-      .where(
-        and(eq(cases.id, caseId), inArray(cases.stage, [...MAKER_EDITABLE_STAGES])),
-      )
+      .where(and(eq(cases.id, caseId), inArray(cases.stage, [...MAKER_EDITABLE_STAGES])))
       .returning();
 
     const row = rows[0];
@@ -2062,4 +2089,3 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
     throw new Error("Failed to generate field visit PDF");
   }
 }
-

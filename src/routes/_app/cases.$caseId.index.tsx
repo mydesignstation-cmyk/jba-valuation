@@ -63,7 +63,13 @@ import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
 import { ReassignSiteEngineerDialog } from "@/components/case/ReassignSiteEngineerDialog";
-import { getSiteEngineer, getMaker, getAssigner, getUser, getChecker } from "@/services/user.service";
+import {
+  getSiteEngineer,
+  getMaker,
+  getAssigner,
+  getUser,
+  getChecker,
+} from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
   head: () => pageMeta("Case Detail", "Case information, customer, assignment and history."),
@@ -210,8 +216,7 @@ function Page() {
         backLabel: "My Cases",
         backAction: "Back to My Cases",
       };
-    if (isMaker)
-      return { backTo: "/maker", backLabel: "My Cases", backAction: "Back to My Cases" };
+    if (isMaker) return { backTo: "/maker", backLabel: "My Cases", backAction: "Back to My Cases" };
     if (isUploader)
       return {
         backTo: "/uploader",
@@ -412,8 +417,7 @@ function Page() {
   // only if the user can't be resolved (deleted acct). These now surface under
   // the pipeline milestones rather than in the Case Details card.
   const hasCheckedBy = !!valuationCase.checkedById;
-  const checkedByName =
-    checkedBy?.name ?? (hasCheckedBy ? valuationCase.checkedById : undefined);
+  const checkedByName = checkedBy?.name ?? (hasCheckedBy ? valuationCase.checkedById : undefined);
 
   const hasUploadedBy = !!valuationCase.uploadedById;
   const uploadedByName =
@@ -691,9 +695,7 @@ function Page() {
       <Tabs defaultValue="overview">
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
-          <TabsTrigger value="field-visit">
-            Field Visit
-          </TabsTrigger>
+          <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}

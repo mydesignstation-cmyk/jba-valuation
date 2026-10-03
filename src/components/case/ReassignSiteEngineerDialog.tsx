@@ -38,7 +38,11 @@ export function ReassignSiteEngineerDialog({
   isSubmitting,
 }: ReassignSiteEngineerDialogProps) {
   const [engineerId, setEngineerId] = useState("");
-  const { data: engineers = [], isLoading, isError } = useQuery({
+  const {
+    data: engineers = [],
+    isLoading,
+    isError,
+  } = useQuery({
     queryKey: ["site-engineers"],
     queryFn: listSiteEngineers,
     enabled: open,
@@ -75,7 +79,11 @@ export function ReassignSiteEngineerDialog({
         </DialogHeader>
         <div className="space-y-2 py-2">
           <Label htmlFor="reassign-site-engineer-select">Select Site Engineer</Label>
-          <Select value={engineerId} onValueChange={setEngineerId} disabled={isLoading || isSubmitting}>
+          <Select
+            value={engineerId}
+            onValueChange={setEngineerId}
+            disabled={isLoading || isSubmitting}
+          >
             <SelectTrigger id="reassign-site-engineer-select">
               <SelectValue
                 placeholder={
@@ -106,7 +114,9 @@ export function ReassignSiteEngineerDialog({
             </p>
           )}
           {!isLoading && !isError && availableEngineers.length === 0 && (
-            <p className="text-sm text-muted-foreground">No different active Site Engineer is available.</p>
+            <p className="text-sm text-muted-foreground">
+              No different active Site Engineer is available.
+            </p>
           )}
         </div>
         <DialogFooter>

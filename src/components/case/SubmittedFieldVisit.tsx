@@ -67,9 +67,7 @@ function SectionCard({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">
-          {children}
-        </div>
+        <div className="grid grid-cols-1 gap-x-6 gap-y-4 sm:grid-cols-2">{children}</div>
       </CardContent>
     </Card>
   );
@@ -204,96 +202,105 @@ export function SubmittedFieldVisit({
           height, so short cards sit beneath short cards with no ragged gaps.
           Per-card spacing is handled by `mb-4` + `break-inside-avoid`. */}
       <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
-      <SectionCard title="Case & Location" icon={LandmarkIcon}>
-        <ReadOnlyField label="Case Number" value={autoFill?.caseNumber ?? "—"} />
-        <ReadOnlyField label="Request Number" value={autoFill?.requestNumber ?? "—"} />
-        <ReadOnlyField label="Bank" value={autoFill?.bankName ?? "—"} />
-        <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
-        <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
-        <ReadOnlyField
-          label="Date of Visit"
-          value={visit.visitDate ? formatDisplayDate(visit.visitDate) : "—"}
-        />
-        <ReadOnlyField label="GPS Location" value={gpsText} />
-      </SectionCard>
-
-      <SectionCard title="Visit Details" icon={UserIcon}>
-        <ReadOnlyField label="Person Met" value={visit.personMet ?? "—"} />
-        <ReadOnlyField label="Phone" value={visit.personPhone ?? "—"} />
-        <ReadOnlyField label="Relationship" value={visit.relationship ?? "—"} />
-        {visit.relationship === "Other" && (
-          <>
-            <ReadOnlyField label="Other Relationship" value={visit.otherRelationship ?? "—"} />
-            <ReadOnlyField label="Other Relationship Remarks" value={visit.otherRelationshipRemarks ?? "—"} />
-          </>
-        )}
-      </SectionCard>
-
-      <SectionCard title="Property" icon={Home}>
-        <ReadOnlyField label="Landmark" value={visit.landmark ?? "—"} />
-        <ReadOnlyField label="Property Type" value={visit.propertyType ?? "—"} />
-        {visit.propertyType === "Other" && (
-          <ReadOnlyField label="Property Type Remarks" value={visit.propertyTypeRemarks ?? "—"} />
-        )}
-        <ReadOnlyField label="Locality" value={visit.localityType ?? "—"} />
-        <ReadOnlyField label="Occupancy Status" value={visit.occupancyStatus ?? "—"} />
-        {visit.occupancyStatus === "Other" && (
-          <ReadOnlyField label="Occupancy Status Remarks" value={visit.occupancyStatusRemarks ?? "—"} />
-        )}
-        <ReadOnlyField label="Occupancy with Name" value={visit.occupancyWithName ?? "—"} />
-      </SectionCard>
-
-      <SectionCard title="Building" icon={Building2}>
-        <ReadOnlyField label="Structure Type" value={visit.structureType ?? "—"} />
-        {visit.structureType === "Other" && (
-          <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
-        )}
-        <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
-        <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
-        <ReadOnlyField label="Floors in Building" value={visit.floorsInBuilding ?? "—"} />
-        <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
-        <ReadOnlyField label="Flats on Floor" value={visit.flatsOnFloor ?? "—"} />
-        <ReadOnlyField label="Wings" value={visit.wingsInBuilding ?? "—"} />
-        <ReadOnlyField label="Lifts/Staircases" value={visit.liftsStaircases ?? "—"} />
-      </SectionCard>
-
-      <SectionCard title="Construction" icon={Hammer}>
-        <ReadOnlyField
-          label="Year of Construction"
-          value={visit.yearOfConstruction?.toString() ?? "—"}
-        />
-        <ReadOnlyField label="Construction Stage (%)" value={visit.constructionStage ?? "—"} />
-        <ReadOnlyField label="Work Description" value={visit.workDescription ?? "—"} />
-        <ReadOnlyField label="Flat Identification" value={visit.flatIdentification ?? "—"} />
-        <ReadOnlyField label="Plot Demarcation" value={visit.plotDemarcation ?? "—"} />
-        <ReadOnlyField label="No. of Labor" value={visit.noOfLabor ?? "—"} />
-        <ReadOnlyField label="Material at Site" value={visit.materialAtSite ?? "—"} />
-      </SectionCard>
-
-      <SectionCard title="Boundaries" icon={Compass}>
-        <ReadOnlyField label="East" value={visit.boundaryEast ?? "—"} />
-        <ReadOnlyField label="West" value={visit.boundaryWest ?? "—"} />
-        <ReadOnlyField label="North" value={visit.boundaryNorth ?? "—"} />
-        <ReadOnlyField label="South" value={visit.boundarySouth ?? "—"} />
-      </SectionCard>
-
-      <SectionCard title="Assessment" icon={RouteIcon}>
-        <ReadOnlyField label="Approach Road" value={visit.approachRoadCondition ?? "—"} />
-        <ReadOnlyField label="Width of Approach Road" value={visit.widthOfApproachRoad ?? "—"} />
-        <ReadOnlyField label="Remarks Approach Road" value={visit.remarksApproachRoad ?? "—"} />
-        <ReadOnlyField label="Name on Society Notice Board" value={visit.societyNameBoard ?? "—"} />
-        <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
-        <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
-        <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
-        <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
-        <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
-      </SectionCard>
-
-      {visit.finalRemarks && (
-        <SectionCard title="Final Remarks" icon={ClipboardCheck}>
-          <ReadOnlyField label="Remarks" value={visit.finalRemarks} />
+        <SectionCard title="Case & Location" icon={LandmarkIcon}>
+          <ReadOnlyField label="Case Number" value={autoFill?.caseNumber ?? "—"} />
+          <ReadOnlyField label="Request Number" value={autoFill?.requestNumber ?? "—"} />
+          <ReadOnlyField label="Bank" value={autoFill?.bankName ?? "—"} />
+          <ReadOnlyField label="Customer" value={autoFill?.customerName ?? "—"} />
+          <ReadOnlyField label="Address" value={autoFill?.address ?? "—"} />
+          <ReadOnlyField
+            label="Date of Visit"
+            value={visit.visitDate ? formatDisplayDate(visit.visitDate) : "—"}
+          />
+          <ReadOnlyField label="GPS Location" value={gpsText} />
         </SectionCard>
-      )}
+
+        <SectionCard title="Visit Details" icon={UserIcon}>
+          <ReadOnlyField label="Person Met" value={visit.personMet ?? "—"} />
+          <ReadOnlyField label="Phone" value={visit.personPhone ?? "—"} />
+          <ReadOnlyField label="Relationship" value={visit.relationship ?? "—"} />
+          {visit.relationship === "Other" && (
+            <>
+              <ReadOnlyField label="Other Relationship" value={visit.otherRelationship ?? "—"} />
+              <ReadOnlyField
+                label="Other Relationship Remarks"
+                value={visit.otherRelationshipRemarks ?? "—"}
+              />
+            </>
+          )}
+        </SectionCard>
+
+        <SectionCard title="Property" icon={Home}>
+          <ReadOnlyField label="Landmark" value={visit.landmark ?? "—"} />
+          <ReadOnlyField label="Property Type" value={visit.propertyType ?? "—"} />
+          {visit.propertyType === "Other" && (
+            <ReadOnlyField label="Property Type Remarks" value={visit.propertyTypeRemarks ?? "—"} />
+          )}
+          <ReadOnlyField label="Locality" value={visit.localityType ?? "—"} />
+          <ReadOnlyField label="Occupancy Status" value={visit.occupancyStatus ?? "—"} />
+          {visit.occupancyStatus === "Other" && (
+            <ReadOnlyField
+              label="Occupancy Status Remarks"
+              value={visit.occupancyStatusRemarks ?? "—"}
+            />
+          )}
+          <ReadOnlyField label="Occupancy with Name" value={visit.occupancyWithName ?? "—"} />
+        </SectionCard>
+
+        <SectionCard title="Building" icon={Building2}>
+          <ReadOnlyField label="Structure Type" value={visit.structureType ?? "—"} />
+          {visit.structureType === "Other" && (
+            <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
+          )}
+          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
+          <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
+          <ReadOnlyField label="Floors in Building" value={visit.floorsInBuilding ?? "—"} />
+          <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
+          <ReadOnlyField label="Flats on Floor" value={visit.flatsOnFloor ?? "—"} />
+          <ReadOnlyField label="Wings" value={visit.wingsInBuilding ?? "—"} />
+          <ReadOnlyField label="Lifts/Staircases" value={visit.liftsStaircases ?? "—"} />
+        </SectionCard>
+
+        <SectionCard title="Construction" icon={Hammer}>
+          <ReadOnlyField
+            label="Year of Construction"
+            value={visit.yearOfConstruction?.toString() ?? "—"}
+          />
+          <ReadOnlyField label="Construction Stage (%)" value={visit.constructionStage ?? "—"} />
+          <ReadOnlyField label="Work Description" value={visit.workDescription ?? "—"} />
+          <ReadOnlyField label="Flat Identification" value={visit.flatIdentification ?? "—"} />
+          <ReadOnlyField label="Plot Demarcation" value={visit.plotDemarcation ?? "—"} />
+          <ReadOnlyField label="No. of Labor" value={visit.noOfLabor ?? "—"} />
+          <ReadOnlyField label="Material at Site" value={visit.materialAtSite ?? "—"} />
+        </SectionCard>
+
+        <SectionCard title="Boundaries" icon={Compass}>
+          <ReadOnlyField label="East" value={visit.boundaryEast ?? "—"} />
+          <ReadOnlyField label="West" value={visit.boundaryWest ?? "—"} />
+          <ReadOnlyField label="North" value={visit.boundaryNorth ?? "—"} />
+          <ReadOnlyField label="South" value={visit.boundarySouth ?? "—"} />
+        </SectionCard>
+
+        <SectionCard title="Assessment" icon={RouteIcon}>
+          <ReadOnlyField label="Approach Road" value={visit.approachRoadCondition ?? "—"} />
+          <ReadOnlyField label="Width of Approach Road" value={visit.widthOfApproachRoad ?? "—"} />
+          <ReadOnlyField label="Remarks Approach Road" value={visit.remarksApproachRoad ?? "—"} />
+          <ReadOnlyField
+            label="Name on Society Notice Board"
+            value={visit.societyNameBoard ?? "—"}
+          />
+          <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
+          <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
+          <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
+          <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
+          <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
+        </SectionCard>
+
+        {visit.finalRemarks && (
+          <SectionCard title="Final Remarks" icon={ClipboardCheck}>
+            <ReadOnlyField label="Remarks" value={visit.finalRemarks} />
+          </SectionCard>
+        )}
       </div>
     </div>
   );

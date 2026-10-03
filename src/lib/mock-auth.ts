@@ -12,12 +12,32 @@ export const roleLabels: Record<Role, string> = {
 };
 
 export const mockUsers: Record<Role, User> = {
-  SUPER_ADMIN: { id: "u-sa", name: "Rajesh Iyer", email: "rajesh.iyer@example.com", role: "SUPER_ADMIN" },
+  SUPER_ADMIN: {
+    id: "u-sa",
+    name: "Rajesh Iyer",
+    email: "rajesh.iyer@example.com",
+    role: "SUPER_ADMIN",
+  },
   ADMIN: { id: "u-admin", name: "Ankur Mehta", email: "ankur.mehta@example.com", role: "ADMIN" },
-  SITE_ENGINEER: { id: "u-se", name: "Vikram Singh", email: "vikram.singh@example.com", role: "SITE_ENGINEER" },
+  SITE_ENGINEER: {
+    id: "u-se",
+    name: "Vikram Singh",
+    email: "vikram.singh@example.com",
+    role: "SITE_ENGINEER",
+  },
   MAKER: { id: "u-maker", name: "Priya Sharma", email: "priya.sharma@example.com", role: "MAKER" },
-  CHECKER: { id: "u-checker", name: "Neha Kapoor", email: "neha.kapoor@example.com", role: "CHECKER" },
-  UPLOADER: { id: "u-uploader", name: "Arjun Rao", email: "arjun.rao@example.com", role: "UPLOADER" },
+  CHECKER: {
+    id: "u-checker",
+    name: "Neha Kapoor",
+    email: "neha.kapoor@example.com",
+    role: "CHECKER",
+  },
+  UPLOADER: {
+    id: "u-uploader",
+    name: "Arjun Rao",
+    email: "arjun.rao@example.com",
+    role: "UPLOADER",
+  },
 };
 
 export const mockNotificationCount = 3;
@@ -62,5 +82,10 @@ export function useCurrentUser(): User | null {
 }
 
 export function initials(name: string) {
-  return name.split(" ").map((p) => p[0]).slice(0, 2).join("").toUpperCase();
+  return name
+    .split(" ")
+    .map((p) => p[0])
+    .slice(0, 2)
+    .join("")
+    .toUpperCase();
 }
