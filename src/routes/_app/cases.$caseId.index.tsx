@@ -50,6 +50,7 @@ import { stageLabels, stageBadgeVariant, isMakerCasePending } from "@/lib/case-f
 import {
   api_getCase,
   api_assignMaker,
+  api_reassignSiteEngineer,
   api_submitToChecker,
   api_submitToUploader,
   api_markUploadCompleted,
@@ -60,6 +61,7 @@ import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
+import { ReassignSiteEngineerDialog } from "@/components/case/ReassignSiteEngineerDialog";
 import { getSiteEngineer, getMaker, getAssigner, getUser, getChecker } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/cases/$caseId/")({
@@ -182,6 +184,8 @@ function Page() {
 
   const [assignOpen, setAssignOpen] = useState(false);
   const [isAssigning, setIsAssigning] = useState(false);
+  const [reassignEngineerOpen, setReassignEngineerOpen] = useState(false);
+  const [isReassigningEngineer, setIsReassigningEngineer] = useState(false);
   const [confirmSubmitToChecker, setConfirmSubmitToChecker] = useState(false);
   const [confirmSubmitToUploader, setConfirmSubmitToUploader] = useState(false);
   const [confirmMarkUploaded, setConfirmMarkUploaded] = useState(false);
@@ -440,6 +444,12 @@ function Page() {
   // Reassign: admins only, to change an already-assigned Maker. Checkers never
   // see this. These gate the buttons; the server re-checks both rules.
   const showReassignMaker = canReassignMaker && makerAssignable && hasMaker;
+  const showReassignSiteEngineer =
+    can(currentUser?.role, "cases.reassignSiteEngineer") &&
+    valuationCase.stage === "FIELD_VISIT_PENDING" &&
+    !fieldVisitLoading &&
+    !!valuationCase.assignedEngineerId &&
+    fieldVisit?.status !== "SUBMITTED";
 
   const handleAssignMaker = async (makerId: string) => {
     setIsAssigning(true);
@@ -455,6 +465,24 @@ function Page() {
       toast.error(err instanceof Error ? err.message : "Failed to assign Maker");
     } finally {
       setIsAssigning(false);
+    }
+  };
+
+  const handleReassignSiteEngineer = async (engineerId: string) => {
+    setIsReassigningEngineer(true);
+    try {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      await api_reassignSiteEngineer(token, valuationCase.id, engineerId);
+      toast.success("Site Engineer reassigned");
+      queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+      queryClient.invalidateQueries({ queryKey: ["cases"] });
+      queryClient.invalidateQueries({ queryKey: ["my-cases"] });
+      setReassignEngineerOpen(false);
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to reassign Site Engineer");
+    } finally {
+      setIsReassigningEngineer(false);
     }
   };
 
@@ -500,6 +528,12 @@ function Page() {
               <Button variant="outline" onClick={() => setAssignOpen(true)}>
                 <UserCog className="mr-2 h-4 w-4" />
                 Reassign Maker
+              </Button>
+            )}
+            {showReassignSiteEngineer && (
+              <Button variant="outline" onClick={() => setReassignEngineerOpen(true)}>
+                <UserCog className="mr-2 h-4 w-4" />
+                Reassign Site Engineer
               </Button>
             )}
           </div>
@@ -855,6 +889,15 @@ function Page() {
           </Card>
         </TabsContent>
       </Tabs>
+
+      <ReassignSiteEngineerDialog
+        open={reassignEngineerOpen}
+        onOpenChange={setReassignEngineerOpen}
+        caseNumber={valuationCase.caseNumber}
+        currentEngineerId={valuationCase.assignedEngineerId!}
+        onReassign={handleReassignSiteEngineer}
+        isSubmitting={isReassigningEngineer}
+      />
 
       <AssignMakerDialog
         open={assignOpen}

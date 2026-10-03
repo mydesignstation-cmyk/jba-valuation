@@ -1069,11 +1069,11 @@ export async function api_reassignSiteEngineer(
       await tx.execute(sql`SELECT id FROM cases WHERE id = ${caseId} FOR UPDATE`);
 
       const visit = await tx
-        .select({ id: fieldVisits.id })
+        .select({ status: fieldVisits.status })
         .from(fieldVisits)
         .where(eq(fieldVisits.case_id, caseId))
         .limit(1);
-      if (visit[0]) {
+      if (visit[0]?.status === "SUBMITTED") {
         throw new Error("Site Engineer reassignment is unavailable after field visit submission");
       }
 
