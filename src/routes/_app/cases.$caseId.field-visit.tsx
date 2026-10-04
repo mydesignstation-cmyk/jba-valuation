@@ -191,7 +191,7 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "personPhone",
     "relationship",
     "otherRelationship",
-    "otherRelationshipRemarks",
+    "relationshipRemarks",
     "gpsLatitude",
     "gpsLongitude",
   ],
@@ -537,7 +537,7 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     personPhone: visit.personPhone ?? "",
     relationship: visit.relationship,
     otherRelationship: visit.otherRelationship ?? "",
-    otherRelationshipRemarks: visit.otherRelationshipRemarks ?? "",
+    relationshipRemarks: visit.relationshipRemarks ?? "",
     gpsLatitude: visit.gpsLatitude != null ? Number(visit.gpsLatitude) : undefined,
     gpsLongitude: visit.gpsLongitude != null ? Number(visit.gpsLongitude) : undefined,
     fullAddress: visit.fullAddress ?? "",
@@ -592,7 +592,7 @@ const EMPTY_FORM_VALUES = {
   personPhone: "",
   relationship: undefined,
   otherRelationship: "",
-  otherRelationshipRemarks: "",
+  relationshipRemarks: "",
   gpsLatitude: undefined,
   gpsLongitude: undefined,
   fullAddress: "",
@@ -839,7 +839,7 @@ export function FieldVisitWizard({
                   form.setValue("personPhone", "9876543210");
                   form.setValue("relationship", "Owner");
                   form.setValue("otherRelationship", "");
-                  form.setValue("otherRelationshipRemarks", "");
+                  form.setValue("relationshipRemarks", "");
                   form.setValue("gpsLatitude", 19.076);
                   form.setValue("gpsLongitude", 72.8777);
                   form.setValue("fullAddress", "123 Main Street, Mumbai");
@@ -944,23 +944,21 @@ export function FieldVisitWizard({
                   options={relationshipOptions}
                 />
                 {v.relationship === "Other" && (
-                  <>
-                    <TextField
-                      form={form}
-                      name="otherRelationship"
-                      label="Other Relationship"
-                      placeholder="e.g. Family member, Friend"
-                      maxLength={255}
-                    />
-                    <TextField
-                      form={form}
-                      name="otherRelationshipRemarks"
-                      label="Remarks"
-                      placeholder="Please specify other relationship details"
-                      maxLength={500}
-                    />
-                  </>
+                  <TextField
+                    form={form}
+                    name="otherRelationship"
+                    label="Other Relationship"
+                    placeholder="e.g. Family member, Friend"
+                    maxLength={255}
+                  />
                 )}
+                <TextField
+                  form={form}
+                  name="relationshipRemarks"
+                  label="Remarks"
+                  placeholder="Please specify details"
+                  maxLength={500}
+                />
               </div>
             )}
 

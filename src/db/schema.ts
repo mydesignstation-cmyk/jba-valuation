@@ -153,7 +153,7 @@ export const fieldVisits = pgTable(
     person_phone: varchar("person_phone", { length: 50 }),
     relationship: varchar("relationship", { length: 50 }),
     other_relationship: varchar("other_relationship", { length: 255 }), // When relationship is "Other"
-    other_relationship_remarks: text("other_relationship_remarks"), // Remarks when relationship is "Other"
+    other_relationship_remarks: text("other_relationship_remarks"), // Remarks for any relationship type
 
     // STEP 2 — Property details
     full_address: text("full_address"), // Full Address as per site

@@ -220,14 +220,9 @@ export function SubmittedFieldVisit({
           <ReadOnlyField label="Phone" value={visit.personPhone ?? "—"} />
           <ReadOnlyField label="Relationship" value={visit.relationship ?? "—"} />
           {visit.relationship === "Other" && (
-            <>
-              <ReadOnlyField label="Other Relationship" value={visit.otherRelationship ?? "—"} />
-              <ReadOnlyField
-                label="Other Relationship Remarks"
-                value={visit.otherRelationshipRemarks ?? "—"}
-              />
-            </>
+            <ReadOnlyField label="Other Relationship" value={visit.otherRelationship ?? "—"} />
           )}
+          <ReadOnlyField label="Remarks" value={visit.relationshipRemarks ?? "—"} />
         </SectionCard>
 
         <SectionCard title="Property" icon={Home}>

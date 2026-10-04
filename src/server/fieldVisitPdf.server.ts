@@ -312,7 +312,7 @@ export async function buildFieldVisitPdf(
     { label: "Phone Number", value: show(visit.personPhone) },
     { label: "Relationship with Property", value: show(visit.relationship) },
     { label: "Other Relationship", value: show(visit.otherRelationship) },
-    { label: "Other Relationship Remarks", value: show(visit.otherRelationshipRemarks) },
+    { label: "Remarks", value: show(visit.relationshipRemarks) },
   ]);
 
   writer.drawSection("Property Details", [

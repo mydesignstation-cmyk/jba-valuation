@@ -99,7 +99,7 @@ export interface FieldVisit {
   personPhone?: string;
   relationship?: string;
   otherRelationship?: string; // When relationship is "Other"
-  otherRelationshipRemarks?: string; // Remarks when relationship is "Other"
+  relationshipRemarks?: string; // Remarks for any relationship type
 
   // STEP 2 — Property details
   landmark?: string;

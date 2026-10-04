@@ -1184,7 +1184,7 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.relationship != null) visit.relationship = row.relationship;
   if (row.other_relationship != null) visit.otherRelationship = row.other_relationship;
   if (row.other_relationship_remarks != null)
-    visit.otherRelationshipRemarks = row.other_relationship_remarks;
+    visit.relationshipRemarks = row.other_relationship_remarks;
 
   if (row.landmark != null) visit.landmark = row.landmark;
   if (row.property_type != null) visit.propertyType = row.property_type;
@@ -1403,8 +1403,8 @@ export async function api_submitFieldVisit(
           person_phone: data.personPhone,
           relationship: data.relationship,
           other_relationship: data.otherRelationship ? data.otherRelationship : null,
-          other_relationship_remarks: data.otherRelationshipRemarks
-            ? data.otherRelationshipRemarks
+          other_relationship_remarks: data.relationshipRemarks
+            ? data.relationshipRemarks
             : null,
 
           // STEP 2
@@ -1614,8 +1614,8 @@ export async function api_updateFieldVisit(
         person_phone: data.personPhone,
         relationship: data.relationship,
         other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.otherRelationshipRemarks
-          ? data.otherRelationshipRemarks
+        other_relationship_remarks: data.relationshipRemarks
+          ? data.relationshipRemarks
           : null,
 
         // STEP 2
@@ -1768,8 +1768,8 @@ export async function api_updateFieldVisitByChecker(
         person_phone: data.personPhone,
         relationship: data.relationship,
         other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.otherRelationshipRemarks
-          ? data.otherRelationshipRemarks
+        other_relationship_remarks: data.relationshipRemarks
+          ? data.relationshipRemarks
           : null,
 
         // STEP 2

@@ -1,0 +1,2 @@
+-- Rename other_relationship_remarks to relationship_remarks
+ALTER TABLE field_visits RENAME COLUMN other_relationship_remarks TO relationship_remarks;
