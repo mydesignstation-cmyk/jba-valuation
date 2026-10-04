@@ -16,6 +16,9 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
 import type { FieldVisit } from "@/types";
+import { readFileSync } from "fs";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 /** Case-derived header values (same shape the UI already builds). */
 export interface FieldVisitPdfHeader {
@@ -56,6 +59,24 @@ function show(value: unknown): string {
   if (value === undefined || value === null) return EM_DASH;
   const s = String(value).trim();
   return s.length > 0 ? s : EM_DASH;
+}
+
+/** Load logo image from public directory */
+function getLogoBytes(): Buffer {
+  try {
+    // In production (Nitro/serverless), use import.meta.url
+    const currentDir = dirname(fileURLToPath(import.meta.url));
+    // Navigate from src/server to public
+    const logoPath = join(currentDir, "../../public/logo.jpeg");
+    return readFileSync(logoPath);
+  } catch {
+    // Fallback for different environments
+    try {
+      return readFileSync(join(process.cwd(), "public/logo.jpeg"));
+    } catch {
+      throw new Error("Logo file not found at public/logo.jpeg");
+    }
+  }
 }
 
 /**
@@ -107,6 +128,36 @@ class ReportWriter {
     if (this.y - needed < MARGIN) {
       this.page = this.doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
       this.y = PAGE_HEIGHT - MARGIN;
+    }
+  }
+
+  /** Draw the logo image centered at the top of the page. */
+  async drawLogo() {
+    try {
+      const logoBytes = getLogoBytes();
+      const image = await this.doc.embedJpg(logoBytes);
+      
+      // Logo dimensions (adjust width as needed, height scales proportionally)
+      const logoWidth = 80;
+      const logoHeight = 60;
+      
+      // Center horizontally
+      const logoX = (PAGE_WIDTH - logoWidth) / 2;
+      const logoY = this.y - logoHeight - 12; // 12pt from top
+      
+      this.page.drawImage(image, {
+        x: logoX,
+        y: logoY,
+        width: logoWidth,
+        height: logoHeight,
+      });
+      
+      // Move cursor down past the logo and some spacing
+      this.y -= logoHeight + 20;
+    } catch (error) {
+      // If logo fails to load, just continue without it
+      console.warn("Failed to load logo:", error);
+      this.y -= 20; // Still add spacing
     }
   }
 
@@ -224,6 +275,9 @@ export async function buildFieldVisitPdf(
   header: FieldVisitPdfHeader,
 ): Promise<Uint8Array> {
   const writer = await ReportWriter.create();
+
+  // Draw logo at the top center
+  await writer.drawLogo();
 
   const generatedOn = formatDisplayDateTime(new Date());
   writer.drawTitle(
