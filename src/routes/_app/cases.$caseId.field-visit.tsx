@@ -38,6 +38,7 @@ import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { StickyFormFooter } from "@/components/ui/sticky-form-footer";
 import { Label } from "@/components/ui/label";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Progress } from "@/components/ui/progress";
@@ -824,7 +825,7 @@ export function FieldVisitWizard({
         </div>
       </CardHeader>
 
-      <CardContent>
+      <CardContent className="pb-24">
         <Form {...form}>
           <form onSubmit={(e) => e.preventDefault()} className="space-y-6">
             {/* DEV: Auto-fill button for testing */}
@@ -1459,45 +1460,22 @@ export function FieldVisitWizard({
             )}
 
             {/* Navigation */}
-            <div className="flex flex-col-reverse gap-2 border-t pt-4 sm:flex-row sm:justify-between">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={goBack}
-                disabled={stepIndex === 0 || submit.isPending}
-                className="w-full sm:w-auto"
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back
-              </Button>
-
-              {isReview ? (
-                <Button
-                  type="button"
-                  onClick={onFinalSubmit}
-                  disabled={submit.isPending || !gpsReady}
-                  className="w-full sm:w-auto"
-                >
-                  {submit.isPending
-                    ? isEdit
-                      ? "Saving..."
-                      : "Submitting..."
-                    : isEdit
-                      ? "Save Changes"
-                      : "Submit Field Visit Report"}
-                </Button>
-              ) : (
-                <Button
-                  type="button"
-                  onClick={goNext}
-                  disabled={submit.isPending}
-                  className="w-full sm:w-auto"
-                >
-                  Save &amp; Continue
-                  <ArrowRight className="ml-2 h-4 w-4" />
-                </Button>
-              )}
-            </div>
+            <StickyFormFooter
+              onBack={goBack}
+              onNext={isReview ? onFinalSubmit : goNext}
+              nextLabel={
+                isReview
+                  ? isEdit
+                    ? "Save Changes"
+                    : "Submit Field Visit Report"
+                  : "Save & Continue"
+              }
+              isBackDisabled={stepIndex === 0 || submit.isPending}
+              isNextDisabled={submit.isPending || (isReview && !gpsReady)}
+              isPending={submit.isPending}
+              showBackButton={true}
+              showNextIcon={!isReview}
+            />
           </form>
         </Form>
       </CardContent>
