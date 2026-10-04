@@ -157,6 +157,7 @@ const OPTION_ICONS: Record<string, IconType> = {
   "Commercial Office": Building,
   Penthouse: Castle,
   Duplex: Building2,
+  "Residential Flat": Building,
   // Locality + approach road + occupancy share Good/Average/Poor etc.
   Good: ShieldCheck,
   Average: ShieldAlert,

@@ -29,6 +29,7 @@ export const propertyTypeOptions = [
   "Commercial Office",
   "Penthouse",
   "Duplex",
+  "Residential Flat",
   "Other",
 ] as const;
 
