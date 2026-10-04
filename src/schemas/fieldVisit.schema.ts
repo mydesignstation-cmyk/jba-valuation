@@ -167,6 +167,7 @@ export const step2Schema = z
     occupancyStatus: occupancyStatusSchema,
     occupancyStatusRemarks: optionalText(500), // Remarks if "Other" selected
     occupancyWithName: requiredText("Occupancy with Name of Occupant", 500),
+    yearOfLiving: requiredText("Year of living", 100), // Year of living — STEP 2
   })
   .refine(
     (data) =>
@@ -197,7 +198,6 @@ export const step2Schema = z
 const step3Shape = {
   structureType: structureTypeSchema,
   structureTypeRemarks: optionalText(500), // Remarks if "Other" selected
-  yearOfLiving: requiredText("Year of living", 100), // Compulsory for all occupancy statuses
   rentAmount: z.string().optional().or(z.literal("")), // Will be validated conditionally below
   occupancyLevel: requiredText("Occupancy level", 100), // Made required
   floorsInBuilding: requiredText("No. of floors", 100), // Made required

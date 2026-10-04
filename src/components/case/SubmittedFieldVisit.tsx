@@ -241,6 +241,7 @@ export function SubmittedFieldVisit({
             />
           )}
           <ReadOnlyField label="Occupancy with Name" value={visit.occupancyWithName ?? "—"} />
+          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
         </SectionCard>
 
         <SectionCard title="Building" icon={Building2}>
@@ -248,7 +249,6 @@ export function SubmittedFieldVisit({
           {visit.structureType === "Other" && (
             <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
           )}
-          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
           {visit.occupancyStatus === "Rented" && (
             <ReadOnlyField label="Rent Amount" value={visit.rentAmount ?? "—"} />
           )}

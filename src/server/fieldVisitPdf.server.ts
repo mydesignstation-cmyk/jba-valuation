@@ -324,12 +324,12 @@ export async function buildFieldVisitPdf(
     { label: "Occupancy Status", value: show(visit.occupancyStatus) },
     { label: "Occupancy Status Remarks", value: show(visit.occupancyStatusRemarks) },
     { label: "Occupancy with Name", value: show(visit.occupancyWithName) },
+    { label: "Year of Living", value: show(visit.yearOfLiving) },
   ]);
 
   writer.drawSection("Building Details", [
     { label: "Type of Structure", value: show(visit.structureType) },
     { label: "Structure Type Remarks", value: show(visit.structureTypeRemarks) },
-    { label: "Year of Living", value: show(visit.yearOfLiving) },
     ...(visit.occupancyStatus === "Rented" ? [{ label: "Rent Amount", value: show(visit.rentAmount) }] : []),
     { label: "Occupancy Level", value: show(visit.occupancyLevel) },
     { label: "Total Floors", value: show(visit.floorsInBuilding) },
