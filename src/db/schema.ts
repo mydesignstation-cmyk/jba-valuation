@@ -156,6 +156,7 @@ export const fieldVisits = pgTable(
     other_relationship_remarks: text("other_relationship_remarks"), // Remarks when relationship is "Other"
 
     // STEP 2 — Property details
+    full_address: text("full_address"), // Full Address as per site
     landmark: text("landmark"),
     property_type: varchar("property_type", { length: 50 }),
     property_type_remarks: text("property_type_remarks"), // Remarks if "Other"
@@ -168,6 +169,7 @@ export const fieldVisits = pgTable(
     structure_type: varchar("structure_type", { length: 50 }),
     structure_type_remarks: text("structure_type_remarks"), // Remarks if "Other"
     year_of_living: varchar("year_of_living", { length: 100 }), // Conditional: only if "Rented"
+    rent_amount: numeric("rent_amount", { precision: 12, scale: 2 }), // Rent amount (conditional on occupancyStatus = 'Rented')
     occupancy_level: varchar("occupancy_level", { length: 100 }), // Changed to allow open text
     floors_in_building: varchar("floors_in_building", { length: 100 }),
     located_on_floor: varchar("located_on_floor", { length: 100 }),
@@ -185,6 +187,10 @@ export const fieldVisits = pgTable(
     material_at_site: text("material_at_site"),
 
     // STEP 5 — Property boundaries
+    boundary_length: numeric("boundary_length", { precision: 12, scale: 2 }), // Boundary length in SQ FT
+    boundary_breadth: numeric("boundary_breadth", { precision: 12, scale: 2 }), // Boundary breadth in SQ FT
+    boundary_area: numeric("boundary_area", { precision: 12, scale: 2 }), // Auto-calculated: length × breadth
+    boundary_description: text("boundary_description"), // Description of boundaries
     boundary_east: text("boundary_east"),
     boundary_west: text("boundary_west"),
     boundary_north: text("boundary_north"),
@@ -198,6 +204,7 @@ export const fieldVisits = pgTable(
     area_sqft: numeric("area_sqft", { precision: 12, scale: 2 }),
     rate_per_sqft: numeric("rate_per_sqft", { precision: 12, scale: 2 }),
     rate_basis: varchar("rate_basis", { length: 50 }), // New: basis for rate calculation
+    area_basis: varchar("area_basis", { length: 50 }), // Area basis (Carpet Area, Rare Carpet, Built Up, Super Built Up)
     negative_points: text("negative_points"),
     agent_opinion: text("agent_opinion"),
 

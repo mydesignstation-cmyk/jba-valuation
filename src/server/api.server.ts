@@ -1194,10 +1194,12 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.occupancy_status_remarks != null)
     visit.occupancyStatusRemarks = row.occupancy_status_remarks;
   if (row.occupancy_with_name != null) visit.occupancyWithName = row.occupancy_with_name;
+  if (row.full_address != null) visit.fullAddress = row.full_address;
 
   if (row.structure_type != null) visit.structureType = row.structure_type;
   if (row.structure_type_remarks != null) visit.structureTypeRemarks = row.structure_type_remarks;
   if (row.year_of_living != null) visit.yearOfLiving = row.year_of_living;
+  if (row.rent_amount != null) visit.rentAmount = String(row.rent_amount);
   if (row.occupancy_level != null) visit.occupancyLevel = row.occupancy_level;
   if (row.floors_in_building != null) visit.floorsInBuilding = row.floors_in_building;
   if (row.located_on_floor != null) visit.locatedOnFloor = row.located_on_floor;
@@ -1217,6 +1219,10 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.boundary_west != null) visit.boundaryWest = row.boundary_west;
   if (row.boundary_north != null) visit.boundaryNorth = row.boundary_north;
   if (row.boundary_south != null) visit.boundarySouth = row.boundary_south;
+  if (row.boundary_length != null) visit.boundaryLength = String(row.boundary_length);
+  if (row.boundary_breadth != null) visit.boundaryBreadth = String(row.boundary_breadth);
+  if (row.boundary_area != null) visit.boundaryArea = String(row.boundary_area);
+  if (row.boundary_description != null) visit.boundaryDescription = row.boundary_description;
 
   if (row.approach_road_condition != null)
     visit.approachRoadCondition = row.approach_road_condition;
@@ -1226,6 +1232,7 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.area_sqft != null) visit.areaSqFt = String(row.area_sqft);
   if (row.rate_per_sqft != null) visit.ratePerSqFt = String(row.rate_per_sqft);
   if (row.rate_basis != null) visit.rateBasis = row.rate_basis;
+  if (row.area_basis != null) visit.areaBasis = row.area_basis;
   if (row.negative_points != null) visit.negativePoints = row.negative_points;
   if (row.agent_opinion != null) visit.agentOpinion = row.agent_opinion;
 
@@ -1401,6 +1408,7 @@ export async function api_submitFieldVisit(
             : null,
 
           // STEP 2
+          full_address: data.fullAddress ? data.fullAddress : null,
           landmark: data.landmark,
           property_type: data.propertyType,
           property_type_remarks: data.propertyTypeRemarks ? data.propertyTypeRemarks : null,
@@ -1415,6 +1423,7 @@ export async function api_submitFieldVisit(
           structure_type: data.structureType,
           structure_type_remarks: data.structureTypeRemarks ? data.structureTypeRemarks : null,
           year_of_living: data.yearOfLiving ? data.yearOfLiving : null,
+          rent_amount: data.rentAmount && data.rentAmount.trim() ? data.rentAmount : null,
           occupancy_level: data.occupancyLevel,
           floors_in_building: data.floorsInBuilding,
           located_on_floor: data.locatedOnFloor,
@@ -1432,6 +1441,10 @@ export async function api_submitFieldVisit(
           material_at_site: data.materialAtSite ? data.materialAtSite : null,
 
           // STEP 5
+          boundary_length: data.boundaryLength && data.boundaryLength.trim() ? data.boundaryLength : null,
+          boundary_breadth: data.boundaryBreadth && data.boundaryBreadth.trim() ? data.boundaryBreadth : null,
+          boundary_area: data.boundaryArea && data.boundaryArea.trim() ? data.boundaryArea : null,
+          boundary_description: data.boundaryDescription ? data.boundaryDescription : null,
           boundary_east: data.boundaryEast,
           boundary_west: data.boundaryWest,
           boundary_north: data.boundaryNorth,
@@ -1445,6 +1458,7 @@ export async function api_submitFieldVisit(
           area_sqft: data.areaSqFt && data.areaSqFt.trim() ? data.areaSqFt : null,
           rate_per_sqft: data.ratePerSqFt && data.ratePerSqFt.trim() ? data.ratePerSqFt : null,
           rate_basis: data.rateBasis ? data.rateBasis : null,
+          area_basis: data.areaBasis ? data.areaBasis : null,
           negative_points: data.negativePoints ? data.negativePoints : null,
           agent_opinion: data.agentOpinion ? data.agentOpinion : null,
 
@@ -1605,6 +1619,7 @@ export async function api_updateFieldVisit(
           : null,
 
         // STEP 2
+        full_address: data.fullAddress ? data.fullAddress : null,
         landmark: data.landmark,
         property_type: data.propertyType,
         property_type_remarks: data.propertyTypeRemarks ? data.propertyTypeRemarks : null,
@@ -1617,6 +1632,7 @@ export async function api_updateFieldVisit(
         structure_type: data.structureType,
         structure_type_remarks: data.structureTypeRemarks ? data.structureTypeRemarks : null,
         year_of_living: data.yearOfLiving ? data.yearOfLiving : null,
+        rent_amount: data.rentAmount && data.rentAmount.trim() ? data.rentAmount : null,
         occupancy_level: data.occupancyLevel,
         floors_in_building: data.floorsInBuilding,
         located_on_floor: data.locatedOnFloor,
@@ -1634,6 +1650,10 @@ export async function api_updateFieldVisit(
         material_at_site: data.materialAtSite ? data.materialAtSite : null,
 
         // STEP 5
+        boundary_length: data.boundaryLength && data.boundaryLength.trim() ? data.boundaryLength : null,
+        boundary_breadth: data.boundaryBreadth && data.boundaryBreadth.trim() ? data.boundaryBreadth : null,
+        boundary_area: data.boundaryArea && data.boundaryArea.trim() ? data.boundaryArea : null,
+        boundary_description: data.boundaryDescription ? data.boundaryDescription : null,
         boundary_east: data.boundaryEast,
         boundary_west: data.boundaryWest,
         boundary_north: data.boundaryNorth,
@@ -1647,6 +1667,7 @@ export async function api_updateFieldVisit(
         area_sqft: data.areaSqFt && data.areaSqFt.trim() ? data.areaSqFt : null,
         rate_per_sqft: data.ratePerSqFt && data.ratePerSqFt.trim() ? data.ratePerSqFt : null,
         rate_basis: data.rateBasis ? data.rateBasis : null,
+        area_basis: data.areaBasis ? data.areaBasis : null,
         negative_points: data.negativePoints ? data.negativePoints : null,
         agent_opinion: data.agentOpinion ? data.agentOpinion : null,
 
@@ -1752,6 +1773,7 @@ export async function api_updateFieldVisitByChecker(
           : null,
 
         // STEP 2
+        full_address: data.fullAddress ? data.fullAddress : null,
         landmark: data.landmark,
         property_type: data.propertyType,
         locality_type: data.localityType,
@@ -1759,6 +1781,7 @@ export async function api_updateFieldVisitByChecker(
 
         // STEP 3
         structure_type: data.structureType,
+        rent_amount: data.rentAmount && data.rentAmount.trim() ? data.rentAmount : null,
         occupancy_level: data.occupancyLevel,
         floors_in_building: data.floorsInBuilding,
         located_on_floor: data.locatedOnFloor,
@@ -1772,6 +1795,10 @@ export async function api_updateFieldVisitByChecker(
         work_description: data.workDescription ? data.workDescription : null,
 
         // STEP 5
+        boundary_length: data.boundaryLength && data.boundaryLength.trim() ? data.boundaryLength : null,
+        boundary_breadth: data.boundaryBreadth && data.boundaryBreadth.trim() ? data.boundaryBreadth : null,
+        boundary_area: data.boundaryArea && data.boundaryArea.trim() ? data.boundaryArea : null,
+        boundary_description: data.boundaryDescription ? data.boundaryDescription : null,
         boundary_east: data.boundaryEast,
         boundary_west: data.boundaryWest,
         boundary_north: data.boundaryNorth,
@@ -1781,6 +1808,8 @@ export async function api_updateFieldVisitByChecker(
         approach_road_condition: data.approachRoadCondition,
         area_sqft: data.areaSqFt,
         rate_per_sqft: data.ratePerSqFt,
+        rate_basis: data.rateBasis ? data.rateBasis : null,
+        area_basis: data.areaBasis ? data.areaBasis : null,
         negative_points: data.negativePoints ? data.negativePoints : null,
         agent_opinion: data.agentOpinion ? data.agentOpinion : null,
 

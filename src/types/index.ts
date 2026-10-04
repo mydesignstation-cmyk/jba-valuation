@@ -109,11 +109,13 @@ export interface FieldVisit {
   occupancyStatus?: string;
   occupancyStatusRemarks?: string; // Remarks if "Other"
   occupancyWithName?: string; // Name of occupant
+  fullAddress?: string; // Full Address as per site — STEP 2
 
   // STEP 3 — Building information
   structureType?: string;
   structureTypeRemarks?: string; // Remarks if "Other"
   yearOfLiving?: string; // Conditional: only if "Rented"
+  rentAmount?: string; // Rent amount — conditional if occupancyStatus === 'Rented' — STEP 3
   occupancyLevel?: string;
   floorsInBuilding?: string;
   locatedOnFloor?: string;
@@ -135,6 +137,10 @@ export interface FieldVisit {
   boundaryWest?: string;
   boundaryNorth?: string;
   boundarySouth?: string;
+  boundaryLength?: string; // Boundary length in SQ FT — STEP 5
+  boundaryBreadth?: string; // Boundary breadth in SQ FT — STEP 5
+  boundaryArea?: string; // Auto-calculated: length × breadth — STEP 5
+  boundaryDescription?: string; // Description of boundaries — STEP 5
 
   // STEP 6 — Assessment details
   approachRoadCondition?: string;
@@ -144,6 +150,7 @@ export interface FieldVisit {
   areaSqFt?: string;
   ratePerSqFt?: string;
   rateBasis?: string; // New: basis for rate calculation
+  areaBasis?: string; // Area basis (Carpet Area, Rare Carpet, Built Up, Super Built Up) — STEP 6
   negativePoints?: string;
   agentOpinion?: string;
 

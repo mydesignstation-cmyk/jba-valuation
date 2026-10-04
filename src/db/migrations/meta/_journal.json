@@ -71,6 +71,13 @@
       "when": 1790953452638,
       "tag": "0009_nervous_bloodaxe",
       "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1791100645298,
+      "tag": "0010_gorgeous_spot",
+      "breakpoints": true
     }
   ]
 }

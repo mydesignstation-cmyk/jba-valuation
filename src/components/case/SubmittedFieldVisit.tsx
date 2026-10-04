@@ -231,6 +231,7 @@ export function SubmittedFieldVisit({
         </SectionCard>
 
         <SectionCard title="Property" icon={Home}>
+          <ReadOnlyField label="Full Address" value={visit.fullAddress ?? "—"} />
           <ReadOnlyField label="Landmark" value={visit.landmark ?? "—"} />
           <ReadOnlyField label="Property Type" value={visit.propertyType ?? "—"} />
           {visit.propertyType === "Other" && (
@@ -253,6 +254,9 @@ export function SubmittedFieldVisit({
             <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
           )}
           <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
+          {visit.occupancyStatus === "Rented" && (
+            <ReadOnlyField label="Rent Amount" value={visit.rentAmount ?? "—"} />
+          )}
           <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
           <ReadOnlyField label="Floors in Building" value={visit.floorsInBuilding ?? "—"} />
           <ReadOnlyField label="Located on Floor" value={visit.locatedOnFloor ?? "—"} />
@@ -275,6 +279,17 @@ export function SubmittedFieldVisit({
         </SectionCard>
 
         <SectionCard title="Boundaries" icon={Compass}>
+          <ReadOnlyField label="Length (SQ FT)" value={visit.boundaryLength ?? "—"} />
+          <ReadOnlyField label="Breadth (SQ FT)" value={visit.boundaryBreadth ?? "—"} />
+          <ReadOnlyField
+            label="Area (SQ FT)"
+            value={
+              visit.boundaryLength && visit.boundaryBreadth
+                ? `${(Number(visit.boundaryLength) * Number(visit.boundaryBreadth)).toFixed(2)}`
+                : "—"
+            }
+          />
+          <ReadOnlyField label="Description" value={visit.boundaryDescription ?? "—"} />
           <ReadOnlyField label="East" value={visit.boundaryEast ?? "—"} />
           <ReadOnlyField label="West" value={visit.boundaryWest ?? "—"} />
           <ReadOnlyField label="North" value={visit.boundaryNorth ?? "—"} />
@@ -292,6 +307,7 @@ export function SubmittedFieldVisit({
           <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
           <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
           <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
+          <ReadOnlyField label="Area Basis" value={visit.areaBasis ?? "—"} />
           <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
           <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
         </SectionCard>
