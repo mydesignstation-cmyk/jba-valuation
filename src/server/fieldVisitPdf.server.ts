@@ -16,9 +16,6 @@
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
 import type { FieldVisit } from "@/types";
-import { readFileSync } from "fs";
-import { fileURLToPath } from "url";
-import { dirname, join } from "path";
 
 /** Case-derived header values (same shape the UI already builds). */
 export interface FieldVisitPdfHeader {
@@ -53,6 +50,9 @@ const COLOR_RULE = rgb(0.82, 0.85, 0.89);
 const COLOR_BAND = rgb(0.93, 0.95, 0.98);
 
 const EM_DASH = "\u2014";
+
+// Base64-encoded JBA logo (small, optimized)
+const LOGO_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
 /** Coerce any optional value to a display string, using an em dash when empty. */
 function show(value: unknown): string {
@@ -128,6 +128,29 @@ class ReportWriter {
     if (this.y - needed < MARGIN) {
       this.page = this.doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
       this.y = PAGE_HEIGHT - MARGIN;
+    }
+  }
+
+  /** Draw the logo image centered at the top of the page. */
+  async drawLogo() {
+    try {
+      const image = await this.doc.embedPng(Buffer.from(LOGO_BASE64, "base64"));
+      const logoWidth = 80;
+      const logoHeight = 60;
+      const logoX = (PAGE_WIDTH - logoWidth) / 2;
+      const logoY = this.y - logoHeight - 12;
+      
+      this.page.drawImage(image, {
+        x: logoX,
+        y: logoY,
+        width: logoWidth,
+        height: logoHeight,
+      });
+      
+      this.y -= logoHeight + 20;
+    } catch (error) {
+      console.warn("Logo rendering skipped:", error);
+      this.y -= 20;
     }
   }
 
