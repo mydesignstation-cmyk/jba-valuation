@@ -66,15 +66,15 @@ function getLogoBytes(): Buffer {
   try {
     // In production (Nitro/serverless), use import.meta.url
     const currentDir = dirname(fileURLToPath(import.meta.url));
-    // Navigate from src/server to public
-    const logoPath = join(currentDir, "../../public/logo.jpeg");
+    // Navigate from src/server to public - use WebP (5KB vs 118KB JPEG)
+    const logoPath = join(currentDir, "../../public/logo.webp");
     return readFileSync(logoPath);
   } catch {
     // Fallback for different environments
     try {
-      return readFileSync(join(process.cwd(), "public/logo.jpeg"));
+      return readFileSync(join(process.cwd(), "public/logo.webp"));
     } catch {
-      throw new Error("Logo file not found at public/logo.jpeg");
+      throw new Error("Logo file not found at public/logo.webp");
     }
   }
 }
@@ -158,15 +158,12 @@ class ReportWriter {
   async drawLogo() {
     try {
       const logoBytes = getLogoBytes();
-      const image = await this.doc.embedJpg(logoBytes);
+      const image = await this.doc.embedWebp(logoBytes);
       
-      // Logo dimensions (adjust width as needed, height scales proportionally)
       const logoWidth = 80;
       const logoHeight = 60;
-      
-      // Center horizontally
       const logoX = (PAGE_WIDTH - logoWidth) / 2;
-      const logoY = this.y - logoHeight - 12; // 12pt from top
+      const logoY = this.y - logoHeight - 12;
       
       this.page.drawImage(image, {
         x: logoX,
@@ -175,12 +172,10 @@ class ReportWriter {
         height: logoHeight,
       });
       
-      // Move cursor down past the logo and some spacing
       this.y -= logoHeight + 20;
     } catch (error) {
-      // If logo fails to load, just continue without it
       console.warn("Failed to load logo:", error);
-      this.y -= 20; // Still add spacing
+      this.y -= 20;
     }
   }
 
