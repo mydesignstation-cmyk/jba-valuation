@@ -17,7 +17,8 @@ import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf
 import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
 import type { FieldVisit } from "@/types";
 import { readFileSync } from "fs";
-import { join } from "path";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 
 /** Case-derived header values (same shape the UI already builds). */
 export interface FieldVisitPdfHeader {
@@ -63,26 +64,18 @@ function show(value: unknown): string {
 /** Load logo image from public directory */
 function getLogoBytes(): Buffer {
   try {
-    // In Nitro/production, files are in .output/public
-    // Use process.cwd() for consistent resolution
-    const logoPaths = [
-      join(process.cwd(), "public/logo.jpeg"),
-      join(process.cwd(), ".output/public/logo.jpeg"),
-      "public/logo.jpeg",
-    ];
-    
-    for (const path of logoPaths) {
-      try {
-        return readFileSync(path);
-      } catch {
-        // Try next path
-      }
+    // In production (Nitro/serverless), use import.meta.url
+    const currentDir = dirname(fileURLToPath(import.meta.url));
+    // Navigate from src/server to public
+    const logoPath = join(currentDir, "../../public/logo.jpeg");
+    return readFileSync(logoPath);
+  } catch {
+    // Fallback for different environments
+    try {
+      return readFileSync(join(process.cwd(), "public/logo.jpeg"));
+    } catch {
+      throw new Error("Logo file not found at public/logo.jpeg");
     }
-    
-    throw new Error("Logo file not found in any expected location");
-  } catch (error) {
-    console.error("Failed to load logo:", error);
-    throw error;
   }
 }
 
