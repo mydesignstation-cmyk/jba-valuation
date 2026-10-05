@@ -204,11 +204,11 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "occupancyStatus",
     "occupancyStatusRemarks",
     "occupancyWithName",
-    "yearOfLiving",
   ],
   [
     "structureType",
     "structureTypeRemarks",
+    "yearOfLiving",
     "rentAmount",
     "occupancyLevel",
     "floorsInBuilding",
@@ -1028,13 +1028,6 @@ export function FieldVisitWizard({
                   placeholder="e.g. John Doe"
                   maxLength={500}
                 />
-                <TextField
-                  form={form}
-                  name="yearOfLiving"
-                  label="Year of Living"
-                  placeholder="e.g. 2020"
-                  maxLength={100}
-                />
               </div>
             )}
 
@@ -1057,6 +1050,13 @@ export function FieldVisitWizard({
                     maxLength={500}
                   />
                 )}
+                <TextField
+                  form={form}
+                  name="yearOfLiving"
+                  label="Year of Living"
+                  placeholder="e.g. 2020"
+                  maxLength={100}
+                />
                 {v.occupancyStatus === "Rented" && (
                   <TextField
                     form={form}
