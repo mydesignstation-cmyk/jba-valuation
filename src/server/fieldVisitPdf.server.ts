@@ -15,6 +15,7 @@
 
 import { PDFDocument, StandardFonts, rgb, type PDFFont, type PDFPage } from "pdf-lib";
 import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
+import { LOGO_BASE64 } from "./logoBase64";
 import type { FieldVisit } from "@/types";
 
 /** Case-derived header values (same shape the UI already builds). */
@@ -51,32 +52,12 @@ const COLOR_BAND = rgb(0.93, 0.95, 0.98);
 
 const EM_DASH = "\u2014";
 
-// Base64-encoded JBA logo (small, optimized)
-const LOGO_BASE64 = "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==";
 
 /** Coerce any optional value to a display string, using an em dash when empty. */
 function show(value: unknown): string {
   if (value === undefined || value === null) return EM_DASH;
   const s = String(value).trim();
   return s.length > 0 ? s : EM_DASH;
-}
-
-/** Load logo image from public directory */
-function getLogoBytes(): Buffer {
-  try {
-    // In production (Nitro/serverless), use import.meta.url
-    const currentDir = dirname(fileURLToPath(import.meta.url));
-    // Navigate from src/server to public - use WebP (5KB vs 118KB JPEG)
-    const logoPath = join(currentDir, "../../public/logo.webp");
-    return readFileSync(logoPath);
-  } catch {
-    // Fallback for different environments
-    try {
-      return readFileSync(join(process.cwd(), "public/logo.webp"));
-    } catch {
-      throw new Error("Logo file not found at public/logo.webp");
-    }
-  }
 }
 
 /**
@@ -134,9 +115,9 @@ class ReportWriter {
   /** Draw the logo image centered at the top of the page. */
   async drawLogo() {
     try {
-      const image = await this.doc.embedPng(Buffer.from(LOGO_BASE64, "base64"));
+      const image = await this.doc.embedJpg(Buffer.from(LOGO_BASE64, "base64"));
       const logoWidth = 80;
-      const logoHeight = 60;
+      const logoHeight = 80;
       const logoX = (PAGE_WIDTH - logoWidth) / 2;
       const logoY = this.y - logoHeight - 12;
       
@@ -150,31 +131,6 @@ class ReportWriter {
       this.y -= logoHeight + 20;
     } catch (error) {
       console.warn("Logo rendering skipped:", error);
-      this.y -= 20;
-    }
-  }
-
-  /** Draw the logo image centered at the top of the page. */
-  async drawLogo() {
-    try {
-      const logoBytes = getLogoBytes();
-      const image = await this.doc.embedWebp(logoBytes);
-      
-      const logoWidth = 80;
-      const logoHeight = 60;
-      const logoX = (PAGE_WIDTH - logoWidth) / 2;
-      const logoY = this.y - logoHeight - 12;
-      
-      this.page.drawImage(image, {
-        x: logoX,
-        y: logoY,
-        width: logoWidth,
-        height: logoHeight,
-      });
-      
-      this.y -= logoHeight + 20;
-    } catch (error) {
-      console.warn("Failed to load logo:", error);
       this.y -= 20;
     }
   }
