@@ -216,6 +216,9 @@ function Page() {
                           Request Number
                         </span>
                       </TableHead>
+                      <TableHead>Bank Name</TableHead>
+                      <TableHead>Branch Name</TableHead>
+                      <TableHead>Customer Name</TableHead>
                       <TableHead>
                         <span className="flex items-center gap-1.5">
                           <HardHat className="h-3.5 w-3.5 text-muted-foreground" />
@@ -251,6 +254,9 @@ function Page() {
                           </span>
                         </TableCell>
                         <TableCell>{c.requestNumber}</TableCell>
+                        <TableCell>{(c as any).bankName ?? "—"}</TableCell>
+                        <TableCell>{(c as any).branchName ?? "—"}</TableCell>
+                        <TableCell>{(c as any).customerName ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>

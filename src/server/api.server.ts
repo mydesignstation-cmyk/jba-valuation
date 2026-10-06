@@ -901,17 +901,33 @@ const CHECKER_QUEUE_STAGES = [
  */
 export async function api_listCheckerCases(
   token: string | null | undefined,
-): Promise<ValuationCase[]> {
+): Promise<(ValuationCase & { customerName?: string; bankName?: string; branchName?: string })[]> {
   await requireServerUser(token, "CHECKER", "ADMIN", "SUPER_ADMIN");
 
   try {
     const rows = await getDb()
-      .select()
+      .select({
+        case: cases,
+        customerName: customers.name,
+        bankName: banks.name,
+        branchName: branches.name,
+      })
       .from(cases)
+      .leftJoin(customers, eq(cases.customer_id, customers.id))
+      .leftJoin(banks, eq(cases.bank_id, banks.id))
+      .leftJoin(branches, eq(cases.branch_id, branches.id))
       .where(inArray(cases.stage, [...CHECKER_QUEUE_STAGES]))
       .orderBy(cases.created_at);
 
-    return rows.map(mapCaseRow);
+    return rows.map((row) => {
+      const baseCase = mapCaseRow(row.case);
+      return {
+        ...baseCase,
+        customerName: row.customerName || undefined,
+        bankName: row.bankName || undefined,
+        branchName: row.branchName || undefined,
+      } as ValuationCase & { customerName?: string; bankName?: string; branchName?: string };
+    });
   } catch (error) {
     console.error("Failed to list checker cases:", error);
     throw new Error("Failed to load checker cases from database");
