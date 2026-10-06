@@ -306,6 +306,8 @@ function Page() {
                   contact: editingCustomer.contact,
                   email: editingCustomer.email ?? "",
                   address: editingCustomer.address,
+                  alternativeContactPersonName: editingCustomer.alternativeContactPersonName ?? "",
+                  alternativePhoneNumber: editingCustomer.alternativePhoneNumber ?? "",
                 }
               : undefined
           }

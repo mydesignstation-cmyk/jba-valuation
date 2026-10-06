@@ -68,13 +68,27 @@ export function CustomerForm({
           <FormField
             control={form.control}
             name="contact"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Contact</FormLabel>
-                <Input {...field} placeholder="Enter contact number" />
-                <FormMessage />
-              </FormItem>
-            )}
+            render={({ field }) => {
+              const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value.replace(/\D/g, "");
+                field.onChange(value);
+              };
+
+              return (
+                <FormItem>
+                  <FormLabel>Contact</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="10 digit phone number"
+                    maxLength={10}
+                    type="tel"
+                    onChange={handlePhoneChange}
+                    inputMode="numeric"
+                  />
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
 
           <FormField
