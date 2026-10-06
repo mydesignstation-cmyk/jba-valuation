@@ -392,7 +392,7 @@ export function CaseWithCustomerTabs({
                     control={customerForm.control}
                     name="alternativePhoneNumber"
                     render={({ field }) => {
-                      const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                      const handlePhoneChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
                         const value = e.target.value.replace(/\D/g, "");
                         field.onChange(value);
                       };
@@ -400,14 +400,14 @@ export function CaseWithCustomerTabs({
                       return (
                         <FormItem>
                           <FormLabel>Alternative Phone Number</FormLabel>
-                          <Input
+                          <Textarea
                             {...field}
                             placeholder="10 digit phone number"
                             maxLength={10}
-                            type="tel"
-                            disabled={isCreatingCustomer || useExisting}
                             onChange={handlePhoneChange}
-                            inputMode="numeric"
+                            className="resize-none"
+                            rows={3}
+                            disabled={isCreatingCustomer || useExisting}
                           />
                           <FormMessage />
                         </FormItem>
