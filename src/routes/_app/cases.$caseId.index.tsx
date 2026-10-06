@@ -831,6 +831,20 @@ function Page() {
                     value={customer?.email}
                     icon={<Mail className="h-3.5 w-3.5" />}
                   />
+                  {customer?.alternativeContactPersonName && (
+                    <Field
+                      label="Alternative Contact Person"
+                      value={customer.alternativeContactPersonName}
+                      icon={<UserIcon className="h-3.5 w-3.5" />}
+                    />
+                  )}
+                  {customer?.alternativePhoneNumber && (
+                    <Field
+                      label="Alternative Phone Number"
+                      value={customer.alternativePhoneNumber}
+                      icon={<Phone className="h-3.5 w-3.5" />}
+                    />
+                  )}
                 </div>
                 <Separator />
                 <Field
