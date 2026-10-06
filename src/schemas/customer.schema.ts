@@ -14,6 +14,14 @@ export const createCustomerSchema = z.object({
   contact: phoneSchema,
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   address: z.string().min(1, "Address is required"),
+  alternativeContactPersonName: z.string().optional().or(z.literal("")),
+  alternativePhoneNumber: z.string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (val) => !val || val.replace(/\D/g, "").length === 10,
+      "Phone number must be exactly 10 digits"
+    ),
 });
 
 export const updateCustomerSchema = z.object({
@@ -21,6 +29,14 @@ export const updateCustomerSchema = z.object({
   contact: phoneSchema,
   email: z.string().email("Invalid email address").optional().or(z.literal("")),
   address: z.string().min(1, "Address is required"),
+  alternativeContactPersonName: z.string().optional().or(z.literal("")),
+  alternativePhoneNumber: z.string()
+    .optional()
+    .or(z.literal(""))
+    .refine(
+      (val) => !val || val.replace(/\D/g, "").length === 10,
+      "Phone number must be exactly 10 digits"
+    ),
 });
 
 export type CreateCustomerInput = z.infer<typeof createCustomerSchema>;

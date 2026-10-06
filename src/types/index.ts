@@ -32,6 +32,8 @@ export interface Customer {
   contact: string;
   email?: string;
   address: string;
+  alternativeContactPersonName?: string;
+  alternativePhoneNumber?: string;
   createdAt: string;
   updatedAt: string;
 }

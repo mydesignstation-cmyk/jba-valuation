@@ -21,6 +21,8 @@ export const customers = pgTable(
     contact: varchar("contact", { length: 255 }).notNull(),
     email: varchar("email", { length: 255 }),
     address: text("address").notNull(),
+    alternative_contact_person_name: text("alternative_contact_person_name"),
+    alternative_phone_number: varchar("alternative_phone_number", { length: 255 }),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },

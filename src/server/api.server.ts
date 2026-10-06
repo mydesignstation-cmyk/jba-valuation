@@ -274,6 +274,12 @@ export async function api_listCustomers(): Promise<Customer[]> {
       if (row.email !== null) {
         customer.email = row.email;
       }
+      if (row.alternative_contact_person_name !== null) {
+        customer.alternativeContactPersonName = row.alternative_contact_person_name;
+      }
+      if (row.alternative_phone_number !== null) {
+        customer.alternativePhoneNumber = row.alternative_phone_number;
+      }
       return customer;
     });
   } catch (error) {
@@ -333,6 +339,8 @@ export async function api_createCustomer(
         contact: data.contact,
         email: data.email || null,
         address: data.address,
+        alternative_contact_person_name: data.alternativeContactPersonName || null,
+        alternative_phone_number: data.alternativePhoneNumber || null,
         created_at: now,
         updated_at: now,
       })
@@ -351,6 +359,12 @@ export async function api_createCustomer(
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
     };
+    if (row.alternative_contact_person_name !== null) {
+      customer.alternativeContactPersonName = row.alternative_contact_person_name;
+    }
+    if (row.alternative_phone_number !== null) {
+      customer.alternativePhoneNumber = row.alternative_phone_number;
+    }
     if (row.email !== null) {
       customer.email = row.email;
     }
@@ -378,6 +392,8 @@ export async function api_updateCustomer(
       contact?: string;
       email?: string | null;
       address?: string;
+      alternative_contact_person_name?: string | null;
+      alternative_phone_number?: string | null;
       updated_at: Date;
     } = { updated_at: now };
 
@@ -385,6 +401,8 @@ export async function api_updateCustomer(
     if (data.contact !== undefined) updateData.contact = data.contact;
     if (data.email !== undefined) updateData.email = data.email || null;
     if (data.address !== undefined) updateData.address = data.address;
+    if (data.alternativeContactPersonName !== undefined) updateData.alternative_contact_person_name = data.alternativeContactPersonName || null;
+    if (data.alternativePhoneNumber !== undefined) updateData.alternative_phone_number = data.alternativePhoneNumber || null;
 
     const rows = await getDb()
       .update(customers)
@@ -405,6 +423,12 @@ export async function api_updateCustomer(
       createdAt: row.created_at.toISOString(),
       updatedAt: row.updated_at.toISOString(),
     };
+    if (row.alternative_contact_person_name !== null) {
+      customer.alternativeContactPersonName = row.alternative_contact_person_name;
+    }
+    if (row.alternative_phone_number !== null) {
+      customer.alternativePhoneNumber = row.alternative_phone_number;
+    }
     if (row.email !== null) {
       customer.email = row.email;
     }

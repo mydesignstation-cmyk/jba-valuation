@@ -16,6 +16,8 @@ interface CustomerFormProps {
         contact: string;
         email: string;
         address: string;
+        alternativeContactPersonName?: string;
+        alternativePhoneNumber?: string;
       }
     | undefined;
   onSubmit: (data: CustomerFormValues) => Promise<void>;
@@ -38,6 +40,8 @@ export function CustomerForm({
       contact: initialData?.contact ?? "",
       email: initialData?.email ?? "",
       address: initialData?.address ?? "",
+      alternativeContactPersonName: initialData?.alternativeContactPersonName ?? "",
+      alternativePhoneNumber: initialData?.alternativePhoneNumber ?? "",
     },
   });
 
@@ -95,6 +99,44 @@ export function CustomerForm({
                 <FormMessage />
               </FormItem>
             )}
+          />
+
+          <FormField
+            control={form.control}
+            name="alternativeContactPersonName"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Alternative Contact Person Name</FormLabel>
+                <Input {...field} placeholder="Enter alternative contact person name" />
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="alternativePhoneNumber"
+            render={({ field }) => {
+              const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                const value = e.target.value.replace(/\D/g, "");
+                field.onChange(value);
+              };
+
+              return (
+                <FormItem>
+                  <FormLabel>Alternative Phone Number</FormLabel>
+                  <Input
+                    {...field}
+                    placeholder="10 digit phone number"
+                    maxLength={10}
+                    type="tel"
+                    onChange={handlePhoneChange}
+                    inputMode="numeric"
+                  />
+                  <FormMessage />
+                </FormItem>
+              );
+            }}
           />
         </div>
 

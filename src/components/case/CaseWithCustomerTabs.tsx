@@ -104,6 +104,8 @@ export function CaseWithCustomerTabs({
       const newCustomer = await api_createCustomer({
         ...values,
         email: values.email ?? "",
+        alternativeContactPersonName: values.alternativeContactPersonName ?? "",
+        alternativePhoneNumber: values.alternativePhoneNumber ?? "",
       });
       console.log("Customer created:", newCustomer.id);
 
@@ -367,6 +369,49 @@ export function CaseWithCustomerTabs({
                       <FormMessage />
                     </FormItem>
                   )}
+                />
+
+                <FormField
+                  control={customerForm.control}
+                  name="alternativeContactPersonName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Alternative Contact Person Name</FormLabel>
+                      <Input
+                        {...field}
+                        placeholder="Enter alternative contact person name"
+                        disabled={isCreatingCustomer || useExisting}
+                      />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={customerForm.control}
+                  name="alternativePhoneNumber"
+                  render={({ field }) => {
+                    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                      const value = e.target.value.replace(/\D/g, "");
+                      field.onChange(value);
+                    };
+
+                    return (
+                      <FormItem>
+                        <FormLabel>Alternative Phone Number</FormLabel>
+                        <Input
+                          {...field}
+                          placeholder="10 digit phone number"
+                          maxLength={10}
+                          type="tel"
+                          disabled={isCreatingCustomer || useExisting}
+                          onChange={handlePhoneChange}
+                          inputMode="numeric"
+                        />
+                        <FormMessage />
+                      </FormItem>
+                    );
+                  }}
                 />
 
                 {/* Use Existing Customer Checkbox - Hidden for now */}

@@ -88,6 +88,8 @@ function Page() {
           contact: data.contact,
           email: data.email ?? "",
           address: data.address,
+          alternativeContactPersonName: data.alternativeContactPersonName ?? "",
+          alternativePhoneNumber: data.alternativePhoneNumber ?? "",
         });
         toast.success("Customer updated successfully");
       } else {
@@ -96,6 +98,8 @@ function Page() {
           contact: data.contact,
           email: data.email ?? "",
           address: data.address,
+          alternativeContactPersonName: data.alternativeContactPersonName ?? "",
+          alternativePhoneNumber: data.alternativePhoneNumber ?? "",
         });
         toast.success("Customer created successfully");
       }

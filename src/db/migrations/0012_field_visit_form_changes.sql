@@ -15,4 +15,6 @@ ALTER TABLE field_visits DROP COLUMN IF EXISTS rate_basis;
 ALTER TABLE field_visits ALTER COLUMN rate_per_sqft TYPE text;
 
 -- Add rent_per_month column
-ALTER TABLE field_visits ADD COLUMN rent_per_month text;
+ALTER TABLE field_visits ADD COLUMN IF NOT EXISTS rent_per_month text;
+
+
