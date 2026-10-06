@@ -120,9 +120,10 @@ class ReportWriter {
 
   async initLogoWatermark() {
     try {
-      this.logoImage = await this.doc.embedPng(Buffer.from(LOGO_BASE64, "base64"));
+      const buffer = Buffer.from(LOGO_BASE64, "base64");
+      this.logoImage = await this.doc.embedPng(buffer);
     } catch (error) {
-      console.warn("Logo watermark initialization skipped:", error);
+      console.warn("Logo watermark initialization skipped:", error instanceof Error ? error.message : error);
     }
   }
 
@@ -130,18 +131,22 @@ class ReportWriter {
   drawWatermark() {
     if (!this.logoImage) return;
     
-    const watermarkWidth = 150;
-    const watermarkHeight = 150;
-    const watermarkX = (PAGE_WIDTH - watermarkWidth) / 2;
-    const watermarkY = (PAGE_HEIGHT - watermarkHeight) / 2;
-    
-    this.page.drawImage(this.logoImage, {
-      x: watermarkX,
-      y: watermarkY,
-      width: watermarkWidth,
-      height: watermarkHeight,
-      opacity: 0.5,
-    });
+    try {
+      const watermarkWidth = 150;
+      const watermarkHeight = 150;
+      const watermarkX = (PAGE_WIDTH - watermarkWidth) / 2;
+      const watermarkY = (PAGE_HEIGHT - watermarkHeight) / 2;
+      
+      this.page.drawImage(this.logoImage, {
+        x: watermarkX,
+        y: watermarkY,
+        width: watermarkWidth,
+        height: watermarkHeight,
+        opacity: 0.5,
+      });
+    } catch (error) {
+      console.warn("Failed to draw watermark:", error);
+    }
   }
 
   /** Report title + subtitle block at the top of the first page. */

@@ -101,43 +101,45 @@ export function CustomerForm({
             )}
           />
 
-          <FormField
-            control={form.control}
-            name="alternativeContactPersonName"
-            render={({ field }) => (
-              <FormItem>
-                <FormLabel>Alternative Contact Person Name</FormLabel>
-                <Input {...field} placeholder="Enter alternative contact person name" />
-                <FormMessage />
-              </FormItem>
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="alternativePhoneNumber"
-            render={({ field }) => {
-              const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                const value = e.target.value.replace(/\D/g, "");
-                field.onChange(value);
-              };
-
-              return (
+          <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+            <FormField
+              control={form.control}
+              name="alternativeContactPersonName"
+              render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Alternative Phone Number</FormLabel>
-                  <Input
-                    {...field}
-                    placeholder="10 digit phone number"
-                    maxLength={10}
-                    type="tel"
-                    onChange={handlePhoneChange}
-                    inputMode="numeric"
-                  />
+                  <FormLabel>Alternative Contact Person Name</FormLabel>
+                  <Input {...field} placeholder="Enter name" />
                   <FormMessage />
                 </FormItem>
-              );
-            }}
-          />
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="alternativePhoneNumber"
+              render={({ field }) => {
+                const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                  const value = e.target.value.replace(/\D/g, "");
+                  field.onChange(value);
+                };
+
+                return (
+                  <FormItem>
+                    <FormLabel>Alternative Phone Number</FormLabel>
+                    <Input
+                      {...field}
+                      placeholder="10 digit phone number"
+                      maxLength={10}
+                      type="tel"
+                      onChange={handlePhoneChange}
+                      inputMode="numeric"
+                    />
+                    <FormMessage />
+                  </FormItem>
+                );
+              }}
+            />
+          </div>
         </div>
 
         <FormActions submitText={submitText} isSubmitting={isSubmitting} onCancel={onCancel} />

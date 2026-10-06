@@ -371,48 +371,50 @@ export function CaseWithCustomerTabs({
                   )}
                 />
 
-                <FormField
-                  control={customerForm.control}
-                  name="alternativeContactPersonName"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Alternative Contact Person Name</FormLabel>
-                      <Input
-                        {...field}
-                        placeholder="Enter alternative contact person name"
-                        disabled={isCreatingCustomer || useExisting}
-                      />
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-
-                <FormField
-                  control={customerForm.control}
-                  name="alternativePhoneNumber"
-                  render={({ field }) => {
-                    const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-                      const value = e.target.value.replace(/\D/g, "");
-                      field.onChange(value);
-                    };
-
-                    return (
+                <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+                  <FormField
+                    control={customerForm.control}
+                    name="alternativeContactPersonName"
+                    render={({ field }) => (
                       <FormItem>
-                        <FormLabel>Alternative Phone Number</FormLabel>
+                        <FormLabel>Alternative Contact Person Name</FormLabel>
                         <Input
                           {...field}
-                          placeholder="10 digit phone number"
-                          maxLength={10}
-                          type="tel"
+                          placeholder="Enter name"
                           disabled={isCreatingCustomer || useExisting}
-                          onChange={handlePhoneChange}
-                          inputMode="numeric"
                         />
                         <FormMessage />
                       </FormItem>
-                    );
-                  }}
-                />
+                    )}
+                  />
+
+                  <FormField
+                    control={customerForm.control}
+                    name="alternativePhoneNumber"
+                    render={({ field }) => {
+                      const handlePhoneChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+                        const value = e.target.value.replace(/\D/g, "");
+                        field.onChange(value);
+                      };
+
+                      return (
+                        <FormItem>
+                          <FormLabel>Alternative Phone Number</FormLabel>
+                          <Input
+                            {...field}
+                            placeholder="10 digit phone number"
+                            maxLength={10}
+                            type="tel"
+                            disabled={isCreatingCustomer || useExisting}
+                            onChange={handlePhoneChange}
+                            inputMode="numeric"
+                          />
+                          <FormMessage />
+                        </FormItem>
+                      );
+                    }}
+                  />
+                </div>
 
                 {/* Use Existing Customer Checkbox - Hidden for now */}
                 <div className="hidden pt-2">
