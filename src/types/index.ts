@@ -144,7 +144,7 @@ export interface FieldVisit {
   societyNameBoard?: string;
   areaSqFt?: string;
   areaBasis?: string; // Area basis (CA, RERA CA, BUA, SBUA) — STEP 6
-  rateBasis?: string; // Rate basis — STEP 6
+  rateBasis?: "Carpet Area" | "Built Up Area" | "Super Built Up Area" | "RERA Carpet Area" | "Lumpsum Rate" | "Floorwise Rate"; // Rate basis — STEP 6
   ratePerSqFt?: string; // Rate per sq.ft. (accepts numbers and text) — STEP 6
   rentPerMonth?: string; // Rent per month — STEP 6
   negativePoints?: string;

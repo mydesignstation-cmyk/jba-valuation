@@ -271,7 +271,7 @@ export const step6Schema = z
     societyNameBoard: requiredText("Name on society notice board", 500), // Made required, label updated
     areaSqFt: numericString("Area of property", { min: 0 }), // Made required, must be numeric
     areaBasis: areaBasisSchema, // Area type (CA, RERA CA, BUA, SBUA)
-    rateBasis: optionalText(100), // Rate basis
+    rateBasis: rateBasisSchema.optional(), // Rate basis (Carpet Area, Built Up Area, etc.)
     ratePerSqFt: requiredText("Rate per sq. ft.", 100), // Accepts numbers and letters
     rentPerMonth: requiredText("Rent per month", 100), // Rent per month
     negativePoints: requiredText("Negative points", 2000), // Made required

@@ -1242,7 +1242,7 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.society_name_board != null) visit.societyNameBoard = row.society_name_board;
   if (row.area_sqft != null) visit.areaSqFt = String(row.area_sqft);
   if (row.area_basis != null) visit.areaBasis = row.area_basis;
-  if (row.rate_basis != null) visit.rateBasis = row.rate_basis;
+  if (row.rate_basis != null) visit.rateBasis = row.rate_basis as any;
   if (row.rate_per_sqft != null) visit.ratePerSqFt = row.rate_per_sqft;
   if (row.rent_per_month != null) visit.rentPerMonth = row.rent_per_month;
   if (row.area_basis != null) visit.areaBasis = row.area_basis;

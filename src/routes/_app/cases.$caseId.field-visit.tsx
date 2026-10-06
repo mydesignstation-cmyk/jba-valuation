@@ -621,7 +621,7 @@ const EMPTY_FORM_VALUES = {
   societyNameBoard: "",
   areaSqFt: "",
   areaBasis: undefined,
-  rateBasis: "",
+  rateBasis: undefined,
   ratePerSqFt: "",
   rentPerMonth: "",
   negativePoints: "",
@@ -850,7 +850,7 @@ export function FieldVisitWizard({
                   form.setValue("societyNameBoard", "Golden Heights Society");
                   form.setValue("areaSqFt", "1500");
                   form.setValue("areaBasis", "BUA");
-                  form.setValue("rateBasis", "Market Rate");
+                  form.setValue("rateBasis", "Carpet Area");
                   form.setValue("ratePerSqFt", "5000/sqft");
                   form.setValue("rentPerMonth", "25000");
                   form.setValue("negativePoints", "None observed");
@@ -1173,8 +1173,8 @@ export function FieldVisitWizard({
                   placeholder="e.g. Green Valley Apartments"
                   maxLength={500}
                 />
-                {/* Row 1: Area of Property + Area Basis + Rate Basis */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+                {/* Row 1: Area of Property + Area Basis */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <TextField
                     form={form}
                     name="areaSqFt"
@@ -1189,15 +1189,8 @@ export function FieldVisitWizard({
                     options={areaBasisOptions}
                     placeholder="Select area type"
                   />
-                  <TextField
-                    form={form}
-                    name="rateBasis"
-                    label="Rate Basis"
-                    placeholder="e.g. Market Rate"
-                    maxLength={100}
-                  />
                 </div>
-                {/* Row 2: Rate per Sq. Ft. + Rent per Month */}
+                {/* Row 2: Rate per Sq. Ft. + Rate Basis */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <TextField
                     form={form}
@@ -1206,6 +1199,16 @@ export function FieldVisitWizard({
                     placeholder="e.g. 5200 or 5200/sqft"
                     maxLength={100}
                   />
+                  <DropdownField
+                    form={form}
+                    name="rateBasis"
+                    label="Rate Basis"
+                    options={rateBasisOptions}
+                    placeholder="Select rate basis"
+                  />
+                </div>
+                {/* Row 3: Rent per Month */}
+                <div className="grid grid-cols-1 gap-6">
                   <TextField
                     form={form}
                     name="rentPerMonth"

@@ -83,7 +83,9 @@ class ReportWriter {
     const doc = await PDFDocument.create();
     const font = await doc.embedFont(StandardFonts.Helvetica);
     const bold = await doc.embedFont(StandardFonts.HelveticaBold);
-    return new ReportWriter(doc, font, bold);
+    const writer = new ReportWriter(doc, font, bold);
+    await writer.initLogoWatermark();
+    return writer;
   }
 
   /** Split text into lines that fit within maxWidth at the given font size. */
@@ -108,31 +110,38 @@ class ReportWriter {
   private ensureSpace(needed: number) {
     if (this.y - needed < MARGIN) {
       this.page = this.doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+      this.drawWatermark(); // Draw watermark on new page
       this.y = PAGE_HEIGHT - MARGIN;
     }
   }
 
-  /** Draw the logo image centered at the top of the page. */
-  async drawLogo() {
+  /** Draw the logo as a watermark (50% opacity) centered on every page. */
+  private logoImage: any = null;
+
+  async initLogoWatermark() {
     try {
-      const image = await this.doc.embedJpg(Buffer.from(LOGO_BASE64, "base64"));
-      const logoWidth = 80;
-      const logoHeight = 80;
-      const logoX = (PAGE_WIDTH - logoWidth) / 2;
-      const logoY = this.y - logoHeight - 12;
-      
-      this.page.drawImage(image, {
-        x: logoX,
-        y: logoY,
-        width: logoWidth,
-        height: logoHeight,
-      });
-      
-      this.y -= logoHeight + 20;
+      this.logoImage = await this.doc.embedJpg(Buffer.from(LOGO_BASE64, "base64"));
     } catch (error) {
-      console.warn("Logo rendering skipped:", error);
-      this.y -= 20;
+      console.warn("Logo watermark initialization skipped:", error);
     }
+  }
+
+  /** Draw watermark on the current page at center with 50% opacity. */
+  drawWatermark() {
+    if (!this.logoImage) return;
+    
+    const watermarkWidth = 150;
+    const watermarkHeight = 150;
+    const watermarkX = (PAGE_WIDTH - watermarkWidth) / 2;
+    const watermarkY = (PAGE_HEIGHT - watermarkHeight) / 2;
+    
+    this.page.drawImage(this.logoImage, {
+      x: watermarkX,
+      y: watermarkY,
+      width: watermarkWidth,
+      height: watermarkHeight,
+      opacity: 0.5,
+    });
   }
 
   /** Report title + subtitle block at the top of the first page. */
@@ -250,8 +259,8 @@ export async function buildFieldVisitPdf(
 ): Promise<Uint8Array> {
   const writer = await ReportWriter.create();
 
-  // Draw logo at the top center
-  await writer.drawLogo();
+  // Draw watermark on first page
+  writer.drawWatermark();
 
   const generatedOn = formatDisplayDateTime(new Date());
   writer.drawTitle(
