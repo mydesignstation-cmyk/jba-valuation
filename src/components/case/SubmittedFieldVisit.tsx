@@ -287,6 +287,7 @@ export function SubmittedFieldVisit({
           />
           <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
           <ReadOnlyField label="Area Type" value={visit.areaBasis ?? "—"} />
+          <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
           <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
           <ReadOnlyField label="Rent per Month" value={visit.rentPerMonth ?? "—"} />
           <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />

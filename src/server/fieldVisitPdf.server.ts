@@ -336,6 +336,7 @@ export async function buildFieldVisitPdf(
     { label: "Name on Society Notice Board", value: show(visit.societyNameBoard) },
     { label: "Area of Property", value: show(visit.areaSqFt) },
     { label: "Area Type", value: show(visit.areaBasis) },
+    { label: "Rate Basis", value: show(visit.rateBasis) },
     { label: "Rate per Sq. Ft.", value: show(visit.ratePerSqFt) },
     { label: "Rent per Month", value: show(visit.rentPerMonth) },
     { label: "Negative Points", value: show(visit.negativePoints) },

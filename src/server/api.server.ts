@@ -1242,6 +1242,7 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.society_name_board != null) visit.societyNameBoard = row.society_name_board;
   if (row.area_sqft != null) visit.areaSqFt = String(row.area_sqft);
   if (row.area_basis != null) visit.areaBasis = row.area_basis;
+  if (row.rate_basis != null) visit.rateBasis = row.rate_basis;
   if (row.rate_per_sqft != null) visit.ratePerSqFt = row.rate_per_sqft;
   if (row.rent_per_month != null) visit.rentPerMonth = row.rent_per_month;
   if (row.area_basis != null) visit.areaBasis = row.area_basis;
@@ -1464,6 +1465,7 @@ export async function api_submitFieldVisit(
           society_name_board: data.societyNameBoard ? data.societyNameBoard : null,
           area_sqft: data.areaSqFt && data.areaSqFt.trim() ? data.areaSqFt : null,
           area_basis: data.areaBasis ? data.areaBasis : null,
+          rate_basis: data.rateBasis ? data.rateBasis : null,
           rate_per_sqft: data.ratePerSqFt ? data.ratePerSqFt : null,
           rent_per_month: data.rentPerMonth ? data.rentPerMonth : null,
           negative_points: data.negativePoints ? data.negativePoints : null,
@@ -1668,6 +1670,7 @@ export async function api_updateFieldVisit(
         society_name_board: data.societyNameBoard ? data.societyNameBoard : null,
         area_sqft: data.areaSqFt && data.areaSqFt.trim() ? data.areaSqFt : null,
         area_basis: data.areaBasis ? data.areaBasis : null,
+        rate_basis: data.rateBasis ? data.rateBasis : null,
         rate_per_sqft: data.ratePerSqFt ? data.ratePerSqFt : null,
         rent_per_month: data.rentPerMonth ? data.rentPerMonth : null,
         negative_points: data.negativePoints ? data.negativePoints : null,
@@ -1807,6 +1810,7 @@ export async function api_updateFieldVisitByChecker(
         approach_road_condition: data.approachRoadCondition,
         area_sqft: data.areaSqFt,
         area_basis: data.areaBasis ? data.areaBasis : null,
+        rate_basis: data.rateBasis ? data.rateBasis : null,
         rate_per_sqft: data.ratePerSqFt,
         rent_per_month: data.rentPerMonth ? data.rentPerMonth : null,
         negative_points: data.negativePoints ? data.negativePoints : null,

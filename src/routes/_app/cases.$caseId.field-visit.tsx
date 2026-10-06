@@ -238,6 +238,7 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "societyNameBoard",
     "areaSqFt",
     "areaBasis",
+    "rateBasis",
     "ratePerSqFt",
     "rentPerMonth",
     "negativePoints",
@@ -569,6 +570,7 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     societyNameBoard: visit.societyNameBoard ?? "",
     areaSqFt: visit.areaSqFt ?? "",
     areaBasis: visit.areaBasis,
+    rateBasis: visit.rateBasis ?? "",
     ratePerSqFt: visit.ratePerSqFt ?? "",
     rentPerMonth: visit.rentPerMonth ?? "",
     negativePoints: visit.negativePoints ?? "",
@@ -619,6 +621,7 @@ const EMPTY_FORM_VALUES = {
   societyNameBoard: "",
   areaSqFt: "",
   areaBasis: undefined,
+  rateBasis: "",
   ratePerSqFt: "",
   rentPerMonth: "",
   negativePoints: "",
@@ -1169,8 +1172,8 @@ export function FieldVisitWizard({
                   placeholder="e.g. Green Valley Apartments"
                   maxLength={500}
                 />
-                {/* Row 1: Area of Property + Area Basis */}
-                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
+                {/* Row 1: Area of Property + Area Basis + Rate Basis */}
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
                   <TextField
                     form={form}
                     name="areaSqFt"
@@ -1184,6 +1187,13 @@ export function FieldVisitWizard({
                     label="Area Type (required)"
                     options={areaBasisOptions}
                     placeholder="Select area type"
+                  />
+                  <TextField
+                    form={form}
+                    name="rateBasis"
+                    label="Rate Basis"
+                    placeholder="e.g. Market Rate"
+                    maxLength={100}
                   />
                 </div>
                 {/* Row 2: Rate per Sq. Ft. + Rent per Month */}
@@ -1330,6 +1340,7 @@ export function FieldVisitWizard({
                   <ReadOnlyField label="Society Name Board" value={v.societyNameBoard ?? ""} />
                   <ReadOnlyField label="Area (Sq. Ft.)" value={v.areaSqFt ?? ""} />
                   <ReadOnlyField label="Area Type" value={v.areaBasis ?? ""} />
+                  <ReadOnlyField label="Rate Basis" value={v.rateBasis ?? ""} />
                   <ReadOnlyField label="Rate per Sq. Ft." value={v.ratePerSqFt ?? ""} />
                   <ReadOnlyField label="Rent per Month" value={v.rentPerMonth ?? ""} />
                   <ReadOnlyField label="Negative Points" value={v.negativePoints ?? ""} />
