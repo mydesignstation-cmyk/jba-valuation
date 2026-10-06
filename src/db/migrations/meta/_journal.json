@@ -85,6 +85,20 @@
       "when": 1791103505258,
       "tag": "0011_rename_other_relationship_remarks",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1728239400000,
+      "tag": "0012_field_visit_form_changes",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1728240000000,
+      "tag": "0013_restore_rate_basis",
+      "breakpoints": true
     }
   ]
 }

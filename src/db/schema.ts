@@ -198,6 +198,7 @@ export const fieldVisits = pgTable(
     society_name_board: text("society_name_board"),
     area_sqft: numeric("area_sqft", { precision: 12, scale: 2 }),
     area_basis: varchar("area_basis", { length: 50 }), // Area basis (CA, RERA CA, BUA, SBUA)
+    rate_basis: varchar("rate_basis", { length: 50 }), // Rate basis (moved here in current form)
     rate_per_sqft: text("rate_per_sqft"), // Rate per sq.ft. (accepts numbers and text)
     rent_per_month: text("rent_per_month"), // Rent per month
     negative_points: text("negative_points"),
