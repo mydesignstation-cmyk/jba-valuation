@@ -128,7 +128,7 @@ class ReportWriter {
   }
 
   /** Draw watermark on the current page at center with 50% opacity. */
-  drawWatermark() {
+  private drawWatermark() {
     if (!this.logoImage) return;
     
     try {
@@ -147,6 +147,10 @@ class ReportWriter {
     } catch (error) {
       console.warn("Failed to draw watermark:", error);
     }
+  }
+
+  applyWatermarkToCurrentPage() {
+    this.drawWatermark();
   }
 
   /** Report title + subtitle block at the top of the first page. */
@@ -264,8 +268,8 @@ export async function buildFieldVisitPdf(
 ): Promise<Uint8Array> {
   const writer = await ReportWriter.create();
 
-  // Draw watermark on first page
-  writer.drawWatermark();
+  // Apply watermark to first page
+  writer.applyWatermarkToCurrentPage();
 
   const generatedOn = formatDisplayDateTime(new Date());
   writer.drawTitle(
