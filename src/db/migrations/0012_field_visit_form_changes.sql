@@ -12,9 +12,21 @@ ALTER TABLE field_visits DROP COLUMN IF EXISTS boundary_description;
 ALTER TABLE field_visits DROP COLUMN IF EXISTS rate_basis;
 
 -- Update rate_per_sqft to handle text values
-ALTER TABLE field_visits ALTER COLUMN rate_per_sqft TYPE text;
+-- Only do this if the column exists (idempotent)
+DO $$
+BEGIN
+  BEGIN
+    ALTER TABLE field_visits ALTER COLUMN rate_per_sqft TYPE text;
+  EXCEPTION WHEN others THEN
+    NULL;
+  END;
+END $$;
 
 -- Add rent_per_month column
 ALTER TABLE field_visits ADD COLUMN IF NOT EXISTS rent_per_month text;
+
+-- Add other_relationship column
+ALTER TABLE field_visits ADD COLUMN IF NOT EXISTS other_relationship varchar(255);
+
 
 
