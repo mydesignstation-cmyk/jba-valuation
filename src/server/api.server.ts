@@ -320,6 +320,12 @@ export async function api_getCustomer(id: string): Promise<Customer | undefined>
     if (row.email !== null) {
       customer.email = row.email;
     }
+    if (row.alternative_contact_person_name !== null) {
+      customer.alternativeContactPersonName = row.alternative_contact_person_name;
+    }
+    if (row.alternative_phone_number !== null) {
+      customer.alternativePhoneNumber = row.alternative_phone_number;
+    }
     return customer;
   } catch (error) {
     console.error("Failed to get customer:", error);
