@@ -850,6 +850,7 @@ export function FieldVisitWizard({
                   form.setValue("societyNameBoard", "Golden Heights Society");
                   form.setValue("areaSqFt", "1500");
                   form.setValue("areaBasis", "BUA");
+                  form.setValue("rateBasis", "Market Rate");
                   form.setValue("ratePerSqFt", "5000/sqft");
                   form.setValue("rentPerMonth", "25000");
                   form.setValue("negativePoints", "None observed");
