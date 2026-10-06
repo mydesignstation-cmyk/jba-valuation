@@ -164,12 +164,11 @@ export const fieldVisits = pgTable(
     occupancy_status: varchar("occupancy_status", { length: 50 }),
     occupancy_status_remarks: text("occupancy_status_remarks"), // Remarks if "Other"
     occupancy_with_name: text("occupancy_with_name"), // Name of occupant
+    year_of_living: varchar("year_of_living", { length: 100 }), // Year of living — STEP 2
 
     // STEP 3 — Building information
     structure_type: varchar("structure_type", { length: 50 }),
     structure_type_remarks: text("structure_type_remarks"), // Remarks if "Other"
-    year_of_living: varchar("year_of_living", { length: 100 }), // Conditional: only if "Rented"
-    rent_amount: numeric("rent_amount", { precision: 12, scale: 2 }), // Rent amount (conditional on occupancyStatus = 'Rented')
     occupancy_level: varchar("occupancy_level", { length: 100 }), // Changed to allow open text
     floors_in_building: varchar("floors_in_building", { length: 100 }),
     located_on_floor: varchar("located_on_floor", { length: 100 }),
@@ -187,10 +186,6 @@ export const fieldVisits = pgTable(
     material_at_site: text("material_at_site"),
 
     // STEP 5 — Property boundaries
-    boundary_length: numeric("boundary_length", { precision: 12, scale: 2 }), // Boundary length in SQ FT
-    boundary_breadth: numeric("boundary_breadth", { precision: 12, scale: 2 }), // Boundary breadth in SQ FT
-    boundary_area: numeric("boundary_area", { precision: 12, scale: 2 }), // Auto-calculated: length × breadth
-    boundary_description: text("boundary_description"), // Description of boundaries
     boundary_east: text("boundary_east"),
     boundary_west: text("boundary_west"),
     boundary_north: text("boundary_north"),
@@ -202,9 +197,9 @@ export const fieldVisits = pgTable(
     remarks_approach_road: text("remarks_approach_road"),
     society_name_board: text("society_name_board"),
     area_sqft: numeric("area_sqft", { precision: 12, scale: 2 }),
-    rate_per_sqft: numeric("rate_per_sqft", { precision: 12, scale: 2 }),
-    rate_basis: varchar("rate_basis", { length: 50 }), // New: basis for rate calculation
-    area_basis: varchar("area_basis", { length: 50 }), // Area basis (Carpet Area, Rare Carpet, Built Up, Super Built Up)
+    area_basis: varchar("area_basis", { length: 50 }), // Area basis (CA, RERA CA, BUA, SBUA)
+    rate_per_sqft: text("rate_per_sqft"), // Rate per sq.ft. (accepts numbers and text)
+    rent_per_month: text("rent_per_month"), // Rent per month
     negative_points: text("negative_points"),
     agent_opinion: text("agent_opinion"),
 

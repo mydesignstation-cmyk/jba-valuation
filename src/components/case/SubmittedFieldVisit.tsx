@@ -241,16 +241,13 @@ export function SubmittedFieldVisit({
             />
           )}
           <ReadOnlyField label="Occupancy with Name" value={visit.occupancyWithName ?? "—"} />
+          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
         </SectionCard>
 
         <SectionCard title="Building" icon={Building2}>
           <ReadOnlyField label="Structure Type" value={visit.structureType ?? "—"} />
           {visit.structureType === "Other" && (
             <ReadOnlyField label="Structure Remarks" value={visit.structureTypeRemarks ?? "—"} />
-          )}
-          <ReadOnlyField label="Year of Living" value={visit.yearOfLiving ?? "—"} />
-          {visit.occupancyStatus === "Rented" && (
-            <ReadOnlyField label="Rent Amount" value={visit.rentAmount ?? "—"} />
           )}
           <ReadOnlyField label="Occupancy Level (%)" value={visit.occupancyLevel ?? "—"} />
           <ReadOnlyField label="Floors in Building" value={visit.floorsInBuilding ?? "—"} />
@@ -274,17 +271,6 @@ export function SubmittedFieldVisit({
         </SectionCard>
 
         <SectionCard title="Boundaries" icon={Compass}>
-          <ReadOnlyField label="Length (SQ FT)" value={visit.boundaryLength ?? "—"} />
-          <ReadOnlyField label="Breadth (SQ FT)" value={visit.boundaryBreadth ?? "—"} />
-          <ReadOnlyField
-            label="Area (SQ FT)"
-            value={
-              visit.boundaryLength && visit.boundaryBreadth
-                ? `${(Number(visit.boundaryLength) * Number(visit.boundaryBreadth)).toFixed(2)}`
-                : "—"
-            }
-          />
-          <ReadOnlyField label="Description" value={visit.boundaryDescription ?? "—"} />
           <ReadOnlyField label="East" value={visit.boundaryEast ?? "—"} />
           <ReadOnlyField label="West" value={visit.boundaryWest ?? "—"} />
           <ReadOnlyField label="North" value={visit.boundaryNorth ?? "—"} />
@@ -300,9 +286,9 @@ export function SubmittedFieldVisit({
             value={visit.societyNameBoard ?? "—"}
           />
           <ReadOnlyField label="Area (Sq. Ft.)" value={visit.areaSqFt ?? "—"} />
+          <ReadOnlyField label="Area Type" value={visit.areaBasis ?? "—"} />
           <ReadOnlyField label="Rate per Sq. Ft." value={visit.ratePerSqFt ?? "—"} />
-          <ReadOnlyField label="Rate Basis" value={visit.rateBasis ?? "—"} />
-          <ReadOnlyField label="Area Basis" value={visit.areaBasis ?? "—"} />
+          <ReadOnlyField label="Rent per Month" value={visit.rentPerMonth ?? "—"} />
           <ReadOnlyField label="Negative Points" value={visit.negativePoints ?? "—"} />
           <ReadOnlyField label="Agent Opinion" value={visit.agentOpinion ?? "—"} />
         </SectionCard>

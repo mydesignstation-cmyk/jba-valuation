@@ -54,10 +54,10 @@ export const rateBasisOptions = [
   "Floorwise Rate",
 ] as const;
 export const areaBasisOptions = [
-  "Carpet Area",
-  "Rare Carpet",
-  "Built Up",
-  "Super Built Up",
+  "CA",
+  "RERA CA",
+  "BUA",
+  "SBUA",
 ] as const;
 
 export const relationshipSchema = z.enum(relationshipOptions);
@@ -167,6 +167,7 @@ export const step2Schema = z
     occupancyStatus: occupancyStatusSchema,
     occupancyStatusRemarks: optionalText(500), // Remarks if "Other" selected
     occupancyWithName: requiredText("Occupancy with Name of Occupant", 500),
+    yearOfLiving: requiredText("Year of living", 100), // Year of living — STEP 2
   })
   .refine(
     (data) =>
@@ -197,8 +198,6 @@ export const step2Schema = z
 const step3Shape = {
   structureType: structureTypeSchema,
   structureTypeRemarks: optionalText(500), // Remarks if "Other" selected
-  yearOfLiving: requiredText("Year of living", 100), // Compulsory for all occupancy statuses
-  rentAmount: z.string().optional().or(z.literal("")), // Will be validated conditionally below
   occupancyLevel: requiredText("Occupancy level", 100), // Made required
   floorsInBuilding: requiredText("No. of floors", 100), // Made required
   locatedOnFloor: requiredText("Located on floor", 100), // Made required
@@ -257,10 +256,6 @@ export const step4Schema = z.object({
 
 /** STEP 5 — Property boundaries (all required). */
 export const step5Schema = z.object({
-  boundaryLength: numericString("Length in SQ FT", { min: 0 }),
-  boundaryBreadth: numericString("Breadth in SQ FT", { min: 0 }),
-  boundaryArea: numericString("Area", { min: 0 }),
-  boundaryDescription: requiredText("Boundary Description", 2000),
   boundaryEast: requiredText("Boundary — East", 500),
   boundaryWest: requiredText("Boundary — West", 500),
   boundaryNorth: requiredText("Boundary — North", 500),
@@ -275,9 +270,9 @@ export const step6Schema = z
     remarksApproachRoad: requiredText("Remarks on approach road", 500), // Made required
     societyNameBoard: requiredText("Name on society notice board", 500), // Made required, label updated
     areaSqFt: numericString("Area of property", { min: 0 }), // Made required, must be numeric
-    ratePerSqFt: numericString("Rate per sq. ft.", { min: 0 }),
-    rateBasis: rateBasisSchema, // New: basis for rate calculation
-    areaBasis: areaBasisSchema, // Area basis
+    areaBasis: areaBasisSchema, // Area type (CA, RERA CA, BUA, SBUA)
+    ratePerSqFt: requiredText("Rate per sq. ft.", 100), // Accepts numbers and letters
+    rentPerMonth: requiredText("Rent per month", 100), // Rent per month
     negativePoints: requiredText("Negative points", 2000), // Made required
     agentOpinion: requiredText("Agent opinion", 2000), // Made required
   })
@@ -309,16 +304,7 @@ export const fieldVisitFormSchema = step1Schema
   .and(step4Schema)
   .and(step5Schema)
   .and(step6Schema)
-  .and(step7Schema)
-  .refine(
-    (data) =>
-      data.occupancyStatus !== "Rented" ||
-      (data.rentAmount && data.rentAmount.trim() && Number.isFinite(Number(data.rentAmount))),
-    {
-      message: "Rent amount is required when occupancy status is 'Rented' and must be numeric",
-      path: ["rentAmount"],
-    }
-  );
+  .and(step7Schema);
 
 export type FieldVisitFormValues = z.infer<typeof fieldVisitFormSchema>;
 

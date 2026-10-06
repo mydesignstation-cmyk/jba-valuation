@@ -204,12 +204,11 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "occupancyStatus",
     "occupancyStatusRemarks",
     "occupancyWithName",
+    "yearOfLiving",
   ],
   [
     "structureType",
     "structureTypeRemarks",
-    "yearOfLiving",
-    "rentAmount",
     "occupancyLevel",
     "floorsInBuilding",
     "locatedOnFloor",
@@ -227,10 +226,6 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "materialAtSite",
   ],
   [
-    "boundaryLength",
-    "boundaryBreadth",
-    "boundaryArea",
-    "boundaryDescription",
     "boundaryEast",
     "boundaryWest",
     "boundaryNorth",
@@ -242,9 +237,9 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "remarksApproachRoad",
     "societyNameBoard",
     "areaSqFt",
-    "ratePerSqFt",
-    "rateBasis",
     "areaBasis",
+    "ratePerSqFt",
+    "rentPerMonth",
     "negativePoints",
     "agentOpinion",
   ],
@@ -548,10 +543,9 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     occupancyStatus: visit.occupancyStatus,
     occupancyStatusRemarks: visit.occupancyStatusRemarks ?? "",
     occupancyWithName: visit.occupancyWithName ?? "",
+    yearOfLiving: visit.yearOfLiving ?? "",
     structureType: visit.structureType,
     structureTypeRemarks: visit.structureTypeRemarks ?? "",
-    yearOfLiving: visit.yearOfLiving ?? "",
-    rentAmount: visit.rentAmount ?? "",
     occupancyLevel: visit.occupancyLevel ?? "",
     floorsInBuilding: visit.floorsInBuilding ?? "",
     locatedOnFloor: visit.locatedOnFloor ?? "",
@@ -565,10 +559,6 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     plotDemarcation: visit.plotDemarcation ?? "",
     noOfLabor: visit.noOfLabor ?? "",
     materialAtSite: visit.materialAtSite ?? "",
-    boundaryLength: visit.boundaryLength ?? "",
-    boundaryBreadth: visit.boundaryBreadth ?? "",
-    boundaryArea: visit.boundaryArea ?? "",
-    boundaryDescription: visit.boundaryDescription ?? "",
     boundaryEast: visit.boundaryEast ?? "",
     boundaryWest: visit.boundaryWest ?? "",
     boundaryNorth: visit.boundaryNorth ?? "",
@@ -578,9 +568,9 @@ function visitToFormValues(visit: FieldVisit): FieldVisitFormValues {
     remarksApproachRoad: visit.remarksApproachRoad ?? "",
     societyNameBoard: visit.societyNameBoard ?? "",
     areaSqFt: visit.areaSqFt ?? "",
-    ratePerSqFt: visit.ratePerSqFt ?? "",
-    rateBasis: visit.rateBasis,
     areaBasis: visit.areaBasis,
+    ratePerSqFt: visit.ratePerSqFt ?? "",
+    rentPerMonth: visit.rentPerMonth ?? "",
     negativePoints: visit.negativePoints ?? "",
     agentOpinion: visit.agentOpinion ?? "",
     finalRemarks: visit.finalRemarks ?? "",
@@ -603,10 +593,9 @@ const EMPTY_FORM_VALUES = {
   occupancyStatus: undefined,
   occupancyStatusRemarks: "",
   occupancyWithName: "",
+  yearOfLiving: "",
   structureType: undefined,
   structureTypeRemarks: "",
-  yearOfLiving: "",
-  rentAmount: "",
   occupancyLevel: "",
   floorsInBuilding: "",
   locatedOnFloor: "",
@@ -620,10 +609,6 @@ const EMPTY_FORM_VALUES = {
   plotDemarcation: "",
   noOfLabor: "",
   materialAtSite: "",
-  boundaryLength: "",
-  boundaryBreadth: "",
-  boundaryArea: "",
-  boundaryDescription: "",
   boundaryEast: "",
   boundaryWest: "",
   boundaryNorth: "",
@@ -633,9 +618,9 @@ const EMPTY_FORM_VALUES = {
   remarksApproachRoad: "",
   societyNameBoard: "",
   areaSqFt: "",
-  ratePerSqFt: "",
-  rateBasis: undefined,
   areaBasis: undefined,
+  ratePerSqFt: "",
+  rentPerMonth: "",
   negativePoints: "",
   agentOpinion: "",
   finalRemarks: "",
@@ -692,20 +677,6 @@ export function FieldVisitWizard({
     }
     if (gpsLng != null && form.getValues("gpsLongitude") !== gpsLng) {
       form.setValue("gpsLongitude", gpsLng, { shouldValidate: true });
-    }
-  }
-
-  // Auto-calculate boundary area when length or breadth changes
-  const boundaryLength = form.watch("boundaryLength");
-  const boundaryBreadth = form.watch("boundaryBreadth");
-  if (boundaryLength && boundaryBreadth) {
-    const length = Number(boundaryLength);
-    const breadth = Number(boundaryBreadth);
-    if (Number.isFinite(length) && Number.isFinite(breadth)) {
-      const area = (length * breadth).toFixed(2);
-      if (form.getValues("boundaryArea") !== area) {
-        form.setValue("boundaryArea", area, { shouldValidate: true });
-      }
     }
   }
 
@@ -850,10 +821,9 @@ export function FieldVisitWizard({
                   form.setValue("occupancyStatus", "Owner");
                   form.setValue("occupancyStatusRemarks", "");
                   form.setValue("occupancyWithName", "Self");
+                  form.setValue("yearOfLiving", "2020");
                   form.setValue("structureType", "RCC");
                   form.setValue("structureTypeRemarks", "");
-                  form.setValue("yearOfLiving", "2020");
-                  form.setValue("rentAmount", "15000");
                   form.setValue("occupancyLevel", "85");
                   form.setValue("floorsInBuilding", "5");
                   form.setValue("locatedOnFloor", "2");
@@ -867,10 +837,6 @@ export function FieldVisitWizard({
                   form.setValue("plotDemarcation", "Well marked");
                   form.setValue("noOfLabor", "0");
                   form.setValue("materialAtSite", "None");
-                  form.setValue("boundaryLength", "100");
-                  form.setValue("boundaryBreadth", "50");
-                  form.setValue("boundaryArea", "5000");
-                  form.setValue("boundaryDescription", "Well maintained boundaries");
                   form.setValue("boundaryEast", "Street");
                   form.setValue("boundaryWest", "Open");
                   form.setValue("boundaryNorth", "Apartment");
@@ -880,9 +846,9 @@ export function FieldVisitWizard({
                   form.setValue("remarksApproachRoad", "Well maintained");
                   form.setValue("societyNameBoard", "Golden Heights Society");
                   form.setValue("areaSqFt", "1500");
-                  form.setValue("ratePerSqFt", "5000");
-                  form.setValue("rateBasis", "Built Up Area");
-                  form.setValue("areaBasis", "Built Up");
+                  form.setValue("areaBasis", "BUA");
+                  form.setValue("ratePerSqFt", "5000/sqft");
+                  form.setValue("rentPerMonth", "25000");
                   form.setValue("negativePoints", "None observed");
                   form.setValue("agentOpinion", "Good investment");
                   form.setValue("finalRemarks", "Property in excellent condition");
@@ -1028,6 +994,13 @@ export function FieldVisitWizard({
                   placeholder="e.g. John Doe"
                   maxLength={500}
                 />
+                <TextField
+                  form={form}
+                  name="yearOfLiving"
+                  label="Year of Living"
+                  placeholder="e.g. 2020"
+                  maxLength={100}
+                />
               </div>
             )}
 
@@ -1048,23 +1021,6 @@ export function FieldVisitWizard({
                     label="Structure Type Remarks (required)"
                     placeholder="Please specify other structure type"
                     maxLength={500}
-                  />
-                )}
-                <TextField
-                  form={form}
-                  name="yearOfLiving"
-                  label="Year of Living"
-                  placeholder="e.g. 2020"
-                  maxLength={100}
-                />
-                {v.occupancyStatus === "Rented" && (
-                  <TextField
-                    form={form}
-                    name="rentAmount"
-                    label="Rent Amount"
-                    placeholder="e.g. 15000"
-                    type="number"
-                    inputMode="decimal"
                   />
                 )}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -1174,47 +1130,6 @@ export function FieldVisitWizard({
             {/* STEP 5 — Property boundaries */}
             {stepIndex === 4 && (
               <div className="space-y-6">
-                {/* NEW: Boundary dimensions section */}
-                <div className="rounded-md border border-blue-200/40 bg-blue-50/30 p-4">
-                  <h4 className="text-sm font-semibold text-blue-900 mb-4">Boundary Dimensions</h4>
-                  <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                    <TextField
-                      form={form}
-                      name="boundaryLength"
-                      label="Length in SQ FT"
-                      placeholder="e.g. 100"
-                      type="number"
-                      inputMode="decimal"
-                    />
-                    <TextField
-                      form={form}
-                      name="boundaryBreadth"
-                      label="Breadth in SQ FT"
-                      placeholder="e.g. 50"
-                      type="number"
-                      inputMode="decimal"
-                    />
-                  </div>
-                  <div className="mt-4">
-                    <ReadOnlyField
-                      label="Area (Auto-calculated)"
-                      value={
-                        v.boundaryLength && v.boundaryBreadth
-                          ? `${(Number(v.boundaryLength) * Number(v.boundaryBreadth)).toFixed(2)} SQ FT`
-                          : "—"
-                      }
-                    />
-                  </div>
-                </div>
-
-                <TextAreaField
-                  form={form}
-                  name="boundaryDescription"
-                  label="Boundary Description"
-                  placeholder="Describe the boundaries and demarcation details"
-                />
-
-                {/* Existing boundary fields */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
                   <TextField form={form} name="boundaryEast" label="Boundary — East" />
                   <TextField form={form} name="boundaryWest" label="Boundary — West" />
@@ -1266,37 +1181,26 @@ export function FieldVisitWizard({
                   <DropdownField
                     form={form}
                     name="areaBasis"
-                    label="Area Basis (required)"
+                    label="Area Type (required)"
                     options={areaBasisOptions}
-                    placeholder="Select area basis"
+                    placeholder="Select area type"
                   />
                 </div>
-                {/* Row 2: Rate per Sq. Ft. + Rate Basis */}
+                {/* Row 2: Rate per Sq. Ft. + Rent per Month */}
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2">
-                  <div>
-                    <FormField
-                      control={form.control}
-                      name="ratePerSqFt"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Rate per Sq. Ft.</FormLabel>
-                          <Input
-                            {...field}
-                            value={(field.value as string | undefined) ?? ""}
-                            inputMode="decimal"
-                            placeholder="e.g. 5200"
-                          />
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-                  </div>
-                  <DropdownField
+                  <TextField
                     form={form}
-                    name="rateBasis"
-                    label="Rate Basis (required)"
-                    options={rateBasisOptions}
-                    placeholder="Select area basis"
+                    name="ratePerSqFt"
+                    label="Rate per Sq. Ft."
+                    placeholder="e.g. 5200 or 5200/sqft"
+                    maxLength={100}
+                  />
+                  <TextField
+                    form={form}
+                    name="rentPerMonth"
+                    label="Rent per Month"
+                    placeholder="e.g. 25000"
+                    maxLength={100}
                   />
                 </div>
                 <TextAreaField
@@ -1380,16 +1284,13 @@ export function FieldVisitWizard({
                     />
                   )}
                   <ReadOnlyField label="Occupancy with Name" value={v.occupancyWithName ?? ""} />
+                  <ReadOnlyField label="Year of Living" value={v.yearOfLiving ?? ""} />
                 </ReviewSection>
 
                 <ReviewSection title="Building">
                   <ReadOnlyField label="Structure" value={v.structureType ?? ""} />
                   {v.structureType === "Other" && (
                     <ReadOnlyField label="Structure Remarks" value={v.structureTypeRemarks ?? ""} />
-                  )}
-                  <ReadOnlyField label="Year of Living" value={v.yearOfLiving ?? ""} />
-                  {v.occupancyStatus === "Rented" && (
-                    <ReadOnlyField label="Rent Amount" value={v.rentAmount ?? ""} />
                   )}
                   <ReadOnlyField label="Occupancy Level (%)" value={v.occupancyLevel ?? ""} />
                   <ReadOnlyField label="Floors in Building" value={v.floorsInBuilding ?? ""} />
@@ -1410,17 +1311,6 @@ export function FieldVisitWizard({
                 </ReviewSection>
 
                 <ReviewSection title="Boundaries">
-                  <ReadOnlyField label="Length (SQ FT)" value={v.boundaryLength ?? ""} />
-                  <ReadOnlyField label="Breadth (SQ FT)" value={v.boundaryBreadth ?? ""} />
-                  <ReadOnlyField
-                    label="Area (SQ FT)"
-                    value={
-                      v.boundaryLength && v.boundaryBreadth
-                        ? `${(Number(v.boundaryLength) * Number(v.boundaryBreadth)).toFixed(2)}`
-                        : ""
-                    }
-                  />
-                  <ReadOnlyField label="Description" value={v.boundaryDescription ?? ""} />
                   <ReadOnlyField label="East" value={v.boundaryEast ?? ""} />
                   <ReadOnlyField label="West" value={v.boundaryWest ?? ""} />
                   <ReadOnlyField label="North" value={v.boundaryNorth ?? ""} />
@@ -1439,9 +1329,9 @@ export function FieldVisitWizard({
                   />
                   <ReadOnlyField label="Society Name Board" value={v.societyNameBoard ?? ""} />
                   <ReadOnlyField label="Area (Sq. Ft.)" value={v.areaSqFt ?? ""} />
+                  <ReadOnlyField label="Area Type" value={v.areaBasis ?? ""} />
                   <ReadOnlyField label="Rate per Sq. Ft." value={v.ratePerSqFt ?? ""} />
-                  <ReadOnlyField label="Rate Basis" value={v.rateBasis ?? ""} />
-                  <ReadOnlyField label="Area Basis" value={v.areaBasis ?? ""} />
+                  <ReadOnlyField label="Rent per Month" value={v.rentPerMonth ?? ""} />
                   <ReadOnlyField label="Negative Points" value={v.negativePoints ?? ""} />
                   <ReadOnlyField label="Agent Opinion" value={v.agentOpinion ?? ""} />
                 </ReviewSection>

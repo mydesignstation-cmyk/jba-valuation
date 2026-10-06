@@ -304,7 +304,6 @@ export async function buildFieldVisitPdf(
     { label: "Type of Structure", value: show(visit.structureType) },
     { label: "Structure Type Remarks", value: show(visit.structureTypeRemarks) },
     { label: "Year of Living", value: show(visit.yearOfLiving) },
-    ...(visit.occupancyStatus === "Rented" ? [{ label: "Rent Amount", value: show(visit.rentAmount) }] : []),
     { label: "Occupancy Level", value: show(visit.occupancyLevel) },
     { label: "Total Floors", value: show(visit.floorsInBuilding) },
     { label: "Located Floor", value: show(visit.locatedOnFloor) },
@@ -324,10 +323,6 @@ export async function buildFieldVisitPdf(
   ]);
 
   writer.drawSection("Boundaries", [
-    { label: "Length (SQ FT)", value: show(visit.boundaryLength) },
-    { label: "Breadth (SQ FT)", value: show(visit.boundaryBreadth) },
-    { label: "Area (SQ FT)", value: show(visit.boundaryArea) },
-    { label: "Description", value: show(visit.boundaryDescription) },
     { label: "East", value: show(visit.boundaryEast) },
     { label: "West", value: show(visit.boundaryWest) },
     { label: "North", value: show(visit.boundaryNorth) },
@@ -340,9 +335,9 @@ export async function buildFieldVisitPdf(
     { label: "Remarks on Approach Road", value: show(visit.remarksApproachRoad) },
     { label: "Name on Society Notice Board", value: show(visit.societyNameBoard) },
     { label: "Area of Property", value: show(visit.areaSqFt) },
+    { label: "Area Type", value: show(visit.areaBasis) },
     { label: "Rate per Sq. Ft.", value: show(visit.ratePerSqFt) },
-    { label: "Rate Basis", value: show(visit.rateBasis) },
-    { label: "Area Basis", value: show(visit.areaBasis) },
+    { label: "Rent per Month", value: show(visit.rentPerMonth) },
     { label: "Negative Points", value: show(visit.negativePoints) },
     { label: "Agent Opinion", value: show(visit.agentOpinion) },
   ]);

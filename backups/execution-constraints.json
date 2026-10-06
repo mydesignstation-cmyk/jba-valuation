@@ -1,0 +1,13 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Execution Constraints — Parse & Enforce Steering",
+      "trigger": "UserPromptSubmit",
+      "action": {
+        "type": "agent",
+        "prompt": "OUTPUT THIS EXACT JSON FORMAT (no narration, no explanation):\n\nAnalyze the user request and output ONLY this JSON structure:\n\n{\n  \"steeringApplies\": [\"file1.md\", \"file2.md\"],\n  \"executionMode\": \"silent|normal\",\n  \"allowNarration\": false,\n  \"allowExplanation\": false,\n  \"workflowAllowed\": true|false,\n  \"reason\": \"brief reason\"\n}\n\nRULES:\n- executionMode: \"silent\" if execution-silence.md applies (never narrate work)\n- allowNarration: false if any of (execution-silence.md, git-concise.md, ponytail.md) apply\n- allowExplanation: false if execution-silence.md applies\n- workflowAllowed: false if (workflow-decision-gate.md says < 30 min AND pattern exists)\n\nOutput ONLY the JSON. No other text."
+      }
+    }
+  ]
+}

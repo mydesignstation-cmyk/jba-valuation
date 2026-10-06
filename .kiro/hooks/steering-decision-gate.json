@@ -1,0 +1,14 @@
+{
+  "version": "v1",
+  "hooks": [
+    {
+      "name": "Steering Decision Gate — Block Workflow Violations",
+      "trigger": "PreToolUse",
+      "matcher": "run_workflow",
+      "action": {
+        "type": "agent",
+        "prompt": "MANDATORY DECISION GATE — ENFORCE STEERING RULES\n\nBefore allowing this workflow launch, apply workflow-decision-gate.md:\n\n**DECISION TREE:**\n- If: task < 30 min AND < 5 files AND pattern exists in codebase → **BLOCK** workflow, recommend direct execution\n- If: task > 1 hour OR complex OR ambiguous OR requires design review → allow workflow\n- If: unclear, ask user to clarify scope\n\n**Your job:**\n1. Read the user's task description from context\n2. Check workflow-decision-gate.md criteria\n3. If it's a violation (small task, pattern exists), output a JSON decision blocking the workflow\n4. If it passes, allow the workflow to proceed\n\n**Output format for blocking:**\n```json\n{\n  \"hookSpecificOutput\": {\n    \"permissionDecision\": \"ask\",\n    \"permissionDecisionReason\": \"This looks like a 15-minute direct execution task (single field, pattern exists in field-visit-form-template.md). Per workflow-decision-gate.md: < 5 files AND pattern exists = direct execution, not workflow. Recommend: Read template, edit 7 files directly, verify with tsc, commit. Should take ~20 minutes. Proceed with direct execution instead?\"\n  }\n}\n```\n\n**Allow the workflow if:**\n- Task is complex (> 1 hour, ambiguous, multi-module, architectural)\n- Requires design/review loop\n- User explicitly requests a workflow\n\nApply this gate strictly. Block small tasks."
+      }
+    }
+  ]
+}
