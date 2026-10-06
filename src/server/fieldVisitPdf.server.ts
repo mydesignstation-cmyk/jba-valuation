@@ -120,7 +120,7 @@ class ReportWriter {
 
   async initLogoWatermark() {
     try {
-      this.logoImage = await this.doc.embedJpg(Buffer.from(LOGO_BASE64, "base64"));
+      this.logoImage = await this.doc.embedPng(Buffer.from(LOGO_BASE64, "base64"));
     } catch (error) {
       console.warn("Logo watermark initialization skipped:", error);
     }
