@@ -150,6 +150,42 @@ class ValuationWriter {
     this.drawRow("Latitude", show(valuation.latitude));
     this.drawRow("Longitude", show(valuation.longitude));
     this.drawRow("Occupancy", show(valuation.occupancy));
+    
+    // Apartment Section
+    this.drawRow("Year of Construction", show(valuation.yearOfConstruction));
+    this.drawRow("Age of Building", show(valuation.ageOfBuilding));
+    this.drawRow("Residual Life", show(valuation.residualLife));
+    this.drawRow("Type of Structure", show(valuation.typeOfStructure));
+    this.drawRow("Nos. of unit per floor", show(valuation.nosOfUnitPerFloor));
+    this.drawRow("Building", show(valuation.buildingType));
+    this.drawRow("Appearance", show(valuation.appearance));
+    this.drawRow("Quality of Construction", show(valuation.qualityOfConstruction));
+    this.drawRow("Maintenance", show(valuation.maintenance));
+    this.drawRow("Protected Water Supply", show(valuation.protectedWaterSupply));
+    this.drawRow("Underground Sewerage", show(valuation.undergroundSewerage));
+    this.drawRow("Nos. of Parking", show(valuation.nosOfParking));
+    this.drawRow("Compound Wall", show(valuation.compoundWall));
+    this.drawRow("Open / Covered parking", show(valuation.openCoveredParking));
+    this.drawRow("Pavement laid around the Building", show(valuation.pavementLaidAroundBuilding));
+    
+    // Flat Section
+    this.drawRow("Flooring", show(valuation.flooring));
+    this.drawRow("Doors", show(valuation.doors));
+    this.drawRow("Windows", show(valuation.windows));
+    this.drawRow("Fittings", show(valuation.fittings));
+    this.drawRow("Finishing", show(valuation.finishing));
+    this.drawRow("Assessment No", show(valuation.assessmentNo));
+    this.drawRow("Tax Amount", show(valuation.taxAmount));
+    this.drawRow("Tax Paid in the name of", show(valuation.taxPaidInNameOf));
+    this.drawRow("Electricity Service Connection No", show(valuation.electricityServiceConnectionNo));
+    this.drawRow("Meter Card is in the name of & Dated", show(valuation.meterCardInNameOf));
+    this.drawRow("Meter Card Dated", show(valuation.meterCardDated));
+    this.drawRow("Undivided area of land", show(valuation.undividedAreaOfLand));
+    
+    // Marketability Section
+    this.drawRow("Marketability", show(valuation.marketability));
+    this.drawRow("Positive Factors", show(valuation.positiveFactors));
+    this.drawRow("Negative Factors", show(valuation.negativeFactors));
   }
 }
 

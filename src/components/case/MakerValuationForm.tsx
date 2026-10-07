@@ -26,6 +26,12 @@ import {
   occupancyOptions,
   boundaryMeasuredOptions,
   occupancyStatusOptions,
+  qualityOptions,
+  yesNoOptions,
+  typeOfStructureOptions,
+  buildingTypeOptions,
+  openCoveredParkingOptions,
+  marketabilityOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import { getSessionToken } from "@/lib/auth-client";
@@ -115,6 +121,36 @@ export function MakerValuationForm({
       latitude: "",
       longitude: "",
       occupancy: "",
+      yearOfConstruction: "",
+      ageOfBuilding: "",
+      residualLife: "",
+      typeOfStructure: "",
+      nosOfUnitPerFloor: "",
+      buildingType: "",
+      appearance: "",
+      qualityOfConstruction: "",
+      maintenance: "",
+      protectedWaterSupply: "",
+      undergroundSewerage: "",
+      nosOfParking: "",
+      compoundWall: "",
+      openCoveredParking: "",
+      pavementLaidAroundBuilding: "",
+      flooring: "",
+      doors: "",
+      windows: "",
+      fittings: "",
+      finishing: "",
+      assessmentNo: "",
+      taxAmount: "",
+      taxPaidInNameOf: "",
+      electricityServiceConnectionNo: "",
+      meterCardInNameOf: "",
+      meterCardDated: "",
+      undividedAreaOfLand: "",
+      marketability: "",
+      positiveFactors: "",
+      negativeFactors: "",
     },
   });
 
@@ -893,6 +929,448 @@ export function MakerValuationForm({
                           ))}
                         </SelectContent>
                       </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Apartment Section */}
+            <div>
+              <h3 className="font-semibold text-base mb-4">Apartment</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="yearOfConstruction"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Year of Construction</FormLabel>
+                      <Input placeholder="Enter year" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="ageOfBuilding"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Age of Building</FormLabel>
+                      <Input placeholder="Enter age" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="residualLife"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Residual Life</FormLabel>
+                      <Input placeholder="Enter residual life" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="typeOfStructure"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type of Structure</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select structure type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {typeOfStructureOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nosOfUnitPerFloor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nos. of unit per floor</FormLabel>
+                      <Input placeholder="Enter number" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buildingType"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Building</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select building type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {buildingTypeOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="appearance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Appearance</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select appearance" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {qualityOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="qualityOfConstruction"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Quality of Construction</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select quality" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {qualityOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="maintenance"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Maintenance</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select maintenance" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {qualityOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="protectedWaterSupply"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Protected Water Supply</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {yesNoOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="undergroundSewerage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Underground Sewerage</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {yesNoOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nosOfParking"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nos. of Parking</FormLabel>
+                      <Input placeholder="Enter number" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="compoundWall"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Compound Wall</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {yesNoOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="openCoveredParking"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Open / Covered parking</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {openCoveredParkingOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="pavementLaidAroundBuilding"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Pavement laid around the Building</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select option" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {yesNoOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Flat Section */}
+            <div>
+              <h3 className="font-semibold text-base mb-4">Flat</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="flooring"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Flooring</FormLabel>
+                      <Input placeholder="Enter flooring details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="doors"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Doors</FormLabel>
+                      <Input placeholder="Enter doors details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="windows"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Windows</FormLabel>
+                      <Input placeholder="Enter windows details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="fittings"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Fittings</FormLabel>
+                      <Input placeholder="Enter fittings details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="finishing"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Finishing</FormLabel>
+                      <Input placeholder="Enter finishing details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="assessmentNo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Assessment No</FormLabel>
+                      <Input placeholder="Enter assessment number" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="taxAmount"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tax Amount</FormLabel>
+                      <Input placeholder="Enter tax amount" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="taxPaidInNameOf"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tax Paid in the name of</FormLabel>
+                      <Input placeholder="Enter name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="electricityServiceConnectionNo"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Electricity Service Connection No</FormLabel>
+                      <Input placeholder="Enter connection number" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="meterCardInNameOf"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meter Card is in the name of</FormLabel>
+                      <Input placeholder="Enter name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="meterCardDated"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Meter Card Dated</FormLabel>
+                      <Input placeholder="Enter date" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="undividedAreaOfLand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Undivided area of land</FormLabel>
+                      <Input placeholder="Enter area" {...field} />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Marketability Section */}
+            <div>
+              <h3 className="font-semibold text-base mb-4">Marketability</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="marketability"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Marketability</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select marketability" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {marketabilityOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="positiveFactors"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Positive Factors</FormLabel>
+                      <Input placeholder="Enter positive factors" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="negativeFactors"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Negative Factors</FormLabel>
+                      <Input placeholder="Enter negative factors" {...field} />
                     </FormItem>
                   )}
                 />

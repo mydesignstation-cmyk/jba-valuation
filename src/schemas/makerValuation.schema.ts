@@ -64,6 +64,39 @@ export const occupancyStatusOptions = [
   "Other",
 ] as const;
 
+export const qualityOptions = [
+  "Good",
+  "Average",
+  "Poor",
+] as const;
+
+export const yesNoOptions = [
+  "Yes",
+  "No",
+] as const;
+
+export const typeOfStructureOptions = [
+  "RCC, Load Bearing, Mixed",
+] as const;
+
+export const buildingTypeOptions = [
+  "Residential",
+  "Commercial",
+  "Residential Cum Commercial",
+  "Industrial or other",
+] as const;
+
+export const openCoveredParkingOptions = [
+  "Open",
+  "Covered",
+] as const;
+
+export const marketabilityOptions = [
+  "Good",
+  "Average",
+  "Poor",
+] as const;
+
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details
@@ -129,6 +162,39 @@ export const createMakerValuationSchema = z.object({
   latitude: z.string().optional(),
   longitude: z.string().optional(),
   occupancy: z.string().optional(),
+  // Apartment Section
+  yearOfConstruction: z.string().optional(),
+  ageOfBuilding: z.string().optional(),
+  residualLife: z.string().optional(),
+  typeOfStructure: z.string().optional(),
+  nosOfUnitPerFloor: z.string().optional(),
+  buildingType: z.string().optional(),
+  appearance: z.string().optional(),
+  qualityOfConstruction: z.string().optional(),
+  maintenance: z.string().optional(),
+  protectedWaterSupply: z.string().optional(),
+  undergroundSewerage: z.string().optional(),
+  nosOfParking: z.string().optional(),
+  compoundWall: z.string().optional(),
+  openCoveredParking: z.string().optional(),
+  pavementLaidAroundBuilding: z.string().optional(),
+  // Flat Section
+  flooring: z.string().optional(),
+  doors: z.string().optional(),
+  windows: z.string().optional(),
+  fittings: z.string().optional(),
+  finishing: z.string().optional(),
+  assessmentNo: z.string().optional(),
+  taxAmount: z.string().optional(),
+  taxPaidInNameOf: z.string().optional(),
+  electricityServiceConnectionNo: z.string().optional(),
+  meterCardInNameOf: z.string().optional(),
+  meterCardDated: z.string().optional(),
+  undividedAreaOfLand: z.string().optional(),
+  // Marketability Section
+  marketability: z.string().optional(),
+  positiveFactors: z.string().optional(),
+  negativeFactors: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

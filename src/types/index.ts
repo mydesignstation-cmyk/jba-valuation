@@ -251,6 +251,39 @@ export interface MakerValuation {
   latitude?: string | undefined;
   longitude?: string | undefined;
   occupancy?: string | undefined;
+  // Apartment Section
+  yearOfConstruction?: string | undefined;
+  ageOfBuilding?: string | undefined;
+  residualLife?: string | undefined;
+  typeOfStructure?: string | undefined;
+  nosOfUnitPerFloor?: string | undefined;
+  buildingType?: string | undefined;
+  appearance?: string | undefined;
+  qualityOfConstruction?: string | undefined;
+  maintenance?: string | undefined;
+  protectedWaterSupply?: string | undefined;
+  undergroundSewerage?: string | undefined;
+  nosOfParking?: string | undefined;
+  compoundWall?: string | undefined;
+  openCoveredParking?: string | undefined;
+  pavementLaidAroundBuilding?: string | undefined;
+  // Flat Section
+  flooring?: string | undefined;
+  doors?: string | undefined;
+  windows?: string | undefined;
+  fittings?: string | undefined;
+  finishing?: string | undefined;
+  assessmentNo?: string | undefined;
+  taxAmount?: string | undefined;
+  taxPaidInNameOf?: string | undefined;
+  electricityServiceConnectionNo?: string | undefined;
+  meterCardInNameOf?: string | undefined;
+  meterCardDated?: string | undefined;
+  undividedAreaOfLand?: string | undefined;
+  // Marketability Section
+  marketability?: string | undefined;
+  positiveFactors?: string | undefined;
+  negativeFactors?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;
