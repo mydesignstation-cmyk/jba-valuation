@@ -15,11 +15,8 @@ const PAGE_HEIGHT = 841.89;
 const MARGIN = 48;
 const LABEL_WIDTH = 180;
 const VALUE_X = MARGIN + LABEL_WIDTH + 12;
-const VALUE_WIDTH = PAGE_WIDTH - MARGIN - VALUE_X;
 
 const COLOR_TEXT = rgb(0.13, 0.13, 0.15);
-const COLOR_HEADING = rgb(0.11, 0.31, 0.53);
-const COLOR_RULE = rgb(0.82, 0.85, 0.89);
 
 const EM_DASH = "\u2014";
 
@@ -55,15 +52,6 @@ class ValuationWriter {
     return new ValuationWriter(doc, font, bold);
   }
 
-  private drawLine(y: number) {
-    this.page.drawLine({
-      start: { x: MARGIN, y },
-      end: { x: PAGE_WIDTH - MARGIN, y },
-      thickness: 0.5,
-      color: COLOR_RULE,
-    });
-  }
-
   private drawRow(label: string, value: string): void {
     const lineHeight = 18;
     const fontSize = 11;
@@ -95,26 +83,12 @@ class ValuationWriter {
   }
 
   async render(valuation: MakerValuation): Promise<void> {
-    // Title
-    this.page.drawText("Maker Valuation — Basic Details", {
-      x: MARGIN,
-      y: this.y,
-      size: 14,
-      font: this.bold,
-      color: COLOR_HEADING,
-    });
-    this.y -= 24;
-
-    // Separator line
-    this.drawLine(this.y);
-    this.y -= 12;
-
-    // Draw the 5 fields only
-    this.drawRow("Date of Valuation:", formatDisplayDate(valuation.dateOfValuation));
-    this.drawRow("Date of Inspection:", formatDisplayDate(valuation.dateOfInspection));
-    this.drawRow("Ref. No.:", show(valuation.refNo));
-    this.drawRow("Branch:", show(valuation.branch));
-    this.drawRow("Bank Name:", show(valuation.bankName));
+    // Draw the 5 fields only, nothing else
+    this.drawRow("Date of Valuation", formatDisplayDate(valuation.dateOfValuation));
+    this.drawRow("Date of Inspection", formatDisplayDate(valuation.dateOfInspection));
+    this.drawRow("Ref. No.", show(valuation.refNo));
+    this.drawRow("Branch", show(valuation.branch));
+    this.drawRow("Bank Name", show(valuation.bankName));
   }
 }
 

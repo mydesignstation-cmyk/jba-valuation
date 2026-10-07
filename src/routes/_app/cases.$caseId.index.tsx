@@ -60,7 +60,9 @@ import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
+import { api_getMakerValuation } from "@/data/makerValuation.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
+import { MakerValuationForm } from "@/components/case/MakerValuationForm";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
 import { ReassignSiteEngineerDialog } from "@/components/case/ReassignSiteEngineerDialog";
 import {
@@ -196,6 +198,7 @@ function Page() {
   const [confirmSubmitToChecker, setConfirmSubmitToChecker] = useState(false);
   const [confirmSubmitToUploader, setConfirmSubmitToUploader] = useState(false);
   const [confirmMarkUploaded, setConfirmMarkUploaded] = useState(false);
+  const [valuationModalOpen, setValuationModalOpen] = useState(false);
 
   const {
     backTo,
@@ -309,6 +312,13 @@ function Page() {
     queryKey: ["checker-editor", fieldVisit?.checkerUpdatedById],
     queryFn: () => getChecker(fieldVisit!.checkerUpdatedById!),
     enabled: !!fieldVisit?.checkerUpdatedById,
+  });
+
+  // Fetch the Maker Valuation for this case (if it exists).
+  const { data: makerValuation, refetch: refetchMakerValuation } = useQuery({
+    queryKey: ["maker-valuation", caseId],
+    queryFn: async () => (await api_getMakerValuation(caseId)) ?? null,
+    enabled: !!caseId,
   });
 
   // Keep mutation hooks above the loading/error returns so every render uses
@@ -696,6 +706,7 @@ function Page() {
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
           <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
+          <TabsTrigger value="maker-valuation">Maker Valuation</TabsTrigger>
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
@@ -899,6 +910,38 @@ function Page() {
                     ) : undefined
                   }
                 />
+              )}
+            </CardContent>
+          </Card>
+        </TabsContent>
+
+        {/* ---- Maker Valuation ------------------------------------------------- */}
+        <TabsContent value="maker-valuation" className="mt-6">
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Maker Valuation
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              {makerValuation ? (
+                <div className="space-y-4">
+                  <p className="text-sm text-muted-foreground">Valuation created and saved.</p>
+                  {/* Display valuation details */}
+                </div>
+              ) : (
+                <div>
+                  <MakerValuationForm
+                    caseId={valuationCase.id}
+                    onSuccess={() => {
+                      toast.success("Valuation created successfully");
+                      setValuationModalOpen(false);
+                      refetchMakerValuation();
+                    }}
+                    onCancel={() => setValuationModalOpen(false)}
+                  />
+                </div>
               )}
             </CardContent>
           </Card>
