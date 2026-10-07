@@ -204,6 +204,33 @@ const makerValuationSectionIcons: Record<string, ComponentType<{ className?: str
   Remarks: ClipboardCheck,
 };
 
+function downloadMakerValuationDocx(valuation: MakerValuation) {
+  const escapeHtml = (value: unknown) =>
+    String(value ?? "—")
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;");
+  const rows = makerValuationSections
+    .map(
+      (section) =>
+        `<tr><th colspan="2" style="background:#eaf0ff;text-align:left">${escapeHtml(section.title)}</th></tr>` +
+        section.fields
+          .map(
+            (field) =>
+              `<tr><td>${escapeHtml(field.label)}</td><td>${escapeHtml(valuation[field.key])}</td></tr>`,
+          )
+          .join(""),
+    )
+    .join("");
+  const html = `<html><head><meta charset="utf-8"></head><body><h1>Maker Valuation</h1><table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Field</th><th>Value</th></tr>${rows}</table></body></html>`;
+  const blob = new Blob([html], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = `maker-valuation-${valuation.refNo || valuation.caseId}.docx`;
+  link.click();
+  URL.revokeObjectURL(link.href);
+}
 function MakerValuationSection({
   valuation,
   title,
@@ -1066,7 +1093,16 @@ function Page() {
                           <FileText className="mr-2 h-4 w-4" />
                           Download PDF
                         </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => downloadMakerValuationDocx(makerValuation)}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          Download DOCX
+                        </Button>
                       </div>
+
                     </CardContent>
                   </Card>
                   <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
