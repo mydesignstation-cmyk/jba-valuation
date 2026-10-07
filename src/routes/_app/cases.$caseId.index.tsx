@@ -1014,7 +1014,8 @@ function Page() {
             </CardHeader>
             <CardContent>
               {makerValuation ? (
-                <div className="space-y-4">
+                !showValuationForm && (
+                  <div className="space-y-4">
                   <Card className="border-green-600/30 bg-green-600/5 shadow-sm">
                     <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="flex items-start gap-3">
@@ -1079,6 +1080,7 @@ function Page() {
                     ))}
                   </div>
                 </div>
+                )
               ) : isMaker &&
                 (valuationCase.stage === "MAKER_ASSIGNED" ||
                   valuationCase.stage === "MAKER_PENDING") ? (
