@@ -354,19 +354,21 @@ export function MakerValuationForm({
 
   return (
     <Card>
-      <CardHeader className="flex items-center justify-between">
-        <CardTitle>Create Valuation</CardTitle>
-        {isDev && (
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            onClick={handleAutoFill}
-            className="text-xs"
-          >
-            📝 Dev Auto-Fill
-          </Button>
-        )}
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Create Valuation</CardTitle>
+          {isDev && (
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleAutoFill}
+              className="text-xs"
+            >
+              📝 Dev Auto-Fill
+            </Button>
+          )}
+        </div>
       </CardHeader>
       <CardContent>
         <Form {...form}>
