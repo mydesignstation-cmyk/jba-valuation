@@ -930,43 +930,180 @@ function Page() {
               {makerValuation ? (
                 <div className="space-y-4">
                   {/* Show valuation details and action buttons */}
-                  <div className="space-y-4">
-                    <div className="grid gap-4 sm:grid-cols-2">
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Date of Valuation
-                        </p>
-                        <p className="text-sm font-medium">
-                          {formatDisplayDate(makerValuation.dateOfValuation)}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Date of Inspection
-                        </p>
-                        <p className="text-sm font-medium">
-                          {formatDisplayDate(makerValuation.dateOfInspection)}
-                        </p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Ref. No.
-                        </p>
-                        <p className="text-sm font-medium">{makerValuation.refNo}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Branch
-                        </p>
-                        <p className="text-sm font-medium">{makerValuation.branch}</p>
-                      </div>
-                      <div className="space-y-1">
-                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                          Bank Name
-                        </p>
-                        <p className="text-sm font-medium">{makerValuation.bankName}</p>
+                  <div className="space-y-6">
+                    {/* Basic Details */}
+                    <div>
+                      <h3 className="font-semibold text-sm mb-3">Basic Details</h3>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            Date of Valuation
+                          </p>
+                          <p className="text-sm font-medium">
+                            {formatDisplayDate(makerValuation.dateOfValuation)}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            Date of Inspection
+                          </p>
+                          <p className="text-sm font-medium">
+                            {formatDisplayDate(makerValuation.dateOfInspection)}
+                          </p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            Ref. No.
+                          </p>
+                          <p className="text-sm font-medium">{makerValuation.refNo}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            Branch
+                          </p>
+                          <p className="text-sm font-medium">{makerValuation.branch}</p>
+                        </div>
+                        <div className="space-y-1">
+                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                            Bank Name
+                          </p>
+                          <p className="text-sm font-medium">{makerValuation.bankName}</p>
+                        </div>
                       </div>
                     </div>
+
+                    {/* Area Calculation Section */}
+                    <div>
+                      <h3 className="font-semibold text-sm mb-3">Area Calculation</h3>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {makerValuation.adoptedArea && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Adopted Area
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.adoptedArea}</p>
+                          </div>
+                        )}
+                        {makerValuation.builtUpArea && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Built Up Area
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.builtUpArea}</p>
+                          </div>
+                        )}
+                        {makerValuation.physicalMeasuredArea && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Physical Measured Area
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.physicalMeasuredArea}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Rate Section */}
+                    <div>
+                      <h3 className="font-semibold text-sm mb-3">Rate Section</h3>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {makerValuation.adoptedRate && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Adopted Rate
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.adoptedRate}</p>
+                          </div>
+                        )}
+                        {makerValuation.buildingRate && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Building Rate
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.buildingRate}</p>
+                          </div>
+                        )}
+                        {makerValuation.landRate && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Land Rate
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.landRate}</p>
+                          </div>
+                        )}
+                        {makerValuation.rateRange && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Rate Range
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.rateRange}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Valuation Details Section */}
+                    <div>
+                      <h3 className="font-semibold text-sm mb-3">Details of Valuation</h3>
+                      <div className="grid gap-4 sm:grid-cols-2">
+                        {makerValuation.marketValue && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Market Value
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.marketValue}</p>
+                          </div>
+                        )}
+                        {makerValuation.fairMarketValue && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Fair Market Value
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.fairMarketValue}</p>
+                          </div>
+                        )}
+                        {makerValuation.insuranceValue && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Insurance Value
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.insuranceValue}</p>
+                          </div>
+                        )}
+                        {makerValuation.realizableValue && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Realizable Value
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.realizableValue}</p>
+                          </div>
+                        )}
+                        {makerValuation.distressValue && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Distress Value
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.distressValue}</p>
+                          </div>
+                        )}
+                        {makerValuation.govtValue && (
+                          <div className="space-y-1">
+                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                              Govt. Value
+                            </p>
+                            <p className="text-sm font-medium">{makerValuation.govtValue}</p>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    {/* Remarks Section */}
+                    {makerValuation.remarks && (
+                      <div>
+                        <h3 className="font-semibold text-sm mb-3">Remarks</h3>
+                        <p className="text-sm">{makerValuation.remarks}</p>
+                      </div>
+                    )}
                     <div className="flex gap-2 pt-4">
                       {isMaker &&
                         (valuationCase.stage === "MAKER_ASSIGNED" ||
