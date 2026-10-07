@@ -9,26 +9,16 @@ import {
   api_getMakerValuation as db_get,
   api_downloadMakerValuationPdf as db_download,
 } from "@/server/api.server";
+import { getSessionToken } from "@/lib/auth-client";
 import type { MakerValuation } from "@/types";
-
-type CreateMakerValuationInput = {
-  token: string | null;
-  caseId: string;
-  dateOfValuation: string;
-  dateOfInspection: string;
-  refNo: string;
-  branch: string;
-  bankName: string;
-};
+import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
 
 const createMakerValuationFn = createServerFn({ method: "POST" })
   .validator((input: CreateMakerValuationInput) => input)
-  .handler(({ data }) =>
-    db_create(
-      data.token,
-      data,
-    ),
-  );
+  .handler(async ({ data }) => {
+    const token = await getSessionToken();
+    return db_create(token, data);
+  });
 
 const getMakerValuationFn = createServerFn({ method: "GET" })
   .validator((caseId: string) => caseId)

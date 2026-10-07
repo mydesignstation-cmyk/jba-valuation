@@ -214,6 +214,23 @@ export interface MakerValuation {
   blockNo?: string | undefined;
   district?: string | undefined;
   pinCode?: string | undefined;
+  // General Section Fields
+  purposeOfValuation?: string | undefined;
+  documentsName1?: string | undefined;
+  documentsName2?: string | undefined;
+  documentsName3?: string | undefined;
+  nameOfOwner?: string | undefined;
+  address?: string | undefined;
+  configurationInShort?: string | undefined;
+  configurationFullDescription?: string | undefined;
+  locality?: string | undefined;
+  classOfLocality1?: string | undefined;
+  classOfLocality2?: string | undefined;
+  classOfLocality3?: string | undefined;
+  municipalCorporation?: string | undefined;
+  typeOfLand?: string | undefined;
+  genuinenessOrAuthenticity?: string | undefined;
+  anyOtherComments?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;

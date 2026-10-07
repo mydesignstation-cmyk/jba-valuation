@@ -49,6 +49,41 @@ export function MakerValuationForm({
       refNo: initialValues?.refNo || "",
       branch: initialValues?.branch || "",
       bankName: initialValues?.bankName || "",
+      purchaserName: "",
+      typeOfProperty: "",
+      flatNo: "",
+      locatedOnFloor: "",
+      wing: "",
+      buildingName: "",
+      landmark: "",
+      roadNameArea: "",
+      location: "",
+      plotNo: "",
+      ctsNo: "",
+      sNo: "",
+      other: "",
+      village: "",
+      wardNo: "",
+      taluka: "",
+      blockNo: "",
+      district: "",
+      pinCode: "",
+      purposeOfValuation: "",
+      documentsName1: "",
+      documentsName2: "",
+      documentsName3: "",
+      nameOfOwner: "",
+      address: "",
+      configurationInShort: "",
+      configurationFullDescription: "",
+      locality: "",
+      classOfLocality1: "",
+      classOfLocality2: "",
+      classOfLocality3: "",
+      municipalCorporation: "",
+      typeOfLand: "",
+      genuinenessOrAuthenticity: "",
+      anyOtherComments: "",
     },
   });
 
@@ -58,15 +93,7 @@ export function MakerValuationForm({
       const token = await getSessionToken();
       if (!token) throw new Error("Not authenticated");
       
-      await api_createMakerValuation({
-        token,
-        caseId: caseId,
-        dateOfValuation: values.dateOfValuation,
-        dateOfInspection: values.dateOfInspection,
-        refNo: values.refNo,
-        branch: values.branch,
-        bankName: values.bankName,
-      });
+      await api_createMakerValuation(values);
       toast.success(initialValues ? "Valuation updated successfully" : "Valuation created successfully");
       form.reset();
       onSuccess?.();
@@ -349,6 +376,172 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Pin Code</FormLabel>
                       <Input placeholder="Enter pin code" {...field} />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-4">General</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="purposeOfValuation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Purpose of Valuation</FormLabel>
+                      <Input placeholder="Enter purpose" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsName1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documents Name (1)</FormLabel>
+                      <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsName2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documents Name (2)</FormLabel>
+                      <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsName3"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documents Name (3)</FormLabel>
+                      <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nameOfOwner"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Name of Owner</FormLabel>
+                      <Input placeholder="Enter owner name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="address"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Address</FormLabel>
+                      <Input placeholder="Enter address" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="configurationInShort"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Configuration (In Short)</FormLabel>
+                      <Input placeholder="e.g. 1BHK, 2BHK" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="configurationFullDescription"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Configuration (full description)</FormLabel>
+                      <Input placeholder="e.g. 1 living, 1 Kitchen, 1 Bedroom" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="locality"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Locality</FormLabel>
+                      <Input placeholder="Enter locality" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="classOfLocality1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class of locality (1)</FormLabel>
+                      <Input placeholder="e.g. High/Middle/Poor" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="classOfLocality2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class of locality (2)</FormLabel>
+                      <Input placeholder="e.g. Urban/Semi Urban/Rural" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="classOfLocality3"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Class of locality (3)</FormLabel>
+                      <Input placeholder="e.g. Posh class/Medium/Ordinary" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="municipalCorporation"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Municipal Corporation</FormLabel>
+                      <Input placeholder="Enter municipal corporation" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="typeOfLand"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type of Land</FormLabel>
+                      <Input placeholder="e.g. Freehold/Leasehold" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="genuinenessOrAuthenticity"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Genuineness or Authenticity</FormLabel>
+                      <Input placeholder="e.g. Yes/No/NA" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="anyOtherComments"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Any other comments</FormLabel>
+                      <Input placeholder="Enter additional comments" {...field} />
                     </FormItem>
                   )}
                 />

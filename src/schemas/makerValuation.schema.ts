@@ -38,6 +38,23 @@ export const createMakerValuationSchema = z.object({
   blockNo: z.string().optional(),
   district: z.string().optional(),
   pinCode: z.string().optional(),
+  // General Section Fields (all optional)
+  purposeOfValuation: z.string().optional(),
+  documentsName1: z.string().optional(),
+  documentsName2: z.string().optional(),
+  documentsName3: z.string().optional(),
+  nameOfOwner: z.string().optional(),
+  address: z.string().optional(),
+  configurationInShort: z.string().optional(),
+  configurationFullDescription: z.string().optional(),
+  locality: z.string().optional(),
+  classOfLocality1: z.string().optional(),
+  classOfLocality2: z.string().optional(),
+  classOfLocality3: z.string().optional(),
+  municipalCorporation: z.string().optional(),
+  typeOfLand: z.string().optional(),
+  genuinenessOrAuthenticity: z.string().optional(),
+  anyOtherComments: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

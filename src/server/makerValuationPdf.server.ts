@@ -83,12 +83,14 @@ class ValuationWriter {
   }
 
   async render(valuation: MakerValuation): Promise<void> {
-    // Draw the fields
+    // Basic Details
     this.drawRow("Date of Valuation", formatDisplayDate(valuation.dateOfValuation));
     this.drawRow("Date of Inspection", formatDisplayDate(valuation.dateOfInspection));
     this.drawRow("Ref. No.", show(valuation.refNo));
     this.drawRow("Branch", show(valuation.branch));
     this.drawRow("Bank Name", show(valuation.bankName));
+    
+    // Additional Fields (22 fields)
     this.drawRow("Purchaser Name", show(valuation.purchaserName));
     this.drawRow("Type of Property", show(valuation.typeOfProperty));
     this.drawRow("Flat No.", show(valuation.flatNo));
@@ -108,6 +110,24 @@ class ValuationWriter {
     this.drawRow("Block No.", show(valuation.blockNo));
     this.drawRow("District", show(valuation.district));
     this.drawRow("Pin Code", show(valuation.pinCode));
+    
+    // General Section (16 fields)
+    this.drawRow("Purpose of Valuation", show(valuation.purposeOfValuation));
+    this.drawRow("Documents Name (1)", show(valuation.documentsName1));
+    this.drawRow("Documents Name (2)", show(valuation.documentsName2));
+    this.drawRow("Documents Name (3)", show(valuation.documentsName3));
+    this.drawRow("Name of Owner", show(valuation.nameOfOwner));
+    this.drawRow("Address", show(valuation.address));
+    this.drawRow("Configuration (In Short)", show(valuation.configurationInShort));
+    this.drawRow("Configuration (full description)", show(valuation.configurationFullDescription));
+    this.drawRow("Locality", show(valuation.locality));
+    this.drawRow("Class of locality (1)", show(valuation.classOfLocality1));
+    this.drawRow("Class of locality (2)", show(valuation.classOfLocality2));
+    this.drawRow("Class of locality (3)", show(valuation.classOfLocality3));
+    this.drawRow("Municipal Corporation", show(valuation.municipalCorporation));
+    this.drawRow("Type of Land", show(valuation.typeOfLand));
+    this.drawRow("Genuineness or Authenticity", show(valuation.genuinenessOrAuthenticity));
+    this.drawRow("Any other comments", show(valuation.anyOtherComments));
   }
 }
 
