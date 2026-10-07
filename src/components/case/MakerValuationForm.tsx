@@ -32,6 +32,7 @@ import {
   buildingTypeOptions,
   openCoveredParkingOptions,
   marketabilityOptions,
+  areaBasisOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import { getSessionToken } from "@/lib/auth-client";
@@ -151,6 +152,17 @@ export function MakerValuationForm({
       marketability: "",
       positiveFactors: "",
       negativeFactors: "",
+      physicalMeasuredArea: "",
+      physicalMeasuredAreaBasis: "",
+      documentedArea: "",
+      documentedAreaBasis: "",
+      approvedPlanArea: "",
+      approvedPlanAreaBasis: "",
+      builtUpArea: "",
+      builtUpAreaBasis: "",
+      adoptedArea: "",
+      adoptedAreaBasis: "",
+      floorSpaceIndex: "",
     },
   });
 
@@ -1371,6 +1383,178 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Negative Factors</FormLabel>
                       <Input placeholder="Enter negative factors" {...field} />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Area Calculation Section */}
+            <div className="border-b-2 border-gray-200 pb-6">
+              <h3 className="font-semibold text-base mb-4">Area Calculation</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="physicalMeasuredArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Physical Measured Area</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="physicalMeasuredAreaBasis"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Physical Measured Area Basis</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select basis" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {areaBasisOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentedArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documented Area</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentedAreaBasis"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documented Area Basis</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select basis" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {areaBasisOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="approvedPlanArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Approved Plan Area</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="approvedPlanAreaBasis"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Approved Plan Area Basis</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select basis" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {areaBasisOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="builtUpArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Built Up Area</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="builtUpAreaBasis"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Built Up Area Basis</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select basis" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {areaBasisOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="adoptedArea"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adopted Area</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="adoptedAreaBasis"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adopted Area Basis</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select basis" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {areaBasisOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="floorSpaceIndex"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Floor Space Index</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter value" {...field} />
                     </FormItem>
                   )}
                 />

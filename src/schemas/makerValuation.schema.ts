@@ -97,6 +97,13 @@ export const marketabilityOptions = [
   "Poor",
 ] as const;
 
+export const areaBasisOptions = [
+  "CA",
+  "RERA CA",
+  "BUA",
+  "SBUA",
+] as const;
+
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details
@@ -195,6 +202,18 @@ export const createMakerValuationSchema = z.object({
   marketability: z.string().optional(),
   positiveFactors: z.string().optional(),
   negativeFactors: z.string().optional(),
+  // Area Calculation Section
+  physicalMeasuredArea: z.string().optional(),
+  physicalMeasuredAreaBasis: z.string().optional(),
+  documentedArea: z.string().optional(),
+  documentedAreaBasis: z.string().optional(),
+  approvedPlanArea: z.string().optional(),
+  approvedPlanAreaBasis: z.string().optional(),
+  builtUpArea: z.string().optional(),
+  builtUpAreaBasis: z.string().optional(),
+  adoptedArea: z.string().optional(),
+  adoptedAreaBasis: z.string().optional(),
+  floorSpaceIndex: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

@@ -345,6 +345,18 @@ export const makerValuations = pgTable(
     marketability: varchar("marketability", { length: 255 }),
     positive_factors: text("positive_factors"),
     negative_factors: text("negative_factors"),
+    // Area Calculation Section
+    physical_measured_area: numeric("physical_measured_area", { precision: 12, scale: 2 }),
+    physical_measured_area_basis: varchar("physical_measured_area_basis", { length: 255 }),
+    documented_area: numeric("documented_area", { precision: 12, scale: 2 }),
+    documented_area_basis: varchar("documented_area_basis", { length: 255 }),
+    approved_plan_area: numeric("approved_plan_area", { precision: 12, scale: 2 }),
+    approved_plan_area_basis: varchar("approved_plan_area_basis", { length: 255 }),
+    built_up_area: numeric("built_up_area", { precision: 12, scale: 2 }),
+    built_up_area_basis: varchar("built_up_area_basis", { length: 255 }),
+    adopted_area: numeric("adopted_area", { precision: 12, scale: 2 }),
+    adopted_area_basis: varchar("adopted_area_basis", { length: 255 }),
+    floor_space_index: numeric("floor_space_index", { precision: 12, scale: 2 }),
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
     created_by_id: uuid("created_by_id").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

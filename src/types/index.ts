@@ -284,6 +284,18 @@ export interface MakerValuation {
   marketability?: string | undefined;
   positiveFactors?: string | undefined;
   negativeFactors?: string | undefined;
+  // Area Calculation Section
+  physicalMeasuredArea?: string | undefined;
+  physicalMeasuredAreaBasis?: string | undefined;
+  documentedArea?: string | undefined;
+  documentedAreaBasis?: string | undefined;
+  approvedPlanArea?: string | undefined;
+  approvedPlanAreaBasis?: string | undefined;
+  builtUpArea?: string | undefined;
+  builtUpAreaBasis?: string | undefined;
+  adoptedArea?: string | undefined;
+  adoptedAreaBasis?: string | undefined;
+  floorSpaceIndex?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;

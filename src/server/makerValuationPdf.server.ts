@@ -186,6 +186,19 @@ class ValuationWriter {
     this.drawRow("Marketability", show(valuation.marketability));
     this.drawRow("Positive Factors", show(valuation.positiveFactors));
     this.drawRow("Negative Factors", show(valuation.negativeFactors));
+    
+    // Area Calculation Section
+    this.drawRow("Physical Measured Area", show(valuation.physicalMeasuredArea));
+    this.drawRow("Physical Measured Area Basis", show(valuation.physicalMeasuredAreaBasis));
+    this.drawRow("Documented Area", show(valuation.documentedArea));
+    this.drawRow("Documented Area Basis", show(valuation.documentedAreaBasis));
+    this.drawRow("Approved Plan Area", show(valuation.approvedPlanArea));
+    this.drawRow("Approved Plan Area Basis", show(valuation.approvedPlanAreaBasis));
+    this.drawRow("Built Up Area", show(valuation.builtUpArea));
+    this.drawRow("Built Up Area Basis", show(valuation.builtUpAreaBasis));
+    this.drawRow("Adopted Area", show(valuation.adoptedArea));
+    this.drawRow("Adopted Area Basis", show(valuation.adoptedAreaBasis));
+    this.drawRow("Floor Space Index", show(valuation.floorSpaceIndex));
   }
 }
 
