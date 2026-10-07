@@ -934,6 +934,31 @@ function Page() {
                       Valuation created successfully
                     </p>
                   </div>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          const result = await (
+                            await import("@/data/makerValuation.functions")
+                          ).api_downloadMakerValuationPdf(valuationCase.id);
+                          const link = document.createElement("a");
+                          link.href = `data:application/pdf;base64,${result.pdfBase64}`;
+                          link.download = result.filename;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          toast.success("PDF downloaded");
+                        } catch (error) {
+                          toast.error("Failed to download PDF");
+                          console.error("Download error:", error);
+                        }
+                      }}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </Button>
+                  </div>
                 </div>
               ) : isMaker && 
                   (valuationCase.stage === "MAKER_ASSIGNED" || 
