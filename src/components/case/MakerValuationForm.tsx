@@ -35,13 +35,13 @@ export function MakerValuationForm({
 
   const form = useForm<CreateMakerValuationInput>({
     resolver: zodResolver(createMakerValuationSchema),
-    defaultValues: initialValues || {
-      caseId,
-      dateOfValuation: "",
-      dateOfInspection: "",
-      refNo: "",
-      branch: "",
-      bankName: "",
+    defaultValues: {
+      caseId: caseId,
+      dateOfValuation: initialValues?.dateOfValuation || "",
+      dateOfInspection: initialValues?.dateOfInspection || "",
+      refNo: initialValues?.refNo || "",
+      branch: initialValues?.branch || "",
+      bankName: initialValues?.bankName || "",
     },
   });
 
@@ -53,19 +53,20 @@ export function MakerValuationForm({
       
       await api_createMakerValuation({
         token,
-        caseId: values.caseId,
+        caseId: caseId,
         dateOfValuation: values.dateOfValuation,
         dateOfInspection: values.dateOfInspection,
         refNo: values.refNo,
         branch: values.branch,
         bankName: values.bankName,
       });
-      toast.success("Valuation created successfully");
+      toast.success(initialValues ? "Valuation updated successfully" : "Valuation created successfully");
       form.reset();
       onSuccess?.();
     } catch (error) {
-      console.error("Failed to create valuation:", error);
-      toast.error("Failed to create valuation");
+      console.error("Failed to save valuation:", error);
+      const errorMsg = error instanceof Error ? error.message : "Failed to save valuation";
+      toast.error(errorMsg);
     } finally {
       setIsSubmitting(false);
     }
