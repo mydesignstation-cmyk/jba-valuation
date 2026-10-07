@@ -644,7 +644,7 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Type of Property</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
+                        <SelectTrigger className={fieldVisit?.propertyType ? "border-emerald-300 bg-emerald-50/30" : ""}>
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -674,7 +674,11 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Located on Floor</FormLabel>
-                      <Input placeholder="Enter floor" {...field} />
+                      <Input
+                        className={fieldVisit?.locatedOnFloor ? "border-emerald-300 bg-emerald-50/30" : ""}
+                        placeholder="Enter floor"
+                        {...field}
+                      />
                     </FormItem>
                   )}
                 />
@@ -704,7 +708,11 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Landmark</FormLabel>
-                      <Input placeholder="Enter landmark" {...field} />
+                      <Input
+                        className={fieldVisit?.landmark ? "border-emerald-300 bg-emerald-50/30" : ""}
+                        placeholder="Enter landmark"
+                        {...field}
+                      />
                     </FormItem>
                   )}
                 />
@@ -1273,7 +1281,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Latitude</FormLabel>
-                      <Input placeholder="Enter latitude" {...field} />
+                      <Input className={fieldVisit?.gpsLatitude ? "border-emerald-300 bg-emerald-50/30" : ""} placeholder="Enter latitude" {...field} />
                       {fieldVisit?.gpsLatitude && (
                         <p className="text-xs text-muted-foreground">Fetched from Field Visit report</p>
                       )}
@@ -1286,7 +1294,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Longitude</FormLabel>
-                      <Input placeholder="Enter longitude" {...field} />
+                      <Input className={fieldVisit?.gpsLongitude ? "border-emerald-300 bg-emerald-50/30" : ""} placeholder="Enter longitude" {...field} />
                       {fieldVisit?.gpsLongitude && (
                         <p className="text-xs text-muted-foreground">Fetched from Field Visit report</p>
                       )}
@@ -1306,8 +1314,7 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Occupancy</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select occupancy status" />
+                        <SelectTrigger className={fieldVisit?.occupancyStatus ? "border-emerald-300 bg-emerald-50/30" : ""}>
                         </SelectTrigger>
                         <SelectContent>
                           {occupancyStatusOptions.map((option) => (
@@ -1333,7 +1340,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Year of Construction</FormLabel>
-                      <Input placeholder="Enter year" {...field} />
+                      <Input className={fieldVisit?.yearOfConstruction ? "border-emerald-300 bg-emerald-50/30" : ""} placeholder="Enter year" {...field} />
                     </FormItem>
                   )}
                 />
@@ -1364,8 +1371,7 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Type of Structure</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select structure type" />
+                        <SelectTrigger className={fieldVisit?.structureType ? "border-emerald-300 bg-emerald-50/30" : ""}>
                         </SelectTrigger>
                         <SelectContent>
                           {typeOfStructureOptions.map((option) => (
@@ -1384,7 +1390,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nos. of unit per floor</FormLabel>
-                      <Input placeholder="Enter number" {...field} />
+                      <Input className={fieldVisit?.flatsOnFloor ? "border-emerald-300 bg-emerald-50/30" : ""} placeholder="Enter number" {...field} />
                     </FormItem>
                   )}
                 />
