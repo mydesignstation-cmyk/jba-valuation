@@ -1660,7 +1660,7 @@ export function MakerValuationForm({
                 />
                 {/* Insurance Value (read-only, formula-based) */}
                 <div className="space-y-2">
-                  <FormLabel className="block">Insurance Value</FormLabel>
+                  <label className="text-sm font-medium text-gray-700">Insurance Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("builtUpArea") && form.watch("buildingRate")
                       ? (
@@ -1679,7 +1679,7 @@ export function MakerValuationForm({
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 {/* Market Value (formula-based) */}
                 <div className="space-y-2">
-                  <FormLabel className="block">Market Value</FormLabel>
+                  <label className="text-sm font-medium text-gray-700">Market Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
@@ -1701,7 +1701,7 @@ export function MakerValuationForm({
                 />
                 {/* Fair Market Value (formula-based) */}
                 <div className="space-y-2">
-                  <FormLabel className="block">Fair Market Value</FormLabel>
+                  <label className="text-sm font-medium text-gray-700">Fair Market Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate") && form.watch("carParkingValue")
                       ? (
@@ -1715,7 +1715,7 @@ export function MakerValuationForm({
                 </div>
                 {/* Realizable Value (formula-based: FMV × 95%) */}
                 <div className="space-y-2">
-                  <FormLabel className="block">Realizable Value</FormLabel>
+                  <label className="text-sm font-medium text-gray-700">Realizable Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
@@ -1728,7 +1728,7 @@ export function MakerValuationForm({
                 </div>
                 {/* Distress Value (formula-based: FMV × 80%) */}
                 <div className="space-y-2">
-                  <FormLabel className="block">Distress Value</FormLabel>
+                  <label className="text-sm font-medium text-gray-700">Distress Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
@@ -1761,7 +1761,7 @@ export function MakerValuationForm({
                 />
                 {/* Govt. Value (calculated) */}
                 <div className="space-y-2">
-                  <FormLabel className="block">Govt. Value</FormLabel>
+                  <label className="text-sm font-medium text-gray-700">Govt. Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("govtReadyReckonerRatePerSqMtr")
                       ? (
