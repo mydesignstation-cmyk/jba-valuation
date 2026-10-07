@@ -1,6 +1,6 @@
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { Form, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -36,16 +36,45 @@ import {
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
+import type { MakerValuation } from "@/types";
+
+const makerValuationFields = [
+  "dateOfValuation", "dateOfInspection", "refNo", "branch", "bankName",
+  "purchaserName", "typeOfProperty", "flatNo", "locatedOnFloor", "wing", "buildingName", "landmark", "roadNameArea", "location", "plotNo", "ctsNo", "sNo", "other", "village", "wardNo", "taluka", "blockNo", "district", "pinCode",
+  "purposeOfValuation", "documentsName1", "documentsDetails1", "documentsName2", "documentsDetails2", "documentsName3", "documentsDetails3", "nameOfOwner", "address", "configurationInShort", "configurationFullDescription", "locality", "classOfLocality1", "classOfLocality2", "classOfLocality3", "municipalCorporation", "typeOfLand", "genuinenessOrAuthenticity", "anyOtherComments", "nosOfFloor", "nosOfStaircase", "nosOfLifts",
+  "boundaryPropertyNorth", "boundaryPropertySouth", "boundaryPropertyEast", "boundaryPropertyWest", "boundaryPropertyMeasured", "boundarySiteNorth", "boundarySiteSouth", "boundarySiteEast", "boundarySiteWest", "boundarySiteMeasured", "latitude", "longitude", "occupancy",
+  "yearOfConstruction", "ageOfBuilding", "residualLife", "typeOfStructure", "nosOfUnitPerFloor", "buildingType", "appearance", "qualityOfConstruction", "maintenance", "protectedWaterSupply", "undergroundSewerage", "nosOfParking", "compoundWall", "openCoveredParking", "pavementLaidAroundBuilding", "flooring", "doors", "windows", "fittings", "finishing", "assessmentNo", "taxAmount", "taxPaidInNameOf", "electricityServiceConnectionNo", "meterCardInNameOf", "meterCardDated", "undividedAreaOfLand",
+  "marketability", "positiveFactors", "negativeFactors",
+  "physicalMeasuredArea", "physicalMeasuredAreaBasis", "documentedArea", "documentedAreaBasis", "approvedPlanArea", "approvedPlanAreaBasis", "builtUpArea", "builtUpAreaBasis", "adoptedArea", "adoptedAreaBasis", "floorSpaceIndex",
+  "rateRange", "adoptedRate", "buildingRate", "landRate", "insuranceValue", "marketValue", "carParkingValue", "fairMarketValue", "realizableValue", "distressValue", "govtReadyReckonerRatePerSqMtr", "govtReadyReckonerRatePerSqFt", "govtValue", "rentRangePerMonth", "remarks",
+] as const satisfies readonly (keyof Omit<CreateMakerValuationInput, "caseId">)[];
+
+function formString(value: unknown): string {
+  return value == null ? "" : String(value);
+}
+
+function formDate(value: unknown): string {
+  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  return formString(value).slice(0, 10);
+}
+
+function makerValuationToFormValues(
+  caseId: string,
+  valuation: MakerValuation,
+): CreateMakerValuationInput {
+  const values: Record<string, string> = { caseId };
+  const source = valuation as unknown as Record<string, unknown>;
+  for (const field of makerValuationFields) {
+    values[field] = field === "dateOfValuation" || field === "dateOfInspection"
+      ? formDate(source[field])
+      : formString(source[field]);
+  }
+  return values as CreateMakerValuationInput;
+}
 
 interface MakerValuationFormProps {
   caseId: string;
-  initialValues?: {
-    dateOfValuation: string;
-    dateOfInspection: string;
-    refNo: string;
-    branch: string;
-    bankName: string;
-  };
+  initialValues?: MakerValuation;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -58,15 +87,15 @@ export function MakerValuationForm({
 }: MakerValuationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const form = useForm<CreateMakerValuationInput>({
-    resolver: zodResolver(createMakerValuationSchema),
-    defaultValues: {
+  const formDefaultValues = useMemo(
+    (): CreateMakerValuationInput =>
+      initialValues ? makerValuationToFormValues(caseId, initialValues) : {
       caseId: caseId,
-      dateOfValuation: initialValues?.dateOfValuation || "",
-      dateOfInspection: initialValues?.dateOfInspection || "",
-      refNo: initialValues?.refNo || "",
-      branch: initialValues?.branch || "",
-      bankName: initialValues?.bankName || "",
+      dateOfValuation: "",
+      dateOfInspection: "",
+      refNo: "",
+      branch: "",
+      bankName: "",
       purchaserName: "",
       typeOfProperty: "",
       flatNo: "",
@@ -178,8 +207,17 @@ export function MakerValuationForm({
       rentRangePerMonth: "",
       remarks: "",
     },
+    [caseId, initialValues],
+  );
+
+  const form = useForm<CreateMakerValuationInput>({
+    resolver: zodResolver(createMakerValuationSchema),
+    defaultValues: formDefaultValues,
   });
 
+  useEffect(() => {
+    form.reset(initialValues ? makerValuationToFormValues(caseId, initialValues) : formDefaultValues);
+  }, [caseId, initialValues, form]);
   const handleAutoFill = () => {
     const today = new Date().toISOString().split("T")[0];
     form.reset({
@@ -190,7 +228,7 @@ export function MakerValuationForm({
       branch: "Dev Branch",
       bankName: "Dev Bank",
       purchaserName: "John Developer",
-      typeOfProperty: "Apartment",
+      typeOfProperty: "Residential Flat",
       flatNo: "101",
       locatedOnFloor: "1st Floor",
       wing: "A",
@@ -220,12 +258,12 @@ export function MakerValuationForm({
       configurationInShort: "3BHK",
       configurationFullDescription: "3 Bedroom, Hall, Kitchen with modern amenities",
       locality: "Dev Locality",
-      classOfLocality1: "Prime",
-      classOfLocality2: "Commercial",
-      classOfLocality3: "Residential",
+      classOfLocality1: "High",
+      classOfLocality2: "Urban",
+      classOfLocality3: "Posh class",
       municipalCorporation: "Dev Municipal Corp",
       typeOfLand: "Freehold",
-      genuinenessOrAuthenticity: "Genuine",
+      genuinenessOrAuthenticity: "Yes",
       anyOtherComments: "Dev property for testing",
       nosOfFloor: "15",
       nosOfStaircase: "2",
@@ -234,19 +272,19 @@ export function MakerValuationForm({
       boundaryPropertySouth: "Garden",
       boundaryPropertyEast: "Park",
       boundaryPropertyWest: "Building",
-      boundaryPropertyMeasured: "Measured",
+      boundaryPropertyMeasured: "As per actuals",
       boundarySiteNorth: "100m",
       boundarySiteSouth: "100m",
       boundarySiteEast: "100m",
       boundarySiteWest: "100m",
-      boundarySiteMeasured: "Measured",
+      boundarySiteMeasured: "As per actuals",
       latitude: "19.0760",
       longitude: "72.8777",
-      occupancy: "Owner Occupied",
+      occupancy: "Self-occupied",
       yearOfConstruction: "2020",
       ageOfBuilding: "4",
       residualLife: "50",
-      typeOfStructure: "RCC",
+      typeOfStructure: "RCC, Load Bearing, Mixed",
       nosOfUnitPerFloor: "4",
       buildingType: "Residential",
       appearance: "Good",
@@ -275,31 +313,30 @@ export function MakerValuationForm({
       negativeFactors: "Old building",
       // Area Calculation
       physicalMeasuredArea: "1000",
-      physicalMeasuredAreaBasis: "Measured",
+      physicalMeasuredAreaBasis: "CA",
       documentedArea: "1000",
-      documentedAreaBasis: "Documented",
+      documentedAreaBasis: "RERA CA",
       approvedPlanArea: "1000",
-      approvedPlanAreaBasis: "Plan",
+      approvedPlanAreaBasis: "BUA",
       builtUpArea: "800",
-      builtUpAreaBasis: "Measured",
+      builtUpAreaBasis: "BUA",
       adoptedArea: "1000",
-      adoptedAreaBasis: "Approved",
+      adoptedAreaBasis: "CA",
       floorSpaceIndex: "2.5",
       // Rate Section
       rateRange: "5000",
       adoptedRate: "5000",
       buildingRate: "3000",
       landRate: "2000",
-      insuranceValue: "",
-      // Details of Valuation
-      marketValue: "",
+      insuranceValue: "2400000.00",
+      marketValue: "5000000.00",
       carParkingValue: "100000",
-      fairMarketValue: "",
-      realizableValue: "",
-      distressValue: "",
+      fairMarketValue: "5100000.00",
+      realizableValue: "4845000.00",
+      distressValue: "4080000.00",
       govtReadyReckonerRatePerSqMtr: "4000",
       govtReadyReckonerRatePerSqFt: "370",
-      govtValue: "",
+      govtValue: "4000000.00",
       rentRangePerMonth: "25000",
       remarks: "Dev test property - all formulas will auto-calculate",
     } as any);

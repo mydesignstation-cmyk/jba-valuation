@@ -2159,6 +2159,17 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
 // MAKER VALUATIONS
 // ============================================================================
 
+function normalizeMakerValuationInput(
+  input: CreateMakerValuationInput,
+): CreateMakerValuationInput {
+  return Object.fromEntries(
+    Object.entries(input).map(([key, value]) => [
+      key,
+      value == null || value === "" ? undefined : String(value),
+    ]),
+  ) as CreateMakerValuationInput;
+}
+
 /**
  * Create a new Maker Valuation for a case.
  * Generates PDF immediately and stores as base64.
@@ -2171,6 +2182,7 @@ export async function api_createMakerValuation(
   const user = await requireServerUser(token, "MAKER");
 
   try {
+    input = normalizeMakerValuationInput(input);
     // Build the valuation object for PDF generation
     const valuationForPdf: MakerValuation = {
       id: "",
@@ -2614,7 +2626,17 @@ export async function api_downloadMakerValuationPdf(
 /**
  * Map database row to MakerValuation type.
  */
-function mapMakerValuationRow(row: any): MakerValuation {
+function normalizeMakerRowValue(value: unknown): string | undefined {
+  if (value == null) return undefined;
+  if (value instanceof Date) return value.toISOString();
+  return String(value);
+}
+
+function mapMakerValuationRow(rawRow: any): MakerValuation {
+  const row = Object.fromEntries(
+    Object.entries(rawRow).map(([key, value]) => [key, normalizeMakerRowValue(value)]),
+  ) as any;
+
   return {
     id: row.id,
     caseId: row.case_id,
@@ -2735,6 +2757,6 @@ function mapMakerValuationRow(row: any): MakerValuation {
     remarks: row.remarks,
     pdfBytes: row.pdf_bytes,
     createdById: row.created_by_id,
-    createdAt: row.created_at?.toISOString?.() || row.created_at,
+    createdAt: row.created_at ?? "",
   };
 }

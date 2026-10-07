@@ -1,0 +1,28 @@
+{
+  "id": "FEAT-001",
+  "type": "fix",
+  "description": "Make the 115-field Maker Valuation contract and edit flow lossless from the complete form through Neon persistence and back into the form.",
+  "status": "completed",
+  "steps": [
+    "Read context.json and this feature file first. In e:/codefiles/va2/src/db/schema.ts align boundaryPropertyNorth/South/East/West and boundarySiteNorth/South/East/West with the verified Neon/migration varchar(255) type; do not create a destructive migration or change live data.",
+    "In e:/codefiles/va2/src/components/case/MakerValuationForm.tsx create or extract a complete typed 115-field form-value/default adapter. Accept a complete MakerValuation for edit, normalize nullable/numeric values to strings and date values to YYYY-MM-DD, reset when initialValues changes, preserve the existing zod resolver, calculated-value behavior, and api_createMakerValuation call.",
+    "In e:/codefiles/va2/src/routes/_app/cases.$caseId.index.tsx pass the complete fetched makerValuation to the edit form rather than projecting five Basic fields. Keep the existing query and auth/session behavior.",
+    "In e:/codefiles/va2/src/components/case/MakerValuationForm.tsx repair Dev Auto-Fill to use exact existing select options and populate every canonical field, including deterministic calculated values; keep rateRange as an open numeric input.",
+    "In e:/codefiles/va2/src/server/api.server.ts preserve requireServerUser(token, MAKER), the upsert, and PDF generation while ensuring create and update mappings and mapMakerValuationRow remain one-to-one for all 115 fields with explicit null/numeric/date normalization. Leave e:/codefiles/va2/src/data/makerValuation.functions.ts auth/session-token behavior intact unless a type-only adjustment is required.",
+    "Run the feature verification commands and update this FEAT file status to completed, recording implementation and verification findings needed by later features. Commit locally on the current branch; never push."
+  ],
+  "acceptance_criteria": [
+    "The Drizzle boundary declarations match the verified Neon table and migration types; all 115 canonical field names remain present exactly once.",
+    "Create and update persistence plus row mapping preserve all 115 fields without renames or dropped values, while existing Maker authentication remains enforced.",
+    "Editing a fetched valuation hydrates all 115 values, including numeric columns as strings, dates as YYYY-MM-DD, and nulls as empty strings.",
+    "Dev Auto-Fill assigns valid values for every canonical field and all select values are members of their existing option arrays; rateRange remains numeric/open.",
+    "The form builds and type-checks without changing unrelated behavior."
+  ],
+  "verification": [
+    "From e:/codefiles/va2 run npx tsc --noEmit and expect exit code 0.",
+    "From e:/codefiles/va2 run npm run build and expect exit code 0.",
+    "With a valid Maker session, use Dev Auto-Fill, save, reload the case, open Edit, and verify all 115 fields are populated; save a changed value from each major section and reload it again."
+  ],
+  "blocked_reason": null,
+  "findings": "Implementation: aligned all eight boundary side columns to varchar(255) without a migration; added a typed 115-field edit adapter with nullable/numeric/date normalization and reset-on-prop-change; passed the complete MakerValuation into edit mode; corrected all Dev Auto-Fill select values and deterministic calculated values while retaining open numeric rateRange; normalized storage input and mapped database numerics/dates back to string-shaped domain values while preserving requireServerUser(token, MAKER), upsert, PDF generation, and session-token wrappers. Verification: npx tsc --noEmit passed; npm run build passed; adapter field count is 115 and auto-fill assignment count is 116 including caseId; npm run lint remains blocked by the repository's pre-existing broad Prettier/CRLF violations (5,453 errors across the full tree), not TypeScript errors. Manual valid-Maker-session save/reload/edit/PDF smoke test was not executable in this step because no authenticated browser session was available; later feature verification should run it."
+}

@@ -1175,13 +1175,7 @@ function Page() {
                   <CardContent>
                     <MakerValuationForm
                       caseId={valuationCase.id}
-                      initialValues={{
-                        dateOfValuation: makerValuation.dateOfValuation,
-                        dateOfInspection: makerValuation.dateOfInspection,
-                        refNo: makerValuation.refNo,
-                        branch: makerValuation.branch,
-                        bankName: makerValuation.bankName,
-                      }}
+                      initialValues={makerValuation}
                       onSuccess={() => {
                         setShowValuationForm(false);
                         refetchMakerValuation();
