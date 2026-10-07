@@ -239,6 +239,37 @@ export const fieldVisits = pgTable(
   ],
 );
 
+// Maker Valuations table
+//
+// One Maker Valuation per Case (case_id is UNIQUE). Stores the 5 Basic Details
+// fields and the generated PDF as bytes. No DRAFT status, no updates—created
+// once at submission, PDF generated and stored immediately.
+export const makerValuations = pgTable(
+  "maker_valuations",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    case_id: uuid("case_id").notNull().unique(),
+    date_of_valuation: date("date_of_valuation").notNull(),
+    date_of_inspection: date("date_of_inspection").notNull(),
+    ref_no: varchar("ref_no", { length: 255 }).notNull(),
+    branch: varchar("branch", { length: 255 }).notNull(),
+    bank_name: varchar("bank_name", { length: 255 }).notNull(),
+    pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
+    created_by_id: uuid("created_by_id").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.case_id],
+      foreignColumns: [cases.id],
+      name: "maker_valuations_case_id_fk",
+    }).onDelete("restrict"),
+    index("maker_valuations_case_id_idx").on(table.case_id),
+    index("maker_valuations_created_by_id_idx").on(table.created_by_id),
+    index("maker_valuations_created_at_idx").on(table.created_at),
+  ],
+);
+
 // Relations
 export const customersRelations = relations(customers, ({ many }) => ({
   cases: many(cases),

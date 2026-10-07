@@ -2,7 +2,7 @@ import type { ReactNode } from "react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/date-format";
-import { stageBadgeVariant, stageLabels } from "@/lib/case-format";
+import { stageBadgeVariant, stageLabels, stageColors } from "@/lib/case-format";
 import type { CaseStage } from "@/types";
 
 interface CaseListCardProps {
@@ -65,7 +65,9 @@ export function CaseListCard({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Badge variant={stageBadgeVariant[stage]}>{stageLabels[stage]}</Badge>
+          <Badge className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0")}>
+            {stageLabels[stage]}
+          </Badge>
           {actions}
         </div>
       </div>

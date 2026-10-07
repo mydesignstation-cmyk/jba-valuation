@@ -30,6 +30,21 @@ export const stageBadgeVariant: Record<CaseStage, "default" | "secondary" | "out
   COMPLETED: "default",
 };
 
+/** Status-specific background and text colors for better visual distinction. */
+export const stageColors: Record<CaseStage, { bg: string; text: string }> = {
+  CREATED: { bg: "bg-slate-100", text: "text-slate-700" },
+  ASSIGNED: { bg: "bg-blue-100", text: "text-blue-700" },
+  FIELD_VISIT_PENDING: { bg: "bg-orange-100", text: "text-orange-700" },
+  FIELD_VISIT_SUBMITTED: { bg: "bg-green-100", text: "text-green-700" },
+  MAKER_ASSIGNED: { bg: "bg-purple-100", text: "text-purple-700" },
+  MAKER_PENDING: { bg: "bg-purple-100", text: "text-purple-700" },
+  MAKER_COMPLETED: { bg: "bg-purple-200", text: "text-purple-800" },
+  CHECKER_PENDING: { bg: "bg-red-100", text: "text-red-700" },
+  CHECKER_COMPLETED: { bg: "bg-red-200", text: "text-red-800" },
+  UPLOADER_PENDING: { bg: "bg-yellow-100", text: "text-yellow-700" },
+  COMPLETED: { bg: "bg-green-200", text: "text-green-800" },
+};
+
 /**
  * A Site Engineer's work on a case is the field visit. From their point of
  * view a case is "Pending" until they submit the field visit, and "Completed"

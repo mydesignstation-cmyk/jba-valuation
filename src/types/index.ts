@@ -184,3 +184,16 @@ export interface CaseHistoryEntry {
   performedAt: string;
   note?: string;
 }
+
+export interface MakerValuation {
+  id: string;
+  caseId: string;
+  dateOfValuation: string; // ISO date string
+  dateOfInspection: string; // ISO date string
+  refNo: string;
+  branch: string;
+  bankName: string;
+  pdfBytes: string; // Base64-encoded PDF
+  createdById: string;
+  createdAt: string;
+}

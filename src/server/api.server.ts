@@ -5,12 +5,13 @@
  */
 
 import { getDb } from "@/db";
-import { customers, banks, branches, cases, fieldVisits } from "@/db/schema";
+import { customers, banks, branches, cases, fieldVisits, makerValuations } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit, Role } from "@/types";
+import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit, Role, MakerValuation } from "@/types";
 import { requireServerUser } from "@/server/auth.server";
 import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
 import { buildFieldVisitPdf } from "@/server/fieldVisitPdf.server";
+import { generateMakerValuationPdf } from "@/server/makerValuationPdf.server";
 
 // ============================================================================
 // USERS (Neon Auth)
@@ -2150,4 +2151,126 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
     }
     throw new Error("Failed to generate field visit PDF");
   }
+}
+
+
+// ============================================================================
+// MAKER VALUATIONS
+// ============================================================================
+
+/**
+ * Create a new Maker Valuation for a case.
+ * Generates PDF immediately and stores as base64.
+ * One valuation per case (case_id unique constraint enforced at DB level).
+ */
+export async function api_createMakerValuation(
+  caseId: string,
+  dateOfValuation: string,
+  dateOfInspection: string,
+  refNo: string,
+  branch: string,
+  bankName: string,
+): Promise<MakerValuation> {
+  const user = await requireServerUser("maker.access");
+
+  try {
+    // Build the valuation object for PDF generation
+    const valuationForPdf: MakerValuation = {
+      id: "", // temp, not used in PDF
+      caseId,
+      dateOfValuation,
+      dateOfInspection,
+      refNo,
+      branch,
+      bankName,
+      pdfBytes: "", // will be filled
+      createdById: user.id,
+      createdAt: new Date().toISOString(),
+    };
+
+    // Generate PDF as base64
+    const pdfBase64 = await generateMakerValuationPdf(valuationForPdf);
+
+    // Insert into database
+    const now = new Date();
+    const rows = await getDb()
+      .insert(makerValuations)
+      .values({
+        case_id: caseId,
+        date_of_valuation: dateOfValuation,
+        date_of_inspection: dateOfInspection,
+        ref_no: refNo,
+        branch: branch,
+        bank_name: bankName,
+        pdf_bytes: pdfBase64,
+        created_by_id: user.id,
+        created_at: now,
+      })
+      .returning();
+
+    const row = rows[0];
+    if (!row) throw new Error("Failed to insert maker valuation");
+
+    return mapMakerValuationRow(row);
+  } catch (error) {
+    console.error("Failed to create maker valuation:", error);
+    throw error;
+  }
+}
+
+/**
+ * Fetch a Maker Valuation by case ID.
+ */
+export async function api_getMakerValuation(caseId: string): Promise<MakerValuation | null> {
+  try {
+    const rows = await getDb()
+      .select()
+      .from(makerValuations)
+      .where(eq(makerValuations.case_id, caseId))
+      .limit(1);
+
+    if (!rows[0]) return null;
+    return mapMakerValuationRow(rows[0]);
+  } catch (error) {
+    console.error("Failed to fetch maker valuation:", error);
+    throw error;
+  }
+}
+
+/**
+ * Download the PDF for a Maker Valuation.
+ */
+export async function api_downloadMakerValuationPdf(
+  caseId: string,
+): Promise<{ filename: string; pdfBase64: string }> {
+  try {
+    const valuation = await api_getMakerValuation(caseId);
+    if (!valuation) throw new Error("Maker Valuation not found");
+
+    return {
+      filename: `Maker_Valuation_${caseId}.pdf`,
+      pdfBase64: valuation.pdfBytes,
+    };
+  } catch (error) {
+    console.error("Failed to download maker valuation PDF:", error);
+    throw error;
+  }
+}
+
+/**
+ * Map database row to MakerValuation type.
+ */
+function mapMakerValuationRow(row: any): MakerValuation {
+  return {
+    id: row.id,
+    caseId: row.case_id,
+    dateOfValuation: row.date_of_valuation,
+    dateOfInspection: row.date_of_inspection,
+    refNo: row.ref_no,
+    branch: row.branch,
+    bankName: row.bank_name,
+    pdfBytes: row.pdf_bytes,
+    createdById: row.created_by_id,
+    createdAt: row.created_at?.toISOString?.() || row.created_at,
+  };
 }
