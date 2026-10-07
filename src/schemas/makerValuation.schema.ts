@@ -104,6 +104,11 @@ export const areaBasisOptions = [
   "SBUA",
 ] as const;
 
+export const rateRangeOptions = [
+  "15000 to 20000",
+  "17000",
+] as const;
+
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details
@@ -214,6 +219,24 @@ export const createMakerValuationSchema = z.object({
   adoptedArea: z.string().optional(),
   adoptedAreaBasis: z.string().optional(),
   floorSpaceIndex: z.string().optional(),
+  // Rate Section
+  rateRange: z.string().optional(),
+  adoptedRate: z.string().optional(),
+  buildingRate: z.string().optional(),
+  landRate: z.string().optional(),
+  insuranceValue: z.string().optional(),
+  // Details of Valuation Section
+  marketValue: z.string().optional(),
+  carParkingValue: z.string().optional(),
+  fairMarketValue: z.string().optional(),
+  realizableValue: z.string().optional(),
+  distressValue: z.string().optional(),
+  govtReadyReckonerRatePerSqMtr: z.string().optional(),
+  govtReadyReckonerRatePerSqFt: z.string().optional(),
+  govtValue: z.string().optional(),
+  rentRangePerMonth: z.string().optional(),
+  // Remarks Section
+  remarks: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

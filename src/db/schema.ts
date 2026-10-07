@@ -357,6 +357,24 @@ export const makerValuations = pgTable(
     adopted_area: numeric("adopted_area", { precision: 12, scale: 2 }),
     adopted_area_basis: varchar("adopted_area_basis", { length: 255 }),
     floor_space_index: numeric("floor_space_index", { precision: 12, scale: 2 }),
+    // Rate Section
+    rate_range: varchar("rate_range", { length: 255 }),
+    adopted_rate: numeric("adopted_rate", { precision: 12, scale: 2 }),
+    building_rate: numeric("building_rate", { precision: 12, scale: 2 }),
+    land_rate: numeric("land_rate", { precision: 12, scale: 2 }),
+    insurance_value: numeric("insurance_value", { precision: 12, scale: 2 }),
+    // Details of Valuation Section
+    market_value: numeric("market_value", { precision: 12, scale: 2 }),
+    car_parking_value: numeric("car_parking_value", { precision: 12, scale: 2 }),
+    fair_market_value: numeric("fair_market_value", { precision: 12, scale: 2 }),
+    realizable_value: numeric("realizable_value", { precision: 12, scale: 2 }),
+    distress_value: numeric("distress_value", { precision: 12, scale: 2 }),
+    govt_ready_reckoner_rate_per_sq_mtr: numeric("govt_ready_reckoner_rate_per_sq_mtr", { precision: 12, scale: 2 }),
+    govt_ready_reckoner_rate_per_sq_ft: numeric("govt_ready_reckoner_rate_per_sq_ft", { precision: 12, scale: 2 }),
+    govt_value: numeric("govt_value", { precision: 12, scale: 2 }),
+    rent_range_per_month: numeric("rent_range_per_month", { precision: 12, scale: 2 }),
+    // Remarks Section
+    remarks: text("remarks"),
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
     created_by_id: uuid("created_by_id").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

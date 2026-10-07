@@ -296,6 +296,24 @@ export interface MakerValuation {
   adoptedArea?: string | undefined;
   adoptedAreaBasis?: string | undefined;
   floorSpaceIndex?: string | undefined;
+  // Rate Section
+  rateRange?: string | undefined;
+  adoptedRate?: string | undefined;
+  buildingRate?: string | undefined;
+  landRate?: string | undefined;
+  insuranceValue?: string | undefined;
+  // Details of Valuation Section
+  marketValue?: string | undefined;
+  carParkingValue?: string | undefined;
+  fairMarketValue?: string | undefined;
+  realizableValue?: string | undefined;
+  distressValue?: string | undefined;
+  govtReadyReckonerRatePerSqMtr?: string | undefined;
+  govtReadyReckonerRatePerSqFt?: string | undefined;
+  govtValue?: string | undefined;
+  rentRangePerMonth?: string | undefined;
+  // Remarks Section
+  remarks?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;

@@ -199,6 +199,27 @@ class ValuationWriter {
     this.drawRow("Adopted Area", show(valuation.adoptedArea));
     this.drawRow("Adopted Area Basis", show(valuation.adoptedAreaBasis));
     this.drawRow("Floor Space Index", show(valuation.floorSpaceIndex));
+    
+    // Rate Section
+    this.drawRow("Rate Range", show(valuation.rateRange));
+    this.drawRow("Adopted Rate", show(valuation.adoptedRate));
+    this.drawRow("Building Rate", show(valuation.buildingRate));
+    this.drawRow("Land Rate", show(valuation.landRate));
+    this.drawRow("Insurance Value", show(valuation.insuranceValue));
+    
+    // Details of Valuation Section
+    this.drawRow("Market Value", show(valuation.marketValue));
+    this.drawRow("Car Parking Value", show(valuation.carParkingValue));
+    this.drawRow("Fair Market Value", show(valuation.fairMarketValue));
+    this.drawRow("Realizable Value", show(valuation.realizableValue));
+    this.drawRow("Distress Value", show(valuation.distressValue));
+    this.drawRow("Govt. Ready Reckoner Rate (Per Sq.Mtr.)", show(valuation.govtReadyReckonerRatePerSqMtr));
+    this.drawRow("Govt. Ready Reckoner Rate (Per Sq.Ft.)", show(valuation.govtReadyReckonerRatePerSqFt));
+    this.drawRow("Govt. Value", show(valuation.govtValue));
+    this.drawRow("Rent Range Per month", show(valuation.rentRangePerMonth));
+    
+    // Remarks Section
+    this.drawRow("Remarks", show(valuation.remarks));
   }
 }
 

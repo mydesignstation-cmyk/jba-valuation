@@ -33,6 +33,7 @@ import {
   openCoveredParkingOptions,
   marketabilityOptions,
   areaBasisOptions,
+  rateRangeOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import { getSessionToken } from "@/lib/auth-client";
@@ -163,6 +164,21 @@ export function MakerValuationForm({
       adoptedArea: "",
       adoptedAreaBasis: "",
       floorSpaceIndex: "",
+      rateRange: "",
+      adoptedRate: "",
+      buildingRate: "",
+      landRate: "",
+      insuranceValue: "",
+      marketValue: "",
+      carParkingValue: "",
+      fairMarketValue: "",
+      realizableValue: "",
+      distressValue: "",
+      govtReadyReckonerRatePerSqMtr: "",
+      govtReadyReckonerRatePerSqFt: "",
+      govtValue: "",
+      rentRangePerMonth: "",
+      remarks: "",
     },
   });
 
@@ -172,7 +188,33 @@ export function MakerValuationForm({
       const token = await getSessionToken();
       if (!token) throw new Error("Not authenticated");
       
-      await api_createMakerValuation(values);
+      // Calculate formula-based values
+      const adoptedArea = values.adoptedArea ? Number(values.adoptedArea) : 0;
+      const adoptedRate = values.adoptedRate ? Number(values.adoptedRate) : 0;
+      const builtUpArea = values.builtUpArea ? Number(values.builtUpArea) : 0;
+      const buildingRate = values.buildingRate ? Number(values.buildingRate) : 0;
+      const carParkingValue = values.carParkingValue ? Number(values.carParkingValue) : 0;
+      const govtReadyReckonerRatePerSqMtr = values.govtReadyReckonerRatePerSqMtr ? Number(values.govtReadyReckonerRatePerSqMtr) : 0;
+      
+      const insuranceValue = builtUpArea * buildingRate;
+      const marketValue = adoptedArea * adoptedRate;
+      const fairMarketValue = marketValue + carParkingValue;
+      const realizableValue = fairMarketValue * 0.95;
+      const distressValue = fairMarketValue * 0.8;
+      const govtValue = adoptedArea * govtReadyReckonerRatePerSqMtr;
+      
+      // Update values with calculated amounts
+      const submissionData: CreateMakerValuationInput = {
+        ...values,
+        insuranceValue: insuranceValue > 0 ? insuranceValue.toString() : values.insuranceValue || "",
+        marketValue: marketValue > 0 ? marketValue.toString() : values.marketValue || "",
+        fairMarketValue: fairMarketValue > 0 ? fairMarketValue.toString() : values.fairMarketValue || "",
+        realizableValue: realizableValue > 0 ? realizableValue.toString() : values.realizableValue || "",
+        distressValue: distressValue > 0 ? distressValue.toString() : values.distressValue || "",
+        govtValue: govtValue > 0 ? govtValue.toString() : values.govtValue || "",
+      };
+      
+      await api_createMakerValuation(submissionData);
       toast.success(initialValues ? "Valuation updated successfully" : "Valuation created successfully");
       form.reset();
       onSuccess?.();
@@ -1559,6 +1601,207 @@ export function MakerValuationForm({
                   )}
                 />
               </div>
+            </div>
+
+            {/* Rate Section */}
+            <div className="border-b-2 border-gray-200 pb-6">
+              <h3 className="font-semibold text-base mb-4">Rate</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="rateRange"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rate Range</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select range" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {rateRangeOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="adoptedRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Adopted Rate</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="buildingRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Building Rate</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="landRate"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Land Rate</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
+                    </FormItem>
+                  )}
+                />
+                {/* Insurance Value (read-only, formula-based) */}
+                <div className="space-y-2">
+                  <FormLabel className="block">Insurance Value</FormLabel>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("builtUpArea") && form.watch("buildingRate")
+                      ? (
+                          Number(form.watch("builtUpArea")) *
+                          Number(form.watch("buildingRate"))
+                        ).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Details of Valuation Section */}
+            <div className="border-b-2 border-gray-200 pb-6">
+              <h3 className="font-semibold text-base mb-4">Details of Valuation</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                {/* Market Value (formula-based) */}
+                <div className="space-y-2">
+                  <FormLabel className="block">Market Value</FormLabel>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("adoptedArea") && form.watch("adoptedRate")
+                      ? (
+                          Number(form.watch("adoptedArea")) *
+                          Number(form.watch("adoptedRate"))
+                        ).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="carParkingValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Car Parking Value</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter value" {...field} />
+                    </FormItem>
+                  )}
+                />
+                {/* Fair Market Value (formula-based) */}
+                <div className="space-y-2">
+                  <FormLabel className="block">Fair Market Value</FormLabel>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("adoptedArea") && form.watch("adoptedRate") && form.watch("carParkingValue")
+                      ? (
+                          Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
+                          Number(form.watch("carParkingValue"))
+                        ).toFixed(2)
+                      : form.watch("adoptedArea") && form.watch("adoptedRate")
+                      ? (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate"))).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
+                {/* Realizable Value (formula-based: FMV × 95%) */}
+                <div className="space-y-2">
+                  <FormLabel className="block">Realizable Value</FormLabel>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("adoptedArea") && form.watch("adoptedRate")
+                      ? (
+                          (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
+                            (form.watch("carParkingValue") ? Number(form.watch("carParkingValue")) : 0)) *
+                          0.95
+                        ).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
+                {/* Distress Value (formula-based: FMV × 80%) */}
+                <div className="space-y-2">
+                  <FormLabel className="block">Distress Value</FormLabel>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("adoptedArea") && form.watch("adoptedRate")
+                      ? (
+                          (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
+                            (form.watch("carParkingValue") ? Number(form.watch("carParkingValue")) : 0)) *
+                          0.8
+                        ).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="govtReadyReckonerRatePerSqMtr"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Govt. Ready Reckoner Rate (Per Sq.Mtr.)</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="govtReadyReckonerRatePerSqFt"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Govt. Ready Reckoner Rate (Per Sq.Ft.)</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
+                    </FormItem>
+                  )}
+                />
+                {/* Govt. Value (calculated) */}
+                <div className="space-y-2">
+                  <FormLabel className="block">Govt. Value</FormLabel>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("adoptedArea") && form.watch("govtReadyReckonerRatePerSqMtr")
+                      ? (
+                          Number(form.watch("adoptedArea")) *
+                          Number(form.watch("govtReadyReckonerRatePerSqMtr"))
+                        ).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
+                <FormField
+                  control={form.control}
+                  name="rentRangePerMonth"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rent Range Per month</FormLabel>
+                      <Input type="number" step="0.01" placeholder="Enter range" {...field} />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            {/* Remarks Section */}
+            <div className="border-b-2 border-gray-200 pb-6">
+              <h3 className="font-semibold text-base mb-4">Remarks</h3>
+              <FormField
+                control={form.control}
+                name="remarks"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Remarks</FormLabel>
+                    <textarea
+                      placeholder="Enter any remarks or notes"
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      rows={4}
+                      {...field}
+                    />
+                  </FormItem>
+                )}
+              />
             </div>
 
             <div className="flex gap-2 justify-end pt-4">
