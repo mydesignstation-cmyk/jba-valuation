@@ -216,7 +216,7 @@ function MakerValuationSection({
   const Icon = makerValuationSectionIcons[title] ?? FileText;
 
   return (
-    <Card className="break-inside-avoid shadow-sm transition-shadow hover:shadow-md">
+    <Card className="mb-4 break-inside-avoid shadow-sm transition-shadow hover:shadow-md">
       <CardHeader className="pb-3">
         <CardTitle className="flex items-center gap-2 text-base">
           <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
@@ -1032,9 +1032,40 @@ function Page() {
                           </p>
                         </div>
                       </div>
-                      <Badge variant="secondary" className="w-fit shrink-0">
-                        Read-only
-                      </Badge>
+                      <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
+                        {isMaker &&
+                          (valuationCase.stage === "MAKER_ASSIGNED" ||
+                            valuationCase.stage === "MAKER_PENDING") && (
+                            <Button variant="outline" size="sm" onClick={() => setShowValuationForm(true)}>
+                              <PenLine className="mr-2 h-4 w-4" />
+                              Edit
+                            </Button>
+                          )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={async () => {
+                            try {
+                              const result = await (
+                                await import("@/data/makerValuation.functions")
+                              ).api_downloadMakerValuationPdf(valuationCase.id);
+                              const link = document.createElement("a");
+                              link.href = `data:application/pdf;base64,${result.pdfBase64}`;
+                              link.download = result.filename;
+                              document.body.appendChild(link);
+                              link.click();
+                              document.body.removeChild(link);
+                              toast.success("PDF downloaded");
+                            } catch (error) {
+                              toast.error("Failed to download PDF");
+                              console.error("Download error:", error);
+                            }
+                          }}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          Download PDF
+                        </Button>
+                      </div>
                     </CardContent>
                   </Card>
                   <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
@@ -1046,39 +1077,6 @@ function Page() {
                         fields={section.fields}
                       />
                     ))}
-                  </div>
-                  <div className="flex gap-2 pt-2">
-                    {isMaker &&
-                      (valuationCase.stage === "MAKER_ASSIGNED" ||
-                        valuationCase.stage === "MAKER_PENDING") && (
-                        <Button variant="outline" onClick={() => setShowValuationForm(true)}>
-                          <PenLine className="mr-2 h-4 w-4" />
-                          Edit
-                        </Button>
-                      )}
-                    <Button
-                      variant="outline"
-                      onClick={async () => {
-                        try {
-                          const result = await (
-                            await import("@/data/makerValuation.functions")
-                          ).api_downloadMakerValuationPdf(valuationCase.id);
-                          const link = document.createElement("a");
-                          link.href = `data:application/pdf;base64,${result.pdfBase64}`;
-                          link.download = result.filename;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          toast.success("PDF downloaded");
-                        } catch (error) {
-                          toast.error("Failed to download PDF");
-                          console.error("Download error:", error);
-                        }
-                      }}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
                   </div>
                 </div>
               ) : isMaker &&
