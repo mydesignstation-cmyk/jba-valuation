@@ -128,6 +128,9 @@ class ValuationWriter {
     this.drawRow("Type of Land", show(valuation.typeOfLand));
     this.drawRow("Genuineness or Authenticity", show(valuation.genuinenessOrAuthenticity));
     this.drawRow("Any other comments", show(valuation.anyOtherComments));
+    this.drawRow("Nos. of Floor", show(valuation.nosOfFloor));
+    this.drawRow("Nos. of Staircase", show(valuation.nosOfStaircase));
+    this.drawRow("Nos. of Lifts", show(valuation.nosOfLifts));
   }
 }
 

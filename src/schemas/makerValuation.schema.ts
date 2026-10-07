@@ -97,6 +97,9 @@ export const createMakerValuationSchema = z.object({
   typeOfLand: z.string().optional(),
   genuinenessOrAuthenticity: z.string().optional(),
   anyOtherComments: z.string().optional(),
+  nosOfFloor: z.string().optional(),
+  nosOfStaircase: z.string().optional(),
+  nosOfLifts: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

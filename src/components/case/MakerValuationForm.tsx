@@ -94,6 +94,9 @@ export function MakerValuationForm({
       typeOfLand: "",
       genuinenessOrAuthenticity: "",
       anyOtherComments: "",
+      nosOfFloor: "",
+      nosOfStaircase: "",
+      nosOfLifts: "",
     },
   });
 
@@ -618,6 +621,36 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Any other comments</FormLabel>
                       <Input placeholder="Enter additional comments" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nosOfFloor"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nos. of Floor</FormLabel>
+                      <Input placeholder="Enter number of floors" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nosOfStaircase"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nos. of Staircase</FormLabel>
+                      <Input placeholder="Enter number of staircases" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="nosOfLifts"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Nos. of Lifts</FormLabel>
+                      <Input placeholder="Enter number of lifts" {...field} />
                     </FormItem>
                   )}
                 />

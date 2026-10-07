@@ -292,6 +292,9 @@ export const makerValuations = pgTable(
     type_of_land: varchar("type_of_land", { length: 255 }),
     genuineness_or_authenticity: varchar("genuineness_or_authenticity", { length: 255 }),
     any_other_comments: text("any_other_comments"),
+    nos_of_floor: varchar("nos_of_floor", { length: 255 }),
+    nos_of_staircase: varchar("nos_of_staircase", { length: 255 }),
+    nos_of_lifts: varchar("nos_of_lifts", { length: 255 }),
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
     created_by_id: uuid("created_by_id").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

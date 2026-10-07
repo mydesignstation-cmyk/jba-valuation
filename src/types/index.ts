@@ -231,6 +231,9 @@ export interface MakerValuation {
   typeOfLand?: string | undefined;
   genuinenessOrAuthenticity?: string | undefined;
   anyOtherComments?: string | undefined;
+  nosOfFloor?: string | undefined;
+  nosOfStaircase?: string | undefined;
+  nosOfLifts?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;
