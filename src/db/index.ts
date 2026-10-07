@@ -15,11 +15,7 @@ export function getDb() {
     throw new Error("DATABASE_URL or DATABASE_URL_UNPOOLED is not set");
   }
 
-  const client = postgres(connectionString, {
-    max: 1,
-    idle_timeout: 30,
-    connection_timeout: 10,
-  });
+  const client = postgres(connectionString);
   dbInstance = drizzle(client, { schema });
   return dbInstance;
 }
