@@ -39,14 +39,121 @@ import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema"
 import type { MakerValuation } from "@/types";
 
 const makerValuationFields = [
-  "dateOfValuation", "dateOfInspection", "refNo", "branch", "bankName",
-  "purchaserName", "typeOfProperty", "flatNo", "locatedOnFloor", "wing", "buildingName", "landmark", "roadNameArea", "location", "plotNo", "ctsNo", "sNo", "other", "village", "wardNo", "taluka", "blockNo", "district", "pinCode",
-  "purposeOfValuation", "documentsName1", "documentsDetails1", "documentsName2", "documentsDetails2", "documentsName3", "documentsDetails3", "nameOfOwner", "address", "configurationInShort", "configurationFullDescription", "locality", "classOfLocality1", "classOfLocality2", "classOfLocality3", "municipalCorporation", "typeOfLand", "genuinenessOrAuthenticity", "anyOtherComments", "nosOfFloor", "nosOfStaircase", "nosOfLifts",
-  "boundaryPropertyNorth", "boundaryPropertySouth", "boundaryPropertyEast", "boundaryPropertyWest", "boundaryPropertyMeasured", "boundarySiteNorth", "boundarySiteSouth", "boundarySiteEast", "boundarySiteWest", "boundarySiteMeasured", "latitude", "longitude", "occupancy",
-  "yearOfConstruction", "ageOfBuilding", "residualLife", "typeOfStructure", "nosOfUnitPerFloor", "buildingType", "appearance", "qualityOfConstruction", "maintenance", "protectedWaterSupply", "undergroundSewerage", "nosOfParking", "compoundWall", "openCoveredParking", "pavementLaidAroundBuilding", "flooring", "doors", "windows", "fittings", "finishing", "assessmentNo", "taxAmount", "taxPaidInNameOf", "electricityServiceConnectionNo", "meterCardInNameOf", "meterCardDated", "undividedAreaOfLand",
-  "marketability", "positiveFactors", "negativeFactors",
-  "physicalMeasuredArea", "physicalMeasuredAreaBasis", "documentedArea", "documentedAreaBasis", "approvedPlanArea", "approvedPlanAreaBasis", "builtUpArea", "builtUpAreaBasis", "adoptedArea", "adoptedAreaBasis", "floorSpaceIndex",
-  "rateRange", "adoptedRate", "buildingRate", "landRate", "insuranceValue", "marketValue", "carParkingValue", "fairMarketValue", "realizableValue", "distressValue", "govtReadyReckonerRatePerSqMtr", "govtReadyReckonerRatePerSqFt", "govtValue", "rentRangePerMonth", "remarks",
+  "dateOfValuation",
+  "dateOfInspection",
+  "refNo",
+  "branch",
+  "bankName",
+  "purchaserName",
+  "typeOfProperty",
+  "flatNo",
+  "locatedOnFloor",
+  "wing",
+  "buildingName",
+  "landmark",
+  "roadNameArea",
+  "location",
+  "plotNo",
+  "ctsNo",
+  "sNo",
+  "other",
+  "village",
+  "wardNo",
+  "taluka",
+  "blockNo",
+  "district",
+  "pinCode",
+  "purposeOfValuation",
+  "documentsName1",
+  "documentsDetails1",
+  "documentsName2",
+  "documentsDetails2",
+  "documentsName3",
+  "documentsDetails3",
+  "nameOfOwner",
+  "address",
+  "configurationInShort",
+  "configurationFullDescription",
+  "locality",
+  "classOfLocality1",
+  "classOfLocality2",
+  "classOfLocality3",
+  "municipalCorporation",
+  "typeOfLand",
+  "genuinenessOrAuthenticity",
+  "anyOtherComments",
+  "nosOfFloor",
+  "nosOfStaircase",
+  "nosOfLifts",
+  "boundaryPropertyNorth",
+  "boundaryPropertySouth",
+  "boundaryPropertyEast",
+  "boundaryPropertyWest",
+  "boundaryPropertyMeasured",
+  "boundarySiteNorth",
+  "boundarySiteSouth",
+  "boundarySiteEast",
+  "boundarySiteWest",
+  "boundarySiteMeasured",
+  "latitude",
+  "longitude",
+  "occupancy",
+  "yearOfConstruction",
+  "ageOfBuilding",
+  "residualLife",
+  "typeOfStructure",
+  "nosOfUnitPerFloor",
+  "buildingType",
+  "appearance",
+  "qualityOfConstruction",
+  "maintenance",
+  "protectedWaterSupply",
+  "undergroundSewerage",
+  "nosOfParking",
+  "compoundWall",
+  "openCoveredParking",
+  "pavementLaidAroundBuilding",
+  "flooring",
+  "doors",
+  "windows",
+  "fittings",
+  "finishing",
+  "assessmentNo",
+  "taxAmount",
+  "taxPaidInNameOf",
+  "electricityServiceConnectionNo",
+  "meterCardInNameOf",
+  "meterCardDated",
+  "undividedAreaOfLand",
+  "marketability",
+  "positiveFactors",
+  "negativeFactors",
+  "physicalMeasuredArea",
+  "physicalMeasuredAreaBasis",
+  "documentedArea",
+  "documentedAreaBasis",
+  "approvedPlanArea",
+  "approvedPlanAreaBasis",
+  "builtUpArea",
+  "builtUpAreaBasis",
+  "adoptedArea",
+  "adoptedAreaBasis",
+  "floorSpaceIndex",
+  "rateRange",
+  "adoptedRate",
+  "buildingRate",
+  "landRate",
+  "insuranceValue",
+  "marketValue",
+  "carParkingValue",
+  "fairMarketValue",
+  "realizableValue",
+  "distressValue",
+  "govtReadyReckonerRatePerSqMtr",
+  "govtReadyReckonerRatePerSqFt",
+  "govtValue",
+  "rentRangePerMonth",
+  "remarks",
 ] as const satisfies readonly (keyof Omit<CreateMakerValuationInput, "caseId">)[];
 
 function formString(value: unknown): string {
@@ -65,9 +172,10 @@ function makerValuationToFormValues(
   const values: Record<string, string> = { caseId };
   const source = valuation as unknown as Record<string, unknown>;
   for (const field of makerValuationFields) {
-    values[field] = field === "dateOfValuation" || field === "dateOfInspection"
-      ? formDate(source[field])
-      : formString(source[field]);
+    values[field] =
+      field === "dateOfValuation" || field === "dateOfInspection"
+        ? formDate(source[field])
+        : formString(source[field]);
   }
   return values as CreateMakerValuationInput;
 }
@@ -89,124 +197,126 @@ export function MakerValuationForm({
 
   const formDefaultValues = useMemo(
     (): CreateMakerValuationInput =>
-      initialValues ? makerValuationToFormValues(caseId, initialValues) : {
-      caseId: caseId,
-      dateOfValuation: "",
-      dateOfInspection: "",
-      refNo: "",
-      branch: "",
-      bankName: "",
-      purchaserName: "",
-      typeOfProperty: "",
-      flatNo: "",
-      locatedOnFloor: "",
-      wing: "",
-      buildingName: "",
-      landmark: "",
-      roadNameArea: "",
-      location: "",
-      plotNo: "",
-      ctsNo: "",
-      sNo: "",
-      other: "",
-      village: "",
-      wardNo: "",
-      taluka: "",
-      blockNo: "",
-      district: "",
-      pinCode: "",
-      purposeOfValuation: "",
-      documentsName1: "",
-      documentsDetails1: "",
-      documentsName2: "",
-      documentsDetails2: "",
-      documentsName3: "",
-      documentsDetails3: "",
-      nameOfOwner: "",
-      address: "",
-      configurationInShort: "",
-      configurationFullDescription: "",
-      locality: "",
-      classOfLocality1: "",
-      classOfLocality2: "",
-      classOfLocality3: "",
-      municipalCorporation: "",
-      typeOfLand: "",
-      genuinenessOrAuthenticity: "",
-      anyOtherComments: "",
-      nosOfFloor: "",
-      nosOfStaircase: "",
-      nosOfLifts: "",
-      boundaryPropertyNorth: "",
-      boundaryPropertySouth: "",
-      boundaryPropertyEast: "",
-      boundaryPropertyWest: "",
-      boundaryPropertyMeasured: "",
-      boundarySiteNorth: "",
-      boundarySiteSouth: "",
-      boundarySiteEast: "",
-      boundarySiteWest: "",
-      boundarySiteMeasured: "",
-      latitude: "",
-      longitude: "",
-      occupancy: "",
-      yearOfConstruction: "",
-      ageOfBuilding: "",
-      residualLife: "",
-      typeOfStructure: "",
-      nosOfUnitPerFloor: "",
-      buildingType: "",
-      appearance: "",
-      qualityOfConstruction: "",
-      maintenance: "",
-      protectedWaterSupply: "",
-      undergroundSewerage: "",
-      nosOfParking: "",
-      compoundWall: "",
-      openCoveredParking: "",
-      pavementLaidAroundBuilding: "",
-      flooring: "",
-      doors: "",
-      windows: "",
-      fittings: "",
-      finishing: "",
-      assessmentNo: "",
-      taxAmount: "",
-      taxPaidInNameOf: "",
-      electricityServiceConnectionNo: "",
-      meterCardInNameOf: "",
-      meterCardDated: "",
-      undividedAreaOfLand: "",
-      marketability: "",
-      positiveFactors: "",
-      negativeFactors: "",
-      physicalMeasuredArea: "",
-      physicalMeasuredAreaBasis: "",
-      documentedArea: "",
-      documentedAreaBasis: "",
-      approvedPlanArea: "",
-      approvedPlanAreaBasis: "",
-      builtUpArea: "",
-      builtUpAreaBasis: "",
-      adoptedArea: "",
-      adoptedAreaBasis: "",
-      floorSpaceIndex: "",
-      rateRange: "",
-      adoptedRate: "",
-      buildingRate: "",
-      landRate: "",
-      insuranceValue: "",
-      marketValue: "",
-      carParkingValue: "",
-      fairMarketValue: "",
-      realizableValue: "",
-      distressValue: "",
-      govtReadyReckonerRatePerSqMtr: "",
-      govtReadyReckonerRatePerSqFt: "",
-      govtValue: "",
-      rentRangePerMonth: "",
-      remarks: "",
-    },
+      initialValues
+        ? makerValuationToFormValues(caseId, initialValues)
+        : {
+            caseId: caseId,
+            dateOfValuation: "",
+            dateOfInspection: "",
+            refNo: "",
+            branch: "",
+            bankName: "",
+            purchaserName: "",
+            typeOfProperty: "",
+            flatNo: "",
+            locatedOnFloor: "",
+            wing: "",
+            buildingName: "",
+            landmark: "",
+            roadNameArea: "",
+            location: "",
+            plotNo: "",
+            ctsNo: "",
+            sNo: "",
+            other: "",
+            village: "",
+            wardNo: "",
+            taluka: "",
+            blockNo: "",
+            district: "",
+            pinCode: "",
+            purposeOfValuation: "",
+            documentsName1: "",
+            documentsDetails1: "",
+            documentsName2: "",
+            documentsDetails2: "",
+            documentsName3: "",
+            documentsDetails3: "",
+            nameOfOwner: "",
+            address: "",
+            configurationInShort: "",
+            configurationFullDescription: "",
+            locality: "",
+            classOfLocality1: "",
+            classOfLocality2: "",
+            classOfLocality3: "",
+            municipalCorporation: "",
+            typeOfLand: "",
+            genuinenessOrAuthenticity: "",
+            anyOtherComments: "",
+            nosOfFloor: "",
+            nosOfStaircase: "",
+            nosOfLifts: "",
+            boundaryPropertyNorth: "",
+            boundaryPropertySouth: "",
+            boundaryPropertyEast: "",
+            boundaryPropertyWest: "",
+            boundaryPropertyMeasured: "",
+            boundarySiteNorth: "",
+            boundarySiteSouth: "",
+            boundarySiteEast: "",
+            boundarySiteWest: "",
+            boundarySiteMeasured: "",
+            latitude: "",
+            longitude: "",
+            occupancy: "",
+            yearOfConstruction: "",
+            ageOfBuilding: "",
+            residualLife: "",
+            typeOfStructure: "",
+            nosOfUnitPerFloor: "",
+            buildingType: "",
+            appearance: "",
+            qualityOfConstruction: "",
+            maintenance: "",
+            protectedWaterSupply: "",
+            undergroundSewerage: "",
+            nosOfParking: "",
+            compoundWall: "",
+            openCoveredParking: "",
+            pavementLaidAroundBuilding: "",
+            flooring: "",
+            doors: "",
+            windows: "",
+            fittings: "",
+            finishing: "",
+            assessmentNo: "",
+            taxAmount: "",
+            taxPaidInNameOf: "",
+            electricityServiceConnectionNo: "",
+            meterCardInNameOf: "",
+            meterCardDated: "",
+            undividedAreaOfLand: "",
+            marketability: "",
+            positiveFactors: "",
+            negativeFactors: "",
+            physicalMeasuredArea: "",
+            physicalMeasuredAreaBasis: "",
+            documentedArea: "",
+            documentedAreaBasis: "",
+            approvedPlanArea: "",
+            approvedPlanAreaBasis: "",
+            builtUpArea: "",
+            builtUpAreaBasis: "",
+            adoptedArea: "",
+            adoptedAreaBasis: "",
+            floorSpaceIndex: "",
+            rateRange: "",
+            adoptedRate: "",
+            buildingRate: "",
+            landRate: "",
+            insuranceValue: "",
+            marketValue: "",
+            carParkingValue: "",
+            fairMarketValue: "",
+            realizableValue: "",
+            distressValue: "",
+            govtReadyReckonerRatePerSqMtr: "",
+            govtReadyReckonerRatePerSqFt: "",
+            govtValue: "",
+            rentRangePerMonth: "",
+            remarks: "",
+          },
     [caseId, initialValues],
   );
 
@@ -216,8 +326,10 @@ export function MakerValuationForm({
   });
 
   useEffect(() => {
-    form.reset(initialValues ? makerValuationToFormValues(caseId, initialValues) : formDefaultValues);
-  }, [caseId, initialValues, form]);
+    form.reset(
+      initialValues ? makerValuationToFormValues(caseId, initialValues) : formDefaultValues,
+    );
+  }, [caseId, initialValues, form, formDefaultValues]);
   const handleAutoFill = () => {
     const today = new Date().toISOString().split("T")[0];
     form.reset({
@@ -351,28 +463,35 @@ export function MakerValuationForm({
       const builtUpArea = values.builtUpArea ? Number(values.builtUpArea) : 0;
       const buildingRate = values.buildingRate ? Number(values.buildingRate) : 0;
       const carParkingValue = values.carParkingValue ? Number(values.carParkingValue) : 0;
-      const govtReadyReckonerRatePerSqMtr = values.govtReadyReckonerRatePerSqMtr ? Number(values.govtReadyReckonerRatePerSqMtr) : 0;
-      
+      const govtReadyReckonerRatePerSqMtr = values.govtReadyReckonerRatePerSqMtr
+        ? Number(values.govtReadyReckonerRatePerSqMtr)
+        : 0;
+
       const insuranceValue = builtUpArea * buildingRate;
       const marketValue = adoptedArea * adoptedRate;
       const fairMarketValue = marketValue + carParkingValue;
       const realizableValue = fairMarketValue * 0.95;
       const distressValue = fairMarketValue * 0.8;
       const govtValue = adoptedArea * govtReadyReckonerRatePerSqMtr;
-      
+
       // Update values with calculated amounts
       const submissionData: CreateMakerValuationInput = {
         ...values,
-        insuranceValue: insuranceValue > 0 ? insuranceValue.toString() : values.insuranceValue || "",
+        insuranceValue:
+          insuranceValue > 0 ? insuranceValue.toString() : values.insuranceValue || "",
         marketValue: marketValue > 0 ? marketValue.toString() : values.marketValue || "",
-        fairMarketValue: fairMarketValue > 0 ? fairMarketValue.toString() : values.fairMarketValue || "",
-        realizableValue: realizableValue > 0 ? realizableValue.toString() : values.realizableValue || "",
+        fairMarketValue:
+          fairMarketValue > 0 ? fairMarketValue.toString() : values.fairMarketValue || "",
+        realizableValue:
+          realizableValue > 0 ? realizableValue.toString() : values.realizableValue || "",
         distressValue: distressValue > 0 ? distressValue.toString() : values.distressValue || "",
         govtValue: govtValue > 0 ? govtValue.toString() : values.govtValue || "",
       };
-      
+
       await api_createMakerValuation(submissionData);
-      toast.success(initialValues ? "Valuation updated successfully" : "Valuation created successfully");
+      toast.success(
+        initialValues ? "Valuation updated successfully" : "Valuation created successfully",
+      );
       form.reset();
       onSuccess?.();
     } catch (error) {
@@ -1821,8 +1940,7 @@ export function MakerValuationForm({
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("builtUpArea") && form.watch("buildingRate")
                       ? (
-                          Number(form.watch("builtUpArea")) *
-                          Number(form.watch("buildingRate"))
+                          Number(form.watch("builtUpArea")) * Number(form.watch("buildingRate"))
                         ).toFixed(2)
                       : "—"}
                   </div>
@@ -1840,8 +1958,7 @@ export function MakerValuationForm({
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
-                          Number(form.watch("adoptedArea")) *
-                          Number(form.watch("adoptedRate"))
+                          Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate"))
                         ).toFixed(2)
                       : "—"}
                   </div>
@@ -1860,14 +1977,18 @@ export function MakerValuationForm({
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Fair Market Value</label>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
-                    {form.watch("adoptedArea") && form.watch("adoptedRate") && form.watch("carParkingValue")
+                    {form.watch("adoptedArea") &&
+                    form.watch("adoptedRate") &&
+                    form.watch("carParkingValue")
                       ? (
                           Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
                           Number(form.watch("carParkingValue"))
                         ).toFixed(2)
                       : form.watch("adoptedArea") && form.watch("adoptedRate")
-                      ? (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate"))).toFixed(2)
-                      : "—"}
+                        ? (
+                            Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate"))
+                          ).toFixed(2)
+                        : "—"}
                   </div>
                 </div>
                 {/* Realizable Value (formula-based: FMV × 95%) */}
@@ -1877,7 +1998,9 @@ export function MakerValuationForm({
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
                           (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
-                            (form.watch("carParkingValue") ? Number(form.watch("carParkingValue")) : 0)) *
+                            (form.watch("carParkingValue")
+                              ? Number(form.watch("carParkingValue"))
+                              : 0)) *
                           0.95
                         ).toFixed(2)
                       : "—"}
@@ -1890,7 +2013,9 @@ export function MakerValuationForm({
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
                           (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
-                            (form.watch("carParkingValue") ? Number(form.watch("carParkingValue")) : 0)) *
+                            (form.watch("carParkingValue")
+                              ? Number(form.watch("carParkingValue"))
+                              : 0)) *
                           0.8
                         ).toFixed(2)
                       : "—"}

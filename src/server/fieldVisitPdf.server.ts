@@ -52,7 +52,6 @@ const COLOR_BAND = rgb(0.93, 0.95, 0.98);
 
 const EM_DASH = "\u2014";
 
-
 /** Coerce any optional value to a display string, using an em dash when empty. */
 function show(value: unknown): string {
   if (value === undefined || value === null) return EM_DASH;
@@ -116,27 +115,30 @@ class ReportWriter {
   }
 
   /** Draw the logo as a watermark (50% opacity) centered on every page. */
-  private logoImage: any = null;
+  private logoImage: Awaited<ReturnType<PDFDocument["embedPng"]>> | null = null;
 
   async initLogoWatermark() {
     try {
       const buffer = Buffer.from(LOGO_BASE64, "base64");
       this.logoImage = await this.doc.embedPng(buffer);
     } catch (error) {
-      console.warn("Logo watermark initialization skipped:", error instanceof Error ? error.message : error);
+      console.warn(
+        "Logo watermark initialization skipped:",
+        error instanceof Error ? error.message : error,
+      );
     }
   }
 
   /** Draw watermark on the current page at center with 50% opacity. */
   private drawWatermark() {
     if (!this.logoImage) return;
-    
+
     try {
       const watermarkWidth = 150;
       const watermarkHeight = 150;
       const watermarkX = (PAGE_WIDTH - watermarkWidth) / 2;
       const watermarkY = (PAGE_HEIGHT - watermarkHeight) / 2;
-      
+
       this.page.drawImage(this.logoImage, {
         x: watermarkX,
         y: watermarkY,

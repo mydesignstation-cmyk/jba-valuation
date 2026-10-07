@@ -10,52 +10,21 @@ export const typeOfPropertyOptions = [
   "Others",
 ] as const;
 
-export const localityOptions = [
-  "Residential",
-  "Commercial",
-  "Industrial",
-] as const;
+export const localityOptions = ["Residential", "Commercial", "Industrial"] as const;
 
-export const classOfLocality1Options = [
-  "High",
-  "Middle",
-  "Poor",
-] as const;
+export const classOfLocality1Options = ["High", "Middle", "Poor"] as const;
 
-export const classOfLocality2Options = [
-  "Urban",
-  "Semi Urban",
-  "Rural",
-] as const;
+export const classOfLocality2Options = ["Urban", "Semi Urban", "Rural"] as const;
 
-export const classOfLocality3Options = [
-  "Posh class",
-  "Medium",
-  "Ordinary",
-] as const;
+export const classOfLocality3Options = ["Posh class", "Medium", "Ordinary"] as const;
 
-export const typeOfLandOptions = [
-  "Freehold",
-  "Leasehold",
-] as const;
+export const typeOfLandOptions = ["Freehold", "Leasehold"] as const;
 
-export const genuinenessOptions = [
-  "Yes",
-  "No",
-  "NA",
-] as const;
+export const genuinenessOptions = ["Yes", "No", "NA"] as const;
 
-export const occupancyOptions = [
-  "Self-occupied",
-  "Rented",
-  "Seller-Occupied",
-  "Other",
-] as const;
+export const occupancyOptions = ["Self-occupied", "Rented", "Seller-Occupied", "Other"] as const;
 
-export const boundaryMeasuredOptions = [
-  "As per deed",
-  "As per actuals",
-] as const;
+export const boundaryMeasuredOptions = ["As per deed", "As per actuals"] as const;
 
 export const occupancyStatusOptions = [
   "Self-occupied",
@@ -64,20 +33,11 @@ export const occupancyStatusOptions = [
   "Other",
 ] as const;
 
-export const qualityOptions = [
-  "Good",
-  "Average",
-  "Poor",
-] as const;
+export const qualityOptions = ["Good", "Average", "Poor"] as const;
 
-export const yesNoOptions = [
-  "Yes",
-  "No",
-] as const;
+export const yesNoOptions = ["Yes", "No"] as const;
 
-export const typeOfStructureOptions = [
-  "RCC, Load Bearing, Mixed",
-] as const;
+export const typeOfStructureOptions = ["RCC, Load Bearing, Mixed"] as const;
 
 export const buildingTypeOptions = [
   "Residential",
@@ -86,23 +46,11 @@ export const buildingTypeOptions = [
   "Industrial or other",
 ] as const;
 
-export const openCoveredParkingOptions = [
-  "Open",
-  "Covered",
-] as const;
+export const openCoveredParkingOptions = ["Open", "Covered"] as const;
 
-export const marketabilityOptions = [
-  "Good",
-  "Average",
-  "Poor",
-] as const;
+export const marketabilityOptions = ["Good", "Average", "Poor"] as const;
 
-export const areaBasisOptions = [
-  "CA",
-  "RERA CA",
-  "BUA",
-  "SBUA",
-] as const;
+export const areaBasisOptions = ["CA", "RERA CA", "BUA", "SBUA"] as const;
 
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),

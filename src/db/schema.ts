@@ -337,7 +337,9 @@ export const makerValuations = pgTable(
     assessment_no: varchar("assessment_no", { length: 255 }),
     tax_amount: varchar("tax_amount", { length: 255 }),
     tax_paid_in_name_of: varchar("tax_paid_in_name_of", { length: 255 }),
-    electricity_service_connection_no: varchar("electricity_service_connection_no", { length: 255 }),
+    electricity_service_connection_no: varchar("electricity_service_connection_no", {
+      length: 255,
+    }),
     meter_card_in_name_of: varchar("meter_card_in_name_of", { length: 255 }),
     meter_card_dated: varchar("meter_card_dated", { length: 255 }),
     undivided_area_of_land: varchar("undivided_area_of_land", { length: 255 }),
@@ -369,8 +371,14 @@ export const makerValuations = pgTable(
     fair_market_value: numeric("fair_market_value", { precision: 12, scale: 2 }),
     realizable_value: numeric("realizable_value", { precision: 12, scale: 2 }),
     distress_value: numeric("distress_value", { precision: 12, scale: 2 }),
-    govt_ready_reckoner_rate_per_sq_mtr: numeric("govt_ready_reckoner_rate_per_sq_mtr", { precision: 12, scale: 2 }),
-    govt_ready_reckoner_rate_per_sq_ft: numeric("govt_ready_reckoner_rate_per_sq_ft", { precision: 12, scale: 2 }),
+    govt_ready_reckoner_rate_per_sq_mtr: numeric("govt_ready_reckoner_rate_per_sq_mtr", {
+      precision: 12,
+      scale: 2,
+    }),
+    govt_ready_reckoner_rate_per_sq_ft: numeric("govt_ready_reckoner_rate_per_sq_ft", {
+      precision: 12,
+      scale: 2,
+    }),
     govt_value: numeric("govt_value", { precision: 12, scale: 2 }),
     rent_range_per_month: numeric("rent_range_per_month", { precision: 12, scale: 2 }),
     // Remarks Section

@@ -225,12 +225,7 @@ const STEP_FIELDS: Path<FieldVisitFormValues>[][] = [
     "noOfLabor",
     "materialAtSite",
   ],
-  [
-    "boundaryEast",
-    "boundaryWest",
-    "boundaryNorth",
-    "boundarySouth",
-  ],
+  ["boundaryEast", "boundaryWest", "boundaryNorth", "boundarySouth"],
   [
     "approachRoadCondition",
     "widthOfApproachRoad",

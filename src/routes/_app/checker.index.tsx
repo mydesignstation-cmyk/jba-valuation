@@ -43,6 +43,12 @@ import { api_listCheckerCases, api_assignMaker } from "@/data/case.functions";
 import { listSiteEngineers } from "@/services/user.service";
 import type { ValuationCase } from "@/types";
 
+type CheckerCase = ValuationCase & {
+  bankName?: string;
+  branchName?: string;
+  customerName?: string;
+};
+
 export const Route = createFileRoute("/_app/checker/")({
   head: () => pageMeta("My Cases", "Cases waiting for Checker review."),
   beforeLoad: requirePermission("checker.access"),
@@ -254,9 +260,9 @@ function Page() {
                           </span>
                         </TableCell>
                         <TableCell>{c.requestNumber}</TableCell>
-                        <TableCell>{(c as any).bankName ?? "—"}</TableCell>
-                        <TableCell>{(c as any).branchName ?? "—"}</TableCell>
-                        <TableCell>{(c as any).customerName ?? "—"}</TableCell>
+                        <TableCell>{(c as CheckerCase).bankName ?? "—"}</TableCell>
+                        <TableCell>{(c as CheckerCase).branchName ?? "—"}</TableCell>
+                        <TableCell>{(c as CheckerCase).customerName ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
                           <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>

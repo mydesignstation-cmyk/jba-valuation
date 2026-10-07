@@ -32,7 +32,9 @@ const downloadMakerValuationPdfFn = createServerFn({ method: "GET" })
   .validator((caseId: string) => caseId)
   .handler(({ data }) => db_download(data));
 
-export async function api_createMakerValuation(input: CreateMakerValuationInput): Promise<MakerValuation> {
+export async function api_createMakerValuation(
+  input: CreateMakerValuationInput,
+): Promise<MakerValuation> {
   const token = await getSessionToken();
   return createMakerValuationFn({ data: { token, data: input } });
 }

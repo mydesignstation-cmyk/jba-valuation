@@ -53,12 +53,7 @@ export const rateBasisOptions = [
   "Lumpsum Rate",
   "Floorwise Rate",
 ] as const;
-export const areaBasisOptions = [
-  "CA",
-  "RERA CA",
-  "BUA",
-  "SBUA",
-] as const;
+export const areaBasisOptions = ["CA", "RERA CA", "BUA", "SBUA"] as const;
 
 export const relationshipSchema = z.enum(relationshipOptions);
 export const propertyTypeSchema = z.enum(propertyTypeOptions);

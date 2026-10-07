@@ -7,10 +7,22 @@
 import { getDb } from "@/db";
 import { customers, banks, branches, cases, fieldVisits, makerValuations } from "@/db/schema";
 import { and, eq, inArray, sql } from "drizzle-orm";
-import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit, Role, MakerValuation } from "@/types";
+import type {
+  Customer,
+  Bank,
+  Branch,
+  ValuationCase,
+  User,
+  FieldVisit,
+  Role,
+  MakerValuation,
+} from "@/types";
 import { requireServerUser } from "@/server/auth.server";
 import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
-import { createMakerValuationSchema, type CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
+import {
+  createMakerValuationSchema,
+  type CreateMakerValuationInput,
+} from "@/schemas/makerValuation.schema";
 import { buildFieldVisitPdf } from "@/server/fieldVisitPdf.server";
 import { generateMakerValuationPdf } from "@/server/makerValuationPdf.server";
 
@@ -409,8 +421,10 @@ export async function api_updateCustomer(
     if (data.contact !== undefined) updateData.contact = data.contact;
     if (data.email !== undefined) updateData.email = data.email || null;
     if (data.address !== undefined) updateData.address = data.address;
-    if (data.alternativeContactPersonName !== undefined) updateData.alternative_contact_person_name = data.alternativeContactPersonName || null;
-    if (data.alternativePhoneNumber !== undefined) updateData.alternative_phone_number = data.alternativePhoneNumber || null;
+    if (data.alternativeContactPersonName !== undefined)
+      updateData.alternative_contact_person_name = data.alternativeContactPersonName || null;
+    if (data.alternativePhoneNumber !== undefined)
+      updateData.alternative_phone_number = data.alternativePhoneNumber || null;
 
     const rows = await getDb()
       .update(customers)
@@ -1274,7 +1288,8 @@ function mapFieldVisitRow(row: typeof fieldVisits.$inferSelect): FieldVisit {
   if (row.society_name_board != null) visit.societyNameBoard = row.society_name_board;
   if (row.area_sqft != null) visit.areaSqFt = String(row.area_sqft);
   if (row.area_basis != null) visit.areaBasis = row.area_basis;
-  if (row.rate_basis != null) visit.rateBasis = row.rate_basis as any;
+  if (row.rate_basis != null)
+    visit.rateBasis = row.rate_basis as NonNullable<FieldVisit["rateBasis"]>;
   if (row.rate_per_sqft != null) visit.ratePerSqFt = row.rate_per_sqft;
   if (row.rent_per_month != null) visit.rentPerMonth = row.rent_per_month;
   if (row.area_basis != null) visit.areaBasis = row.area_basis;
@@ -1448,9 +1463,7 @@ export async function api_submitFieldVisit(
           person_phone: data.personPhone,
           relationship: data.relationship,
           other_relationship: data.otherRelationship ? data.otherRelationship : null,
-          other_relationship_remarks: data.relationshipRemarks
-            ? data.relationshipRemarks
-            : null,
+          other_relationship_remarks: data.relationshipRemarks ? data.relationshipRemarks : null,
 
           // STEP 2
           full_address: data.fullAddress ? data.fullAddress : null,
@@ -1655,9 +1668,7 @@ export async function api_updateFieldVisit(
         person_phone: data.personPhone,
         relationship: data.relationship,
         other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.relationshipRemarks
-          ? data.relationshipRemarks
-          : null,
+        other_relationship_remarks: data.relationshipRemarks ? data.relationshipRemarks : null,
 
         // STEP 2
         full_address: data.fullAddress ? data.fullAddress : null,
@@ -1805,9 +1816,7 @@ export async function api_updateFieldVisitByChecker(
         person_phone: data.personPhone,
         relationship: data.relationship,
         other_relationship: data.otherRelationship ? data.otherRelationship : null,
-        other_relationship_remarks: data.relationshipRemarks
-          ? data.relationshipRemarks
-          : null,
+        other_relationship_remarks: data.relationshipRemarks ? data.relationshipRemarks : null,
 
         // STEP 2
         full_address: data.fullAddress ? data.fullAddress : null,
@@ -2154,14 +2163,11 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
   }
 }
 
-
 // ============================================================================
 // MAKER VALUATIONS
 // ============================================================================
 
-function normalizeMakerValuationInput(
-  input: CreateMakerValuationInput,
-): CreateMakerValuationInput {
+function normalizeMakerValuationInput(input: CreateMakerValuationInput): CreateMakerValuationInput {
   return Object.fromEntries(
     Object.entries(input).map(([key, value]) => [
       key,
@@ -2182,7 +2188,7 @@ export async function api_createMakerValuation(
   const user = await requireServerUser(token, "MAKER");
 
   try {
-    input = normalizeMakerValuationInput(input);
+    input = createMakerValuationSchema.parse(normalizeMakerValuationInput(input));
     // Build the valuation object for PDF generation
     const valuationForPdf: MakerValuation = {
       id: "",
