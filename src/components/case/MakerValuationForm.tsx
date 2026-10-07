@@ -180,10 +180,19 @@ function makerValuationToFormValues(
   return values as CreateMakerValuationInput;
 }
 
+interface MakerValuationPrefill {
+  dateOfValuation?: string;
+  dateOfInspection?: string | undefined;
+  refNo?: string;
+  branch?: string;
+  bankName?: string;
+}
+
 interface MakerValuationFormProps {
   caseId: string;
   initialValues?: MakerValuation;
   fieldVisit?: Pick<FieldVisit, "gpsLatitude" | "gpsLongitude"> | null | undefined;
+  prefill?: MakerValuationPrefill;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -192,6 +201,7 @@ export function MakerValuationForm({
   caseId,
   initialValues,
   fieldVisit,
+  prefill,
   onSuccess,
   onCancel,
 }: MakerValuationFormProps) {
@@ -203,11 +213,11 @@ export function MakerValuationForm({
         ? makerValuationToFormValues(caseId, initialValues)
         : {
             caseId: caseId,
-            dateOfValuation: "",
-            dateOfInspection: "",
-            refNo: "",
-            branch: "",
-            bankName: "",
+            dateOfValuation: prefill?.dateOfValuation ?? "",
+            dateOfInspection: prefill?.dateOfInspection ?? "",
+            refNo: prefill?.refNo ?? "",
+            branch: prefill?.branch ?? "",
+            bankName: prefill?.bankName ?? "",
             purchaserName: "",
             typeOfProperty: "",
             flatNo: "",
@@ -319,7 +329,7 @@ export function MakerValuationForm({
             rentRangePerMonth: "",
             remarks: "",
           },
-    [caseId, initialValues, fieldVisit],
+    [caseId, initialValues, fieldVisit, prefill],
   );
 
   const form = useForm<CreateMakerValuationInput>({

@@ -568,6 +568,13 @@ function Page() {
   const customerName = customer?.name ?? valuationCase.customerId;
   const bankName = bank?.name ?? valuationCase.bankId;
   const branchName = branch?.name ?? valuationCase.branchId;
+  const makerValuationPrefill = {
+    dateOfValuation: new Date().toISOString().slice(0, 10),
+    dateOfInspection: fieldVisit?.submittedAt?.slice(0, 10),
+    refNo: valuationCase.requestNumber,
+    branch: branchName,
+    bankName,
+  };
   const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
   const hasMaker = !!valuationCase.assignedMakerId;
   const makerName = maker?.name ?? (hasMaker ? valuationCase.assignedMakerId : undefined);
@@ -1162,6 +1169,7 @@ function Page() {
                 <MakerValuationForm
                   caseId={valuationCase.id}
                   fieldVisit={fieldVisit}
+                  prefill={makerValuationPrefill}
                   onSuccess={() => {
                     setShowValuationForm(false);
                     refetchMakerValuation();
@@ -1192,6 +1200,7 @@ function Page() {
                       caseId={valuationCase.id}
                       initialValues={makerValuation}
                       fieldVisit={fieldVisit}
+                  prefill={makerValuationPrefill}
                       onSuccess={() => {
                         setShowValuationForm(false);
                         refetchMakerValuation();
