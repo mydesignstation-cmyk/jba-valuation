@@ -2632,19 +2632,21 @@ function normalizeMakerRowValue(value: unknown): string | undefined {
   return String(value);
 }
 
-function mapMakerValuationRow(rawRow: any): MakerValuation {
+function mapMakerValuationRow(rawRow: typeof makerValuations.$inferSelect): MakerValuation {
   const row = Object.fromEntries(
     Object.entries(rawRow).map(([key, value]) => [key, normalizeMakerRowValue(value)]),
-  ) as any;
+  ) as Record<keyof typeof makerValuations.$inferSelect, string | undefined>;
+
+  const required = (key: keyof typeof makerValuations.$inferSelect): string => row[key] ?? "";
 
   return {
-    id: row.id,
-    caseId: row.case_id,
-    dateOfValuation: row.date_of_valuation,
-    dateOfInspection: row.date_of_inspection,
-    refNo: row.ref_no,
-    branch: row.branch,
-    bankName: row.bank_name,
+    id: required("id"),
+    caseId: required("case_id"),
+    dateOfValuation: required("date_of_valuation"),
+    dateOfInspection: required("date_of_inspection"),
+    refNo: required("ref_no"),
+    branch: required("branch"),
+    bankName: required("bank_name"),
     purchaserName: row.purchaser_name,
     typeOfProperty: row.type_of_property,
     flatNo: row.flat_no,
@@ -2755,8 +2757,8 @@ function mapMakerValuationRow(rawRow: any): MakerValuation {
     govtValue: row.govt_value,
     rentRangePerMonth: row.rent_range_per_month,
     remarks: row.remarks,
-    pdfBytes: row.pdf_bytes,
-    createdById: row.created_by_id,
+    pdfBytes: required("pdf_bytes"),
+    createdById: required("created_by_id"),
     createdAt: row.created_at ?? "",
   };
 }

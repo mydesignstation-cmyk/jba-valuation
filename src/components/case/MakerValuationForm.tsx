@@ -257,7 +257,7 @@ export function MakerValuationForm({
       address: "123 Dev Street, Dev City",
       configurationInShort: "3BHK",
       configurationFullDescription: "3 Bedroom, Hall, Kitchen with modern amenities",
-      locality: "Dev Locality",
+      locality: "Residential",
       classOfLocality1: "High",
       classOfLocality2: "Urban",
       classOfLocality3: "Posh class",
@@ -339,7 +339,7 @@ export function MakerValuationForm({
       govtValue: "4000000.00",
       rentRangePerMonth: "25000",
       remarks: "Dev test property - all formulas will auto-calculate",
-    } as any);
+    } as CreateMakerValuationInput);
   };
 
   const handleSubmit = async (values: CreateMakerValuationInput) => {
