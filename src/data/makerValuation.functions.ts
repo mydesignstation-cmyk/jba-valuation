@@ -13,11 +13,15 @@ import { getSessionToken } from "@/lib/auth-client";
 import type { MakerValuation } from "@/types";
 import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
 
+interface CreateMakerValuationFnInput {
+  token: string | null | undefined;
+  data: CreateMakerValuationInput;
+}
+
 const createMakerValuationFn = createServerFn({ method: "POST" })
-  .validator((input: CreateMakerValuationInput) => input)
-  .handler(async ({ data }) => {
-    const token = await getSessionToken();
-    return db_create(token, data);
+  .validator((input: CreateMakerValuationFnInput) => input)
+  .handler(({ data }) => {
+    return db_create(data.token, data.data);
   });
 
 const getMakerValuationFn = createServerFn({ method: "GET" })
@@ -28,8 +32,9 @@ const downloadMakerValuationPdfFn = createServerFn({ method: "GET" })
   .validator((caseId: string) => caseId)
   .handler(({ data }) => db_download(data));
 
-export function api_createMakerValuation(input: CreateMakerValuationInput): Promise<MakerValuation> {
-  return createMakerValuationFn({ data: input });
+export async function api_createMakerValuation(input: CreateMakerValuationInput): Promise<MakerValuation> {
+  const token = await getSessionToken();
+  return createMakerValuationFn({ data: { token, data: input } });
 }
 
 export function api_getMakerValuation(caseId: string): Promise<MakerValuation | null> {
