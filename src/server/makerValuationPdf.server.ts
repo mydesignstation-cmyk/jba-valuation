@@ -146,6 +146,10 @@ class ValuationWriter {
     this.drawRow("Boundary of Site - East", show(valuation.boundarySiteEast));
     this.drawRow("Boundary of Site - West", show(valuation.boundarySiteWest));
     this.drawRow("Boundary Site Measured", show(valuation.boundarySiteMeasured));
+    
+    this.drawRow("Latitude", show(valuation.latitude));
+    this.drawRow("Longitude", show(valuation.longitude));
+    this.drawRow("Occupancy", show(valuation.occupancy));
   }
 }
 

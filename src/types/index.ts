@@ -248,6 +248,9 @@ export interface MakerValuation {
   boundarySiteEast?: string | undefined;
   boundarySiteWest?: string | undefined;
   boundarySiteMeasured?: string | undefined;
+  latitude?: string | undefined;
+  longitude?: string | undefined;
+  occupancy?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;

@@ -309,6 +309,9 @@ export const makerValuations = pgTable(
     boundary_site_east: text("boundary_site_east"),
     boundary_site_west: text("boundary_site_west"),
     boundary_site_measured: varchar("boundary_site_measured", { length: 255 }),
+    latitude: varchar("latitude", { length: 255 }),
+    longitude: varchar("longitude", { length: 255 }),
+    occupancy: varchar("occupancy", { length: 255 }),
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
     created_by_id: uuid("created_by_id").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

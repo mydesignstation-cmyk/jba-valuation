@@ -57,6 +57,13 @@ export const boundaryMeasuredOptions = [
   "As per actuals",
 ] as const;
 
+export const occupancyStatusOptions = [
+  "Self-occupied",
+  "Rented",
+  "Seller-Occupied",
+  "Other",
+] as const;
+
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details
@@ -119,6 +126,9 @@ export const createMakerValuationSchema = z.object({
   boundarySiteEast: z.string().optional(),
   boundarySiteWest: z.string().optional(),
   boundarySiteMeasured: z.string().optional(),
+  latitude: z.string().optional(),
+  longitude: z.string().optional(),
+  occupancy: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

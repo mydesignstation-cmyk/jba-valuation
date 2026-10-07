@@ -25,6 +25,7 @@ import {
   genuinenessOptions,
   occupancyOptions,
   boundaryMeasuredOptions,
+  occupancyStatusOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import { getSessionToken } from "@/lib/auth-client";
@@ -111,6 +112,9 @@ export function MakerValuationForm({
       boundarySiteEast: "",
       boundarySiteWest: "",
       boundarySiteMeasured: "",
+      latitude: "",
+      longitude: "",
+      occupancy: "",
     },
   });
 
@@ -839,6 +843,59 @@ export function MakerValuationForm({
                     />
                   </div>
                 </div>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-4">Location</h3>
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+                <FormField
+                  control={form.control}
+                  name="latitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Latitude</FormLabel>
+                      <Input placeholder="Enter latitude" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="longitude"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Longitude</FormLabel>
+                      <Input placeholder="Enter longitude" {...field} />
+                    </FormItem>
+                  )}
+                />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-4">Occupancy Status</h3>
+              <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
+                <FormField
+                  control={form.control}
+                  name="occupancy"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Occupancy</FormLabel>
+                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select occupancy status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {occupancyStatusOptions.map((option) => (
+                            <SelectItem key={option} value={option}>
+                              {option}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </FormItem>
+                  )}
+                />
               </div>
             </div>
 
