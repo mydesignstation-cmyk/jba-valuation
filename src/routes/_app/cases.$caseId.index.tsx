@@ -22,6 +22,11 @@ import {
 } from "lucide-react";
 import type { ComponentType, ReactNode } from "react";
 import { useState } from "react";
+import {
+  makerValuationSections,
+  type MakerValuationDisplayField,
+} from "@/lib/makerValuationFields";
+import type { MakerValuation } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -150,6 +155,51 @@ function EmptyState({
       </div>
       {action}
     </div>
+  );
+}
+
+function MakerValuationDisplayRow({
+  valuation,
+  field,
+}: {
+  valuation: MakerValuation;
+  field: MakerValuationDisplayField;
+}) {
+  const rawValue = valuation[field.key];
+  const value = rawValue == null || String(rawValue).trim() === "" ? "—" : String(rawValue);
+  const displayValue =
+    field.key === "dateOfValuation" || field.key === "dateOfInspection"
+      ? formatDisplayDate(value)
+      : value;
+
+  return (
+    <div className="space-y-1">
+      <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+        {field.label}
+      </p>
+      <p className="whitespace-pre-wrap break-words text-sm font-medium">{displayValue}</p>
+    </div>
+  );
+}
+
+function MakerValuationSection({
+  valuation,
+  title,
+  fields,
+}: {
+  valuation: MakerValuation;
+  title: string;
+  fields: readonly MakerValuationDisplayField[];
+}) {
+  return (
+    <section className="space-y-3">
+      <h3 className="text-sm font-semibold">{title}</h3>
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {fields.map((field) => (
+          <MakerValuationDisplayRow key={field.key} valuation={valuation} field={field} />
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -706,9 +756,7 @@ function Page() {
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
           <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
-          {!isSiteEngineer && (
-            <TabsTrigger value="maker-valuation">Maker Valuation</TabsTrigger>
-          )}
+          {!isSiteEngineer && <TabsTrigger value="maker-valuation">Maker Valuation</TabsTrigger>}
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
@@ -928,223 +976,52 @@ function Page() {
             </CardHeader>
             <CardContent>
               {makerValuation ? (
-                <div className="space-y-4">
-                  {/* Show valuation details and action buttons */}
-                  <div className="space-y-6">
-                    {/* Basic Details */}
-                    <div>
-                      <h3 className="font-semibold text-sm mb-3">Basic Details</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Date of Valuation
-                          </p>
-                          <p className="text-sm font-medium">
-                            {formatDisplayDate(makerValuation.dateOfValuation)}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Date of Inspection
-                          </p>
-                          <p className="text-sm font-medium">
-                            {formatDisplayDate(makerValuation.dateOfInspection)}
-                          </p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Ref. No.
-                          </p>
-                          <p className="text-sm font-medium">{makerValuation.refNo}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Branch
-                          </p>
-                          <p className="text-sm font-medium">{makerValuation.branch}</p>
-                        </div>
-                        <div className="space-y-1">
-                          <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                            Bank Name
-                          </p>
-                          <p className="text-sm font-medium">{makerValuation.bankName}</p>
-                        </div>
-                      </div>
-                    </div>
-
-                    {/* Area Calculation Section */}
-                    <div>
-                      <h3 className="font-semibold text-sm mb-3">Area Calculation</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {makerValuation.adoptedArea && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Adopted Area
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.adoptedArea}</p>
-                          </div>
-                        )}
-                        {makerValuation.builtUpArea && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Built Up Area
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.builtUpArea}</p>
-                          </div>
-                        )}
-                        {makerValuation.physicalMeasuredArea && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Physical Measured Area
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.physicalMeasuredArea}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Rate Section */}
-                    <div>
-                      <h3 className="font-semibold text-sm mb-3">Rate Section</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {makerValuation.adoptedRate && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Adopted Rate
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.adoptedRate}</p>
-                          </div>
-                        )}
-                        {makerValuation.buildingRate && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Building Rate
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.buildingRate}</p>
-                          </div>
-                        )}
-                        {makerValuation.landRate && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Land Rate
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.landRate}</p>
-                          </div>
-                        )}
-                        {makerValuation.rateRange && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Rate Range
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.rateRange}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Valuation Details Section */}
-                    <div>
-                      <h3 className="font-semibold text-sm mb-3">Details of Valuation</h3>
-                      <div className="grid gap-4 sm:grid-cols-2">
-                        {makerValuation.marketValue && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Market Value
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.marketValue}</p>
-                          </div>
-                        )}
-                        {makerValuation.fairMarketValue && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Fair Market Value
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.fairMarketValue}</p>
-                          </div>
-                        )}
-                        {makerValuation.insuranceValue && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Insurance Value
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.insuranceValue}</p>
-                          </div>
-                        )}
-                        {makerValuation.realizableValue && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Realizable Value
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.realizableValue}</p>
-                          </div>
-                        )}
-                        {makerValuation.distressValue && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Distress Value
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.distressValue}</p>
-                          </div>
-                        )}
-                        {makerValuation.govtValue && (
-                          <div className="space-y-1">
-                            <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
-                              Govt. Value
-                            </p>
-                            <p className="text-sm font-medium">{makerValuation.govtValue}</p>
-                          </div>
-                        )}
-                      </div>
-                    </div>
-
-                    {/* Remarks Section */}
-                    {makerValuation.remarks && (
-                      <div>
-                        <h3 className="font-semibold text-sm mb-3">Remarks</h3>
-                        <p className="text-sm">{makerValuation.remarks}</p>
-                      </div>
-                    )}
-                    <div className="flex gap-2 pt-4">
-                      {isMaker &&
-                        (valuationCase.stage === "MAKER_ASSIGNED" ||
-                          valuationCase.stage === "MAKER_PENDING") && (
-                          <Button
-                            variant="outline"
-                            onClick={() => setShowValuationForm(true)}
-                          >
-                            <PenLine className="mr-2 h-4 w-4" />
-                            Edit
-                          </Button>
-                        )}
-                      <Button
-                        variant="outline"
-                        onClick={async () => {
-                          try {
-                            const result = await (
-                              await import("@/data/makerValuation.functions")
-                            ).api_downloadMakerValuationPdf(valuationCase.id);
-                            const link = document.createElement("a");
-                            link.href = `data:application/pdf;base64,${result.pdfBase64}`;
-                            link.download = result.filename;
-                            document.body.appendChild(link);
-                            link.click();
-                            document.body.removeChild(link);
-                            toast.success("PDF downloaded");
-                          } catch (error) {
-                            toast.error("Failed to download PDF");
-                            console.error("Download error:", error);
-                          }
-                        }}
-                      >
-                        <FileText className="mr-2 h-4 w-4" />
-                        Download PDF
-                      </Button>
-                    </div>
+                <div className="space-y-6">
+                  {makerValuationSections.map((section) => (
+                    <MakerValuationSection
+                      key={section.title}
+                      valuation={makerValuation}
+                      title={section.title}
+                      fields={section.fields}
+                    />
+                  ))}
+                  <div className="flex gap-2 pt-2">
+                    {isMaker &&
+                      (valuationCase.stage === "MAKER_ASSIGNED" ||
+                        valuationCase.stage === "MAKER_PENDING") && (
+                        <Button variant="outline" onClick={() => setShowValuationForm(true)}>
+                          <PenLine className="mr-2 h-4 w-4" />
+                          Edit
+                        </Button>
+                      )}
+                    <Button
+                      variant="outline"
+                      onClick={async () => {
+                        try {
+                          const result = await (
+                            await import("@/data/makerValuation.functions")
+                          ).api_downloadMakerValuationPdf(valuationCase.id);
+                          const link = document.createElement("a");
+                          link.href = `data:application/pdf;base64,${result.pdfBase64}`;
+                          link.download = result.filename;
+                          document.body.appendChild(link);
+                          link.click();
+                          document.body.removeChild(link);
+                          toast.success("PDF downloaded");
+                        } catch (error) {
+                          toast.error("Failed to download PDF");
+                          console.error("Download error:", error);
+                        }
+                      }}
+                    >
+                      <FileText className="mr-2 h-4 w-4" />
+                      Download PDF
+                    </Button>
                   </div>
                 </div>
-              ) : isMaker && 
-                  (valuationCase.stage === "MAKER_ASSIGNED" || 
-                   valuationCase.stage === "MAKER_PENDING") ? (
+              ) : isMaker &&
+                (valuationCase.stage === "MAKER_ASSIGNED" ||
+                  valuationCase.stage === "MAKER_PENDING") ? (
                 <MakerValuationForm
                   caseId={valuationCase.id}
                   onSuccess={() => {

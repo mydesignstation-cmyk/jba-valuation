@@ -1,0 +1,27 @@
+{
+  "id": "FEAT-002",
+  "type": "feat",
+  "description": "Expose every canonical Maker Valuation field in the saved case display and produce a readable all-field PDF.",
+  "status": "completed",
+  "steps": [
+    "Read context.json and this feature file first. In e:/codefiles/va2/src/routes/_app/cases.$caseId.index.tsx replace the partial saved Maker Valuation card with complete grouped sections matching the canonical inventory: Basic, Additional, General, Boundary/Location/Occupancy, Apartment, Flat, Marketability, Area, Rate, Details, Calculation, and Remarks.",
+    "Use a shared display helper or local row component that renders an em dash for empty values instead of omitting a field. Include every text/select/numeric/date field, all area basis fields, carParkingValue, both government rates, rentRangePerMonth, insuranceValue, all calculated values, and long text values.",
+    "In e:/codefiles/va2/src/server/makerValuationPdf.server.ts retain all 115 rows, add section headings, wrap long labels and values, and paginate without clipping/overlap. Keep formatDisplayDate for the two dates and show em dashes for nulls. Remove stale minimal/five-field comments.",
+    "Run the feature verification commands and update this FEAT file status to completed, recording the display/PDF evidence needed by later steps. Commit locally on the current branch; never push."
+  ],
+  "acceptance_criteria": [
+    "The saved card visibly accounts for all 115 canonical labels and displays the saved value or an em dash for each.",
+    "The PDF contains all 115 canonical labels and values across readable pages, with section headings and wrapped long content.",
+    "No display or PDF field is renamed, duplicated, or replaced by a fake field; calculated values remain the persisted calculated values.",
+    "Rate Range remains displayed as the open numeric field's saved value; no dropdown is introduced."
+  ],
+  "verification": [
+    "From e:/codefiles/va2 run npx tsc --noEmit and expect exit code 0.",
+    "From e:/codefiles/va2 run npm run build and expect exit code 0.",
+    "Use the saved Dev Auto-Fill record, inspect the Maker Valuation tab for all section rows, download the PDF, and verify extracted PDF text contains every canonical label/value across the pages."
+  ],
+  "blocked_reason": null,
+  "findings": "Audit findings: the current route card renders Basic plus only three Area rows, four Rate rows, five calculated/detail rows, and non-empty Remarks. The current PDF source has rows for all fields but no section headings or robust wrapping and still documents itself as minimal.",
+  "implementation_findings": "Added one shared canonical label/key inventory with 115 unique fields. The saved Maker Valuation card now renders all sections and every field through a reusable row helper, preserving long text and showing an em dash for null/empty values. The edit form already receives the complete makerValuation object from FEAT-001. Rebuilt the PDF renderer around the same inventory with section headings, wrapped labels/values, and safe page breaks; both date fields still use formatDisplayDate. Rate Range remains a saved open numeric value and calculated values are rendered from persisted fields.",
+  "verification_findings": "npx tsc --noEmit passed. npm run build passed. A synthetic all-field PDF smoke test counted 115 canonical fields, 115 unique keys, and generated a 4-page PDF without errors. Targeted ESLint passed for the changed route, PDF, and shared inventory files. npm run lint was run but remains blocked by 5,440 repository-wide pre-existing formatting errors (including FEAT-001 files and generated/unrelated source); no unrelated bulk formatting was applied. The live saved-record/browser PDF extraction smoke test requires the authenticated app session and was not executable from this subagent."
+}
