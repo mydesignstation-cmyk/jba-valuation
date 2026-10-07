@@ -186,30 +186,12 @@ interface MakerValuationPrefill {
   refNo?: string;
   branch?: string;
   bankName?: string;
-  typeOfProperty?: string | undefined;
-  locatedOnFloor?: string | undefined;
-  landmark?: string | undefined;
-  occupancy?: string | undefined;
-  yearOfConstruction?: string | undefined;
-  typeOfStructure?: string | undefined;
-  nosOfUnitPerFloor?: string | undefined;
 }
 
 interface MakerValuationFormProps {
   caseId: string;
   initialValues?: MakerValuation;
-  fieldVisit?: Pick<
-    FieldVisit,
-    | "gpsLatitude"
-    | "gpsLongitude"
-    | "propertyType"
-    | "locatedOnFloor"
-    | "landmark"
-    | "occupancyStatus"
-    | "yearOfConstruction"
-    | "structureType"
-    | "flatsOnFloor"
-  > | null | undefined;
+  fieldVisit?: Pick<FieldVisit, "gpsLatitude" | "gpsLongitude"> | null | undefined;
   prefill?: MakerValuationPrefill;
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -236,13 +218,13 @@ export function MakerValuationForm({
             refNo: prefill?.refNo ?? "",
             branch: prefill?.branch ?? "",
             bankName: prefill?.bankName ?? "",
-            typeOfProperty: prefill?.typeOfProperty ?? "",
-            locatedOnFloor: prefill?.locatedOnFloor ?? "",
-            landmark: prefill?.landmark ?? "",
-            occupancy: prefill?.occupancy ?? "",
-            yearOfConstruction: prefill?.yearOfConstruction ?? "",
-            typeOfStructure: prefill?.typeOfStructure ?? "",
-            nosOfUnitPerFloor: prefill?.nosOfUnitPerFloor ?? "",
+            typeOfProperty: "",
+            locatedOnFloor: "",
+            landmark: "",
+            occupancy: "",
+            yearOfConstruction: "",
+            typeOfStructure: "",
+            nosOfUnitPerFloor: "",
             purchaserName: "",
             flatNo: "",
             wing: "",
@@ -644,7 +626,7 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Type of Property</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger className={fieldVisit?.propertyType ? "border-emerald-300 bg-emerald-50/30" : ""}>
+                        <SelectTrigger>
                           <SelectValue placeholder="Select type" />
                         </SelectTrigger>
                         <SelectContent>
@@ -674,11 +656,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Located on Floor</FormLabel>
-                      <Input
-                        className={fieldVisit?.locatedOnFloor ? "border-emerald-300 bg-emerald-50/30" : ""}
-                        placeholder="Enter floor"
-                        {...field}
-                      />
+                      <Input placeholder="Enter floor" {...field} />
                     </FormItem>
                   )}
                 />
@@ -708,11 +686,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Landmark</FormLabel>
-                      <Input
-                        className={fieldVisit?.landmark ? "border-emerald-300 bg-emerald-50/30" : ""}
-                        placeholder="Enter landmark"
-                        {...field}
-                      />
+                      <Input placeholder="Enter landmark" {...field} />
                     </FormItem>
                   )}
                 />
@@ -1314,7 +1288,7 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Occupancy</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger className={fieldVisit?.occupancyStatus ? "border-emerald-300 bg-emerald-50/30" : ""}>
+                        <SelectTrigger >
                         </SelectTrigger>
                         <SelectContent>
                           {occupancyStatusOptions.map((option) => (
@@ -1340,7 +1314,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Year of Construction</FormLabel>
-                      <Input className={fieldVisit?.yearOfConstruction ? "border-emerald-300 bg-emerald-50/30" : ""} placeholder="Enter year" {...field} />
+                      <Input placeholder="Enter year" {...field} />
                     </FormItem>
                   )}
                 />
@@ -1371,7 +1345,7 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Type of Structure</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger className={fieldVisit?.structureType ? "border-emerald-300 bg-emerald-50/30" : ""}>
+                        <SelectTrigger >
                         </SelectTrigger>
                         <SelectContent>
                           {typeOfStructureOptions.map((option) => (
@@ -1390,7 +1364,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nos. of unit per floor</FormLabel>
-                      <Input className={fieldVisit?.flatsOnFloor ? "border-emerald-300 bg-emerald-50/30" : ""} placeholder="Enter number" {...field} />
+                      <Input placeholder="Enter number" {...field} />
                     </FormItem>
                   )}
                 />
