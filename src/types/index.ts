@@ -188,11 +188,32 @@ export interface CaseHistoryEntry {
 export interface MakerValuation {
   id: string;
   caseId: string;
+  // Basic Details
   dateOfValuation: string; // ISO date string
   dateOfInspection: string; // ISO date string
   refNo: string;
   branch: string;
   bankName: string;
+  // Additional Fields
+  purchaserName?: string | undefined;
+  typeOfProperty?: string | undefined;
+  flatNo?: string | undefined;
+  locatedOnFloor?: string | undefined;
+  wing?: string | undefined;
+  buildingName?: string | undefined;
+  landmark?: string | undefined;
+  roadNameArea?: string | undefined;
+  location?: string | undefined;
+  plotNo?: string | undefined;
+  ctsNo?: string | undefined;
+  sNo?: string | undefined;
+  other?: string | undefined;
+  village?: string | undefined;
+  wardNo?: string | undefined;
+  taluka?: string | undefined;
+  blockNo?: string | undefined;
+  district?: string | undefined;
+  pinCode?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;

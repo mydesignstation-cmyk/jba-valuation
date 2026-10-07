@@ -6,10 +6,15 @@ import { drizzle } from "drizzle-orm/postgres-js";
 // Load environment variables from .env.local
 config({ path: ".env.local" });
 
-const connectionString = process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
+let connectionString = process.env["DATABASE_URL_UNPOOLED"] || process.env["DATABASE_URL"];
 
 if (!connectionString) {
   throw new Error("DATABASE_URL or DATABASE_URL_UNPOOLED is not set");
+}
+
+// Strip quotes if present (dotenv quirk on Windows)
+if (connectionString.startsWith('"') && connectionString.endsWith('"')) {
+  connectionString = connectionString.slice(1, -1);
 }
 
 async function runMigrations() {

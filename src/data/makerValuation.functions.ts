@@ -26,12 +26,7 @@ const createMakerValuationFn = createServerFn({ method: "POST" })
   .handler(({ data }) =>
     db_create(
       data.token,
-      data.caseId,
-      data.dateOfValuation,
-      data.dateOfInspection,
-      data.refNo,
-      data.branch,
-      data.bankName,
+      data,
     ),
   );
 

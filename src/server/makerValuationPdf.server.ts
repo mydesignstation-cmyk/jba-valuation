@@ -83,12 +83,31 @@ class ValuationWriter {
   }
 
   async render(valuation: MakerValuation): Promise<void> {
-    // Draw the 5 fields only, nothing else
+    // Draw the fields
     this.drawRow("Date of Valuation", formatDisplayDate(valuation.dateOfValuation));
     this.drawRow("Date of Inspection", formatDisplayDate(valuation.dateOfInspection));
     this.drawRow("Ref. No.", show(valuation.refNo));
     this.drawRow("Branch", show(valuation.branch));
     this.drawRow("Bank Name", show(valuation.bankName));
+    this.drawRow("Purchaser Name", show(valuation.purchaserName));
+    this.drawRow("Type of Property", show(valuation.typeOfProperty));
+    this.drawRow("Flat No.", show(valuation.flatNo));
+    this.drawRow("Located on Floor", show(valuation.locatedOnFloor));
+    this.drawRow("Wing", show(valuation.wing));
+    this.drawRow("Building Name", show(valuation.buildingName));
+    this.drawRow("Landmark", show(valuation.landmark));
+    this.drawRow("Road Name & Area", show(valuation.roadNameArea));
+    this.drawRow("Location", show(valuation.location));
+    this.drawRow("Plot No.", show(valuation.plotNo));
+    this.drawRow("C.T.S No.", show(valuation.ctsNo));
+    this.drawRow("S. No.", show(valuation.sNo));
+    this.drawRow("Other", show(valuation.other));
+    this.drawRow("Village", show(valuation.village));
+    this.drawRow("Ward No.", show(valuation.wardNo));
+    this.drawRow("Taluka", show(valuation.taluka));
+    this.drawRow("Block No.", show(valuation.blockNo));
+    this.drawRow("District", show(valuation.district));
+    this.drawRow("Pin Code", show(valuation.pinCode));
   }
 }
 

@@ -936,13 +936,17 @@ function Page() {
                         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                           Date of Valuation
                         </p>
-                        <p className="text-sm font-medium">{makerValuation.dateOfValuation}</p>
+                        <p className="text-sm font-medium">
+                          {formatDisplayDate(makerValuation.dateOfValuation)}
+                        </p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
                           Date of Inspection
                         </p>
-                        <p className="text-sm font-medium">{makerValuation.dateOfInspection}</p>
+                        <p className="text-sm font-medium">
+                          {formatDisplayDate(makerValuation.dateOfInspection)}
+                        </p>
                       </div>
                       <div className="space-y-1">
                         <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">

@@ -10,6 +10,7 @@ import { and, eq, inArray, sql } from "drizzle-orm";
 import type { Customer, Bank, Branch, ValuationCase, User, FieldVisit, Role, MakerValuation } from "@/types";
 import { requireServerUser } from "@/server/auth.server";
 import { fieldVisitFormSchema } from "@/schemas/fieldVisit.schema";
+import { createMakerValuationSchema, type CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
 import { buildFieldVisitPdf } from "@/server/fieldVisitPdf.server";
 import { generateMakerValuationPdf } from "@/server/makerValuationPdf.server";
 
@@ -2165,26 +2166,40 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
  */
 export async function api_createMakerValuation(
   token: string | null | undefined,
-  caseId: string,
-  dateOfValuation: string,
-  dateOfInspection: string,
-  refNo: string,
-  branch: string,
-  bankName: string,
+  input: CreateMakerValuationInput,
 ): Promise<MakerValuation> {
   const user = await requireServerUser(token, "MAKER");
 
   try {
     // Build the valuation object for PDF generation
     const valuationForPdf: MakerValuation = {
-      id: "", // temp, not used in PDF
-      caseId,
-      dateOfValuation,
-      dateOfInspection,
-      refNo,
-      branch,
-      bankName,
-      pdfBytes: "", // will be filled
+      id: "",
+      caseId: input.caseId,
+      dateOfValuation: input.dateOfValuation,
+      dateOfInspection: input.dateOfInspection,
+      refNo: input.refNo,
+      branch: input.branch,
+      bankName: input.bankName,
+      purchaserName: input.purchaserName,
+      typeOfProperty: input.typeOfProperty,
+      flatNo: input.flatNo,
+      locatedOnFloor: input.locatedOnFloor,
+      wing: input.wing,
+      buildingName: input.buildingName,
+      landmark: input.landmark,
+      roadNameArea: input.roadNameArea,
+      location: input.location,
+      plotNo: input.plotNo,
+      ctsNo: input.ctsNo,
+      sNo: input.sNo,
+      other: input.other,
+      village: input.village,
+      wardNo: input.wardNo,
+      taluka: input.taluka,
+      blockNo: input.blockNo,
+      district: input.district,
+      pinCode: input.pinCode,
+      pdfBytes: "",
       createdById: user.id,
       createdAt: new Date().toISOString(),
     };
@@ -2198,7 +2213,7 @@ export async function api_createMakerValuation(
     const existing = await getDb()
       .select()
       .from(makerValuations)
-      .where(eq(makerValuations.case_id, caseId))
+      .where(eq(makerValuations.case_id, input.caseId))
       .limit(1);
 
     let result;
@@ -2207,15 +2222,34 @@ export async function api_createMakerValuation(
       const rows = await getDb()
         .update(makerValuations)
         .set({
-          date_of_valuation: dateOfValuation,
-          date_of_inspection: dateOfInspection,
-          ref_no: refNo,
-          branch: branch,
-          bank_name: bankName,
+          date_of_valuation: input.dateOfValuation,
+          date_of_inspection: input.dateOfInspection,
+          ref_no: input.refNo,
+          branch: input.branch,
+          bank_name: input.bankName,
+          purchaser_name: input.purchaserName || null,
+          type_of_property: input.typeOfProperty || null,
+          flat_no: input.flatNo || null,
+          located_on_floor: input.locatedOnFloor || null,
+          wing: input.wing || null,
+          building_name: input.buildingName || null,
+          landmark: input.landmark || null,
+          road_name_area: input.roadNameArea || null,
+          location: input.location || null,
+          plot_no: input.plotNo || null,
+          cts_no: input.ctsNo || null,
+          s_no: input.sNo || null,
+          other: input.other || null,
+          village: input.village || null,
+          ward_no: input.wardNo || null,
+          taluka: input.taluka || null,
+          block_no: input.blockNo || null,
+          district: input.district || null,
+          pin_code: input.pinCode || null,
           pdf_bytes: pdfBase64,
-          created_at: now, // Update timestamp on edit
+          created_at: now,
         })
-        .where(eq(makerValuations.case_id, caseId))
+        .where(eq(makerValuations.case_id, input.caseId))
         .returning();
       result = rows[0];
     } else {
@@ -2223,12 +2257,31 @@ export async function api_createMakerValuation(
       const rows = await getDb()
         .insert(makerValuations)
         .values({
-          case_id: caseId,
-          date_of_valuation: dateOfValuation,
-          date_of_inspection: dateOfInspection,
-          ref_no: refNo,
-          branch: branch,
-          bank_name: bankName,
+          case_id: input.caseId,
+          date_of_valuation: input.dateOfValuation,
+          date_of_inspection: input.dateOfInspection,
+          ref_no: input.refNo,
+          branch: input.branch,
+          bank_name: input.bankName,
+          purchaser_name: input.purchaserName || null,
+          type_of_property: input.typeOfProperty || null,
+          flat_no: input.flatNo || null,
+          located_on_floor: input.locatedOnFloor || null,
+          wing: input.wing || null,
+          building_name: input.buildingName || null,
+          landmark: input.landmark || null,
+          road_name_area: input.roadNameArea || null,
+          location: input.location || null,
+          plot_no: input.plotNo || null,
+          cts_no: input.ctsNo || null,
+          s_no: input.sNo || null,
+          other: input.other || null,
+          village: input.village || null,
+          ward_no: input.wardNo || null,
+          taluka: input.taluka || null,
+          block_no: input.blockNo || null,
+          district: input.district || null,
+          pin_code: input.pinCode || null,
           pdf_bytes: pdfBase64,
           created_by_id: user.id,
           created_at: now,
