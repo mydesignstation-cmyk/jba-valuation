@@ -358,7 +358,7 @@ export const makerValuations = pgTable(
     adopted_area_basis: varchar("adopted_area_basis", { length: 255 }),
     floor_space_index: numeric("floor_space_index", { precision: 12, scale: 2 }),
     // Rate Section
-    rate_range: varchar("rate_range", { length: 255 }),
+    rate_range: numeric("rate_range", { precision: 12, scale: 2 }),
     adopted_rate: numeric("adopted_rate", { precision: 12, scale: 2 }),
     building_rate: numeric("building_rate", { precision: 12, scale: 2 }),
     land_rate: numeric("land_rate", { precision: 12, scale: 2 }),

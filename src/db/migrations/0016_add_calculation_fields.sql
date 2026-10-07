@@ -18,7 +18,7 @@ ADD COLUMN IF NOT EXISTS "floor_space_index" numeric(12, 2);
 
 -- Add Rate Section fields
 ALTER TABLE "maker_valuations" 
-ADD COLUMN IF NOT EXISTS "rate_range" varchar(255),
+ADD COLUMN IF NOT EXISTS "rate_range" numeric(12, 2),
 ADD COLUMN IF NOT EXISTS "adopted_rate" numeric(12, 2),
 ADD COLUMN IF NOT EXISTS "building_rate" numeric(12, 2),
 ADD COLUMN IF NOT EXISTS "land_rate" numeric(12, 2),
