@@ -104,11 +104,6 @@ export const areaBasisOptions = [
   "SBUA",
 ] as const;
 
-export const rateRangeOptions = [
-  "15000 to 20000",
-  "17000",
-] as const;
-
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details

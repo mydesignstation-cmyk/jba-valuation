@@ -33,7 +33,6 @@ import {
   openCoveredParkingOptions,
   marketabilityOptions,
   areaBasisOptions,
-  rateRangeOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import { getSessionToken } from "@/lib/auth-client";
@@ -1613,18 +1612,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rate Range</FormLabel>
-                      <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select range" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {rateRangeOptions.map((option) => (
-                            <SelectItem key={option} value={option}>
-                              {option}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                      <Input type="number" step="0.01" placeholder="Enter range" {...field} />
                     </FormItem>
                   )}
                 />
