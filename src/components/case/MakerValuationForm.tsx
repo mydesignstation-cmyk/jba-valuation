@@ -36,7 +36,7 @@ import {
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
-import type { MakerValuation } from "@/types";
+import type { FieldVisit, MakerValuation } from "@/types";
 
 const makerValuationFields = [
   "dateOfValuation",
@@ -183,6 +183,7 @@ function makerValuationToFormValues(
 interface MakerValuationFormProps {
   caseId: string;
   initialValues?: MakerValuation;
+  fieldVisit?: Pick<FieldVisit, "gpsLatitude" | "gpsLongitude"> | null | undefined;
   onSuccess?: () => void;
   onCancel?: () => void;
 }
@@ -190,6 +191,7 @@ interface MakerValuationFormProps {
 export function MakerValuationForm({
   caseId,
   initialValues,
+  fieldVisit,
   onSuccess,
   onCancel,
 }: MakerValuationFormProps) {
@@ -257,8 +259,8 @@ export function MakerValuationForm({
             boundarySiteEast: "",
             boundarySiteWest: "",
             boundarySiteMeasured: "",
-            latitude: "",
-            longitude: "",
+            latitude: fieldVisit?.gpsLatitude ?? "",
+            longitude: fieldVisit?.gpsLongitude ?? "",
             occupancy: "",
             yearOfConstruction: "",
             ageOfBuilding: "",
@@ -317,7 +319,7 @@ export function MakerValuationForm({
             rentRangePerMonth: "",
             remarks: "",
           },
-    [caseId, initialValues],
+    [caseId, initialValues, fieldVisit],
   );
 
   const form = useForm<CreateMakerValuationInput>({
@@ -1244,6 +1246,9 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Latitude</FormLabel>
                       <Input placeholder="Enter latitude" {...field} />
+                      {fieldVisit?.gpsLatitude && (
+                        <p className="text-xs text-muted-foreground">Fetched from Field Visit report</p>
+                      )}
                     </FormItem>
                   )}
                 />
@@ -1254,6 +1259,9 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Longitude</FormLabel>
                       <Input placeholder="Enter longitude" {...field} />
+                      {fieldVisit?.gpsLongitude && (
+                        <p className="text-xs text-muted-foreground">Fetched from Field Visit report</p>
+                      )}
                     </FormItem>
                   )}
                 />

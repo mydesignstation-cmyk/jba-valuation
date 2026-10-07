@@ -1161,6 +1161,7 @@ function Page() {
                   valuationCase.stage === "MAKER_PENDING") ? (
                 <MakerValuationForm
                   caseId={valuationCase.id}
+                  fieldVisit={fieldVisit}
                   onSuccess={() => {
                     setShowValuationForm(false);
                     refetchMakerValuation();
@@ -1190,6 +1191,7 @@ function Page() {
                     <MakerValuationForm
                       caseId={valuationCase.id}
                       initialValues={makerValuation}
+                      fieldVisit={fieldVisit}
                       onSuccess={() => {
                         setShowValuationForm(false);
                         refetchMakerValuation();
