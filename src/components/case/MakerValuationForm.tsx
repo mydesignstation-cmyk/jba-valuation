@@ -58,7 +58,6 @@ export function MakerValuationForm({
   onCancel,
 }: MakerValuationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const isDev = import.meta.env.DEV;
 
   const form = useForm<CreateMakerValuationInput>({
     resolver: zodResolver(createMakerValuationSchema),
@@ -357,17 +356,15 @@ export function MakerValuationForm({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle>Create Valuation</CardTitle>
-          {isDev && (
-            <Button
-              type="button"
-              variant="ghost"
-              size="sm"
-              onClick={handleAutoFill}
-              className="text-xs"
-            >
-              📝 Dev Auto-Fill
-            </Button>
-          )}
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleAutoFill}
+            className="text-xs text-blue-600"
+          >
+            📝 Dev Auto-Fill
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
