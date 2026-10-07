@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { createMakerValuationSchema } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
+import { getSessionToken } from "@/lib/auth-client";
 import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
 
 interface MakerValuationFormProps {
@@ -39,7 +40,18 @@ export function MakerValuationForm({
   const handleSubmit = async (values: CreateMakerValuationInput) => {
     setIsSubmitting(true);
     try {
-      await api_createMakerValuation(values);
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      
+      await api_createMakerValuation({
+        token,
+        caseId: values.caseId,
+        dateOfValuation: values.dateOfValuation,
+        dateOfInspection: values.dateOfInspection,
+        refNo: values.refNo,
+        branch: values.branch,
+        bankName: values.bankName,
+      });
       toast.success("Valuation created successfully");
       form.reset();
       onSuccess?.();

@@ -2164,6 +2164,7 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
  * One valuation per case (case_id unique constraint enforced at DB level).
  */
 export async function api_createMakerValuation(
+  token: string | null | undefined,
   caseId: string,
   dateOfValuation: string,
   dateOfInspection: string,
@@ -2171,7 +2172,7 @@ export async function api_createMakerValuation(
   branch: string,
   bankName: string,
 ): Promise<MakerValuation> {
-  const user = await requireServerUser("maker.access");
+  const user = await requireServerUser(token, "MAKER");
 
   try {
     // Build the valuation object for PDF generation

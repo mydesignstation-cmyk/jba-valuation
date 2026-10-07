@@ -12,6 +12,7 @@ import {
 import type { MakerValuation } from "@/types";
 
 type CreateMakerValuationInput = {
+  token: string | null;
   caseId: string;
   dateOfValuation: string;
   dateOfInspection: string;
@@ -24,6 +25,7 @@ const createMakerValuationFn = createServerFn({ method: "POST" })
   .validator((input: CreateMakerValuationInput) => input)
   .handler(({ data }) =>
     db_create(
+      data.token,
       data.caseId,
       data.dateOfValuation,
       data.dateOfInspection,
