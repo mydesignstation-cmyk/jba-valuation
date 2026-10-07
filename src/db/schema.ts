@@ -298,6 +298,17 @@ export const makerValuations = pgTable(
     nos_of_floor: varchar("nos_of_floor", { length: 255 }),
     nos_of_staircase: varchar("nos_of_staircase", { length: 255 }),
     nos_of_lifts: varchar("nos_of_lifts", { length: 255 }),
+    // Boundaries Section
+    boundary_property_north: text("boundary_property_north"),
+    boundary_property_south: text("boundary_property_south"),
+    boundary_property_east: text("boundary_property_east"),
+    boundary_property_west: text("boundary_property_west"),
+    boundary_property_measured: varchar("boundary_property_measured", { length: 255 }),
+    boundary_site_north: text("boundary_site_north"),
+    boundary_site_south: text("boundary_site_south"),
+    boundary_site_east: text("boundary_site_east"),
+    boundary_site_west: text("boundary_site_west"),
+    boundary_site_measured: varchar("boundary_site_measured", { length: 255 }),
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
     created_by_id: uuid("created_by_id").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

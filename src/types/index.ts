@@ -237,6 +237,17 @@ export interface MakerValuation {
   nosOfFloor?: string | undefined;
   nosOfStaircase?: string | undefined;
   nosOfLifts?: string | undefined;
+  // Boundaries Section
+  boundaryPropertyNorth?: string | undefined;
+  boundaryPropertySouth?: string | undefined;
+  boundaryPropertyEast?: string | undefined;
+  boundaryPropertyWest?: string | undefined;
+  boundaryPropertyMeasured?: string | undefined;
+  boundarySiteNorth?: string | undefined;
+  boundarySiteSouth?: string | undefined;
+  boundarySiteEast?: string | undefined;
+  boundarySiteWest?: string | undefined;
+  boundarySiteMeasured?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
   createdById: string;
   createdAt: string;

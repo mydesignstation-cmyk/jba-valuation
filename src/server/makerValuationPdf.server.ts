@@ -134,6 +134,18 @@ class ValuationWriter {
     this.drawRow("Nos. of Floor", show(valuation.nosOfFloor));
     this.drawRow("Nos. of Staircase", show(valuation.nosOfStaircase));
     this.drawRow("Nos. of Lifts", show(valuation.nosOfLifts));
+    
+    // Boundaries Section
+    this.drawRow("Boundary of Property - North", show(valuation.boundaryPropertyNorth));
+    this.drawRow("Boundary of Property - South", show(valuation.boundaryPropertySouth));
+    this.drawRow("Boundary of Property - East", show(valuation.boundaryPropertyEast));
+    this.drawRow("Boundary of Property - West", show(valuation.boundaryPropertyWest));
+    this.drawRow("Boundary Property Measured", show(valuation.boundaryPropertyMeasured));
+    this.drawRow("Boundary of Site - North", show(valuation.boundarySiteNorth));
+    this.drawRow("Boundary of Site - South", show(valuation.boundarySiteSouth));
+    this.drawRow("Boundary of Site - East", show(valuation.boundarySiteEast));
+    this.drawRow("Boundary of Site - West", show(valuation.boundarySiteWest));
+    this.drawRow("Boundary Site Measured", show(valuation.boundarySiteMeasured));
   }
 }
 

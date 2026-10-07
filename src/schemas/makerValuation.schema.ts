@@ -52,6 +52,11 @@ export const occupancyOptions = [
   "Other",
 ] as const;
 
+export const boundaryMeasuredOptions = [
+  "As per deed",
+  "As per actuals",
+] as const;
+
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details
@@ -103,6 +108,17 @@ export const createMakerValuationSchema = z.object({
   nosOfFloor: z.string().optional(),
   nosOfStaircase: z.string().optional(),
   nosOfLifts: z.string().optional(),
+  // Boundaries Section
+  boundaryPropertyNorth: z.string().optional(),
+  boundaryPropertySouth: z.string().optional(),
+  boundaryPropertyEast: z.string().optional(),
+  boundaryPropertyWest: z.string().optional(),
+  boundaryPropertyMeasured: z.string().optional(),
+  boundarySiteNorth: z.string().optional(),
+  boundarySiteSouth: z.string().optional(),
+  boundarySiteEast: z.string().optional(),
+  boundarySiteWest: z.string().optional(),
+  boundarySiteMeasured: z.string().optional(),
 });
 
 export type CreateMakerValuationInput = z.infer<typeof createMakerValuationSchema>;

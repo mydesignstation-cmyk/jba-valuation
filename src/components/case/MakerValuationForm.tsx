@@ -24,6 +24,7 @@ import {
   typeOfLandOptions,
   genuinenessOptions,
   occupancyOptions,
+  boundaryMeasuredOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
 import { getSessionToken } from "@/lib/auth-client";
@@ -100,6 +101,16 @@ export function MakerValuationForm({
       nosOfFloor: "",
       nosOfStaircase: "",
       nosOfLifts: "",
+      boundaryPropertyNorth: "",
+      boundaryPropertySouth: "",
+      boundaryPropertyEast: "",
+      boundaryPropertyWest: "",
+      boundaryPropertyMeasured: "",
+      boundarySiteNorth: "",
+      boundarySiteSouth: "",
+      boundarySiteEast: "",
+      boundarySiteWest: "",
+      boundarySiteMeasured: "",
     },
   });
 
@@ -687,6 +698,147 @@ export function MakerValuationForm({
                     </FormItem>
                   )}
                 />
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold text-base mb-4">Boundaries</h3>
+              <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+                {/* Boundaries of Property - Left Side */}
+                <div>
+                  <h4 className="font-medium text-sm mb-3 pb-2 border-b">Boundaries of Property</h4>
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="boundaryPropertyNorth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>North</FormLabel>
+                          <Input placeholder="Enter north boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundaryPropertySouth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>South</FormLabel>
+                          <Input placeholder="Enter south boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundaryPropertyEast"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>East</FormLabel>
+                          <Input placeholder="Enter east boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundaryPropertyWest"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>West</FormLabel>
+                          <Input placeholder="Enter west boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundaryPropertyMeasured"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Boundary Measured</FormLabel>
+                          <Select value={field.value || ""} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select measurement basis" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {boundaryMeasuredOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
+
+                {/* Boundary of Site - Right Side */}
+                <div>
+                  <h4 className="font-medium text-sm mb-3 pb-2 border-b">Boundary of Site</h4>
+                  <div className="space-y-4">
+                    <FormField
+                      control={form.control}
+                      name="boundarySiteNorth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>North</FormLabel>
+                          <Input placeholder="Enter north boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundarySiteSouth"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>South</FormLabel>
+                          <Input placeholder="Enter south boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundarySiteEast"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>East</FormLabel>
+                          <Input placeholder="Enter east boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundarySiteWest"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>West</FormLabel>
+                          <Input placeholder="Enter west boundary" {...field} />
+                        </FormItem>
+                      )}
+                    />
+                    <FormField
+                      control={form.control}
+                      name="boundarySiteMeasured"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Boundary Measured</FormLabel>
+                          <Select value={field.value || ""} onValueChange={field.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select measurement basis" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {boundaryMeasuredOptions.map((option) => (
+                                <SelectItem key={option} value={option}>
+                                  {option}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+                </div>
               </div>
             </div>
 
