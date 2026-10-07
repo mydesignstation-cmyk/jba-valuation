@@ -22,10 +22,37 @@ const EM_DASH = "\u2014";
 const BODY_FONT_SIZE = 10;
 const LINE_HEIGHT = 14;
 
+const monetaryFieldKeys = new Set<MakerValuationFieldKey>([
+  "rateRange",
+  "adoptedRate",
+  "buildingRate",
+  "landRate",
+  "carParkingValue",
+  "govtReadyReckonerRatePerSqMtr",
+  "govtReadyReckonerRatePerSqFt",
+  "rentRangePerMonth",
+  "insuranceValue",
+  "marketValue",
+  "fairMarketValue",
+  "realizableValue",
+  "distressValue",
+  "govtValue",
+]);
+
 function show(value: unknown): string {
   if (value === undefined || value === null) return EM_DASH;
   const text = String(value).trim();
   return text.length > 0 ? text : EM_DASH;
+}
+
+function formatMonetaryValue(value: string): string {
+  const numericValue = Number(value.replace(/,/g, ""));
+  if (!Number.isFinite(numericValue)) return value;
+
+  return `Rs. ${numericValue.toLocaleString("en-IN", {
+    minimumFractionDigits: value.includes(".") ? 2 : 0,
+    maximumFractionDigits: 2,
+  })}`;
 }
 
 function splitLongWord(word: string, font: PDFFont, fontSize: number, maxWidth: number): string[] {
@@ -172,11 +199,12 @@ class ValuationWriter {
 
   private displayValue(valuation: MakerValuation, key: MakerValuationFieldKey): string {
     const value = valuation[key];
+    const displayed = show(value);
+    if (displayed === EM_DASH) return displayed;
     if (key === "dateOfValuation" || key === "dateOfInspection") {
-      const displayed = show(value);
-      return displayed === EM_DASH ? displayed : formatDisplayDate(displayed);
+      return formatDisplayDate(displayed);
     }
-    return show(value);
+    return monetaryFieldKeys.has(key) ? formatMonetaryValue(displayed) : displayed;
   }
 
   async render(valuation: MakerValuation): Promise<void> {
