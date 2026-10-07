@@ -3,12 +3,16 @@ import { createFileRoute, Link, type LinkProps } from "@tanstack/react-router";
 import {
   Activity,
   ArrowLeft,
+  Building2,
   CalendarClock,
   CheckCircle2,
+  ClipboardCheck,
   ClipboardList,
+  Compass,
   FileText,
   GitBranch,
   Hash,
+  Home,
   Landmark,
   Mail,
   MapPin,
@@ -16,6 +20,7 @@ import {
   Phone,
   Send,
   ShieldCheck,
+  TrendingUp,
   UploadCloud,
   User as UserIcon,
   UserCog,
@@ -183,6 +188,22 @@ function MakerValuationDisplayRow({
   );
 }
 
+const makerValuationSectionIcons: Record<string, ComponentType<{ className?: string }>> = {
+  "Basic Details": ClipboardList,
+  "Additional Details": Landmark,
+  General: FileText,
+  Boundaries: MapPin,
+  Location: Compass,
+  "Occupancy Status": UserIcon,
+  Apartment: Building2,
+  Flat: Home,
+  Marketability: Activity,
+  "Area Calculation": Hash,
+  Rate: TrendingUp,
+  "Details of Valuation": FileText,
+  Remarks: ClipboardCheck,
+};
+
 function MakerValuationSection({
   valuation,
   title,
@@ -192,15 +213,26 @@ function MakerValuationSection({
   title: string;
   fields: readonly MakerValuationDisplayField[];
 }) {
+  const Icon = makerValuationSectionIcons[title] ?? FileText;
+
   return (
-    <section className="space-y-3">
-      <h3 className="text-sm font-semibold">{title}</h3>
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        {fields.map((field) => (
-          <MakerValuationDisplayRow key={field.key} valuation={valuation} field={field} />
-        ))}
-      </div>
-    </section>
+    <Card className="break-inside-avoid shadow-sm transition-shadow hover:shadow-md">
+      <CardHeader className="pb-3">
+        <CardTitle className="flex items-center gap-2 text-base">
+          <span className="flex h-7 w-7 items-center justify-center rounded-md bg-primary/10 text-primary">
+            <Icon className="h-4 w-4" />
+          </span>
+          {title}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+          {fields.map((field) => (
+            <MakerValuationDisplayRow key={field.key} valuation={valuation} field={field} />
+          ))}
+        </div>
+      </CardContent>
+    </Card>
   );
 }
 
@@ -370,6 +402,11 @@ function Page() {
     queryKey: ["maker-valuation", caseId],
     queryFn: async () => (await api_getMakerValuation(caseId)) ?? null,
     enabled: !!caseId,
+  });
+  const { data: makerValuationCreator } = useQuery({
+    queryKey: ["maker-valuation-creator", makerValuation?.createdById],
+    queryFn: () => getUser(makerValuation!.createdById),
+    enabled: !!makerValuation?.createdById,
   });
 
   // Keep mutation hooks above the loading/error returns so every render uses
@@ -977,15 +1014,39 @@ function Page() {
             </CardHeader>
             <CardContent>
               {makerValuation ? (
-                <div className="space-y-6">
-                  {makerValuationSections.map((section) => (
-                    <MakerValuationSection
-                      key={section.title}
-                      valuation={makerValuation}
-                      title={section.title}
-                      fields={section.fields}
-                    />
-                  ))}
+                <div className="space-y-4">
+                  <Card className="border-green-600/30 bg-green-600/5 shadow-sm">
+                    <CardContent className="flex flex-col gap-3 py-4 sm:flex-row sm:items-center sm:justify-between">
+                      <div className="flex items-start gap-3">
+                        <div className="mt-0.5 rounded-full bg-green-600/15 p-2">
+                          <CheckCircle2 className="h-5 w-5 text-green-600" />
+                        </div>
+                        <div className="space-y-0.5">
+                          <p className="text-sm font-semibold">Maker Valuation submitted</p>
+                          <p className="text-sm text-muted-foreground">
+                            Submitted by{" "}
+                            <span className="font-medium text-foreground">
+                              {makerValuationCreator?.name || "—"}
+                            </span>{" "}
+                            on {formatDisplayDateTime(makerValuation.createdAt)}
+                          </p>
+                        </div>
+                      </div>
+                      <Badge variant="secondary" className="w-fit shrink-0">
+                        Read-only
+                      </Badge>
+                    </CardContent>
+                  </Card>
+                  <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
+                    {makerValuationSections.map((section) => (
+                      <MakerValuationSection
+                        key={section.title}
+                        valuation={makerValuation}
+                        title={section.title}
+                        fields={section.fields}
+                      />
+                    ))}
+                  </div>
                   <div className="flex gap-2 pt-2">
                     {isMaker &&
                       (valuationCase.stage === "MAKER_ASSIGNED" ||
