@@ -10,6 +10,48 @@ export const typeOfPropertyOptions = [
   "Others",
 ] as const;
 
+export const localityOptions = [
+  "Residential",
+  "Commercial",
+  "Industrial",
+] as const;
+
+export const classOfLocality1Options = [
+  "High",
+  "Middle",
+  "Poor",
+] as const;
+
+export const classOfLocality2Options = [
+  "Urban",
+  "Semi Urban",
+  "Rural",
+] as const;
+
+export const classOfLocality3Options = [
+  "Posh class",
+  "Medium",
+  "Ordinary",
+] as const;
+
+export const typeOfLandOptions = [
+  "Freehold",
+  "Leasehold",
+] as const;
+
+export const genuinenessOptions = [
+  "Yes",
+  "No",
+  "NA",
+] as const;
+
+export const occupancyOptions = [
+  "Self-occupied",
+  "Rented",
+  "Seller-Occupied",
+  "Other",
+] as const;
+
 export const createMakerValuationSchema = z.object({
   caseId: z.string().min(1, "Case ID is required"),
   // Basic Details
