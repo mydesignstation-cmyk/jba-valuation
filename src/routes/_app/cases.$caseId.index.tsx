@@ -198,7 +198,6 @@ function Page() {
   const [confirmSubmitToChecker, setConfirmSubmitToChecker] = useState(false);
   const [confirmSubmitToUploader, setConfirmSubmitToUploader] = useState(false);
   const [confirmMarkUploaded, setConfirmMarkUploaded] = useState(false);
-  const [showValuationForm, setShowValuationForm] = useState(false);
 
   const {
     backTo,
@@ -466,13 +465,6 @@ function Page() {
     !!valuationCase.assignedEngineerId &&
     fieldVisit?.status !== "SUBMITTED";
 
-  // Show Create Valuation button: Maker only, during MAKER_ASSIGNED/MAKER_PENDING,
-  // and only if no valuation has been created yet (case_id is unique).
-  const showCreateValuation =
-    isMaker &&
-    (valuationCase.stage === "MAKER_ASSIGNED" || valuationCase.stage === "MAKER_PENDING") &&
-    !makerValuation;
-
   const handleAssignMaker = async (makerId: string) => {
     setIsAssigning(true);
     try {
@@ -556,12 +548,6 @@ function Page() {
               <Button variant="outline" onClick={() => setReassignEngineerOpen(true)}>
                 <UserCog className="mr-2 h-4 w-4" />
                 Reassign Site Engineer
-              </Button>
-            )}
-            {showCreateValuation && (
-              <Button onClick={() => setShowValuationForm(true)}>
-                <FileText className="mr-2 h-4 w-4" />
-                Create Valuation
               </Button>
             )}
           </div>
@@ -719,6 +705,9 @@ function Page() {
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
           <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
+          {!isSiteEngineer && (
+            <TabsTrigger value="maker-valuation">Maker Valuation</TabsTrigger>
+          )}
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
@@ -927,45 +916,49 @@ function Page() {
           </Card>
         </TabsContent>
 
-        {/* ---- Maker Valuation (inline, when form is open) ---------------------- */}
-        {showCreateValuation && showValuationForm && (
-          <Card className="mt-6 border-primary/40 bg-primary/5">
+        {/* ---- Maker Valuation ------------------------------------------------- */}
+        <TabsContent value="maker-valuation" className="mt-6">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
-                Create Valuation
+                Maker Valuation
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <MakerValuationForm
-                caseId={valuationCase.id}
-                onSuccess={() => {
-                  toast.success("Valuation created successfully");
-                  setShowValuationForm(false);
-                  refetchMakerValuation();
-                }}
-                onCancel={() => setShowValuationForm(false)}
-              />
+              {makerValuation ? (
+                <div className="space-y-4">
+                  <div className="flex items-center gap-2 rounded-lg border border-green-600/30 bg-green-600/5 p-4">
+                    <CheckCircle2 className="h-5 w-5 text-green-600" />
+                    <p className="text-sm font-medium text-green-600">
+                      Valuation created successfully
+                    </p>
+                  </div>
+                </div>
+              ) : isMaker && 
+                  (valuationCase.stage === "MAKER_ASSIGNED" || 
+                   valuationCase.stage === "MAKER_PENDING") ? (
+                <MakerValuationForm
+                  caseId={valuationCase.id}
+                  onSuccess={() => {
+                    refetchMakerValuation();
+                  }}
+                  onCancel={() => {}}
+                />
+              ) : (
+                <EmptyState
+                  icon={FileText}
+                  title="No valuation yet"
+                  message={
+                    isMaker
+                      ? "Create a valuation when you're ready."
+                      : "Valuation will appear here once created."
+                  }
+                />
+              )}
             </CardContent>
           </Card>
-        )}
-
-        {/* Show confirmation after valuation is created */}
-        {makerValuation && (
-          <Card className="mt-6 border-green-600/30 bg-green-600/5">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2 text-green-600">
-                <CheckCircle2 className="h-4 w-4" />
-                Valuation Created
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <p className="text-sm text-muted-foreground">
-                Your valuation has been created and saved successfully.
-              </p>
-            </CardContent>
-          </Card>
-        )}
+        </TabsContent>
       </Tabs>
 
       <ReassignSiteEngineerDialog
