@@ -1,4 +1,16 @@
 import { formatDisplayDate, formatDisplayDateTime } from "@/lib/date-format";
+import {
+  AlignmentType,
+  Document,
+  HeadingLevel,
+  Packer,
+  Paragraph,
+  Table,
+  TableCell,
+  TableRow,
+  TextRun,
+  WidthType,
+} from "docx";
 import { createFileRoute, Link, type LinkProps } from "@tanstack/react-router";
 import {
   Activity,
@@ -204,27 +216,54 @@ const makerValuationSectionIcons: Record<string, ComponentType<{ className?: str
   Remarks: ClipboardCheck,
 };
 
-function downloadMakerValuationDocx(valuation: MakerValuation) {
-  const escapeHtml = (value: unknown) =>
-    String(value ?? "—")
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;");
-  const rows = makerValuationSections
-    .map(
-      (section) =>
-        `<tr><th colspan="2" style="background:#eaf0ff;text-align:left">${escapeHtml(section.title)}</th></tr>` +
-        section.fields
-          .map(
+async function downloadMakerValuationDocx(valuation: MakerValuation) {
+  const sectionTables = makerValuationSections.map(
+    (section) =>
+      new Table({
+        width: { size: 100, type: WidthType.PERCENTAGE },
+        rows: [
+          new TableRow({
+            children: [
+              new TableCell({
+                columnSpan: 2,
+                children: [
+                  new Paragraph({
+                    text: section.title,
+                    heading: HeadingLevel.HEADING_2,
+                  }),
+                ],
+              }),
+            ],
+          }),
+          ...section.fields.map(
             (field) =>
-              `<tr><td>${escapeHtml(field.label)}</td><td>${escapeHtml(valuation[field.key])}</td></tr>`,
-          )
-          .join(""),
-    )
-    .join("");
-  const html = `<html><head><meta charset="utf-8"></head><body><h1>Maker Valuation</h1><table border="1" cellspacing="0" cellpadding="6" style="border-collapse:collapse;width:100%"><tr><th>Field</th><th>Value</th></tr>${rows}</table></body></html>`;
-  const blob = new Blob([html], { type: "application/vnd.openxmlformats-officedocument.wordprocessingml.document" });
+              new TableRow({
+                children: [
+                  new TableCell({
+                    width: { size: 35, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph({ children: [new TextRun({ text: field.label, bold: true })] })],
+                  }),
+                  new TableCell({
+                    width: { size: 65, type: WidthType.PERCENTAGE },
+                    children: [new Paragraph(String(valuation[field.key] ?? "—"))],
+                  }),
+                ],
+              }),
+          ),
+        ],
+      }),
+  );
+  const doc = new Document({
+    sections: [
+      {
+        children: [
+          new Paragraph({ text: "Maker Valuation", heading: HeadingLevel.TITLE, alignment: AlignmentType.CENTER }),
+          ...sectionTables.flatMap((table) => [table, new Paragraph("")]),
+        ],
+      },
+    ],
+  });
+  const blob = await Packer.toBlob(doc);
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
   link.download = `maker-valuation-${valuation.refNo || valuation.caseId}.docx`;
