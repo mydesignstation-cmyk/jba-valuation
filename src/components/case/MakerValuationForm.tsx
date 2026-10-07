@@ -180,8 +180,8 @@ export function MakerValuationForm({
       </CardHeader>
       <CardContent>
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-            <div>
+          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-8">
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Basic Details</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
@@ -242,7 +242,7 @@ export function MakerValuationForm({
               </div>
             </div>
 
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Additional Details</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
@@ -449,7 +449,7 @@ export function MakerValuationForm({
               </div>
             </div>
 
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">General</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
@@ -741,7 +741,7 @@ export function MakerValuationForm({
               </div>
             </div>
 
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Boundaries</h3>
               <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 {/* Boundaries of Property - Left Side */}
@@ -882,7 +882,7 @@ export function MakerValuationForm({
               </div>
             </div>
 
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Location</h3>
               <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
                 <FormField
@@ -908,7 +908,7 @@ export function MakerValuationForm({
               </div>
             </div>
 
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Occupancy Status</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
@@ -936,7 +936,7 @@ export function MakerValuationForm({
             </div>
 
             {/* Apartment Section */}
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Apartment</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
@@ -1203,7 +1203,7 @@ export function MakerValuationForm({
             </div>
 
             {/* Flat Section */}
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Flat</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
@@ -1330,7 +1330,7 @@ export function MakerValuationForm({
             </div>
 
             {/* Marketability Section */}
-            <div>
+            <div className="border-b-2 border-gray-200 pb-6">
               <h3 className="font-semibold text-base mb-4">Marketability</h3>
               <div className="grid gap-4 grid-cols-1 sm:grid-cols-2 lg:grid-cols-4">
                 <FormField
