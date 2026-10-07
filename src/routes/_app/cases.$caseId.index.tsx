@@ -867,7 +867,7 @@ function Page() {
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
           <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
-          {!isSiteEngineer && <TabsTrigger value="maker-valuation">Maker Valuation</TabsTrigger>}
+          <TabsTrigger value="maker-valuation" className="hidden">Maker Valuation</TabsTrigger>
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
