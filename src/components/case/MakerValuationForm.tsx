@@ -488,6 +488,17 @@ export function MakerValuationForm({
         govtValue: govtValue > 0 ? govtValue.toString() : values.govtValue || "",
       };
 
+      const missingFields = makerValuationFields.filter(
+        (field) => !submissionData[field]?.trim(),
+      );
+      if (missingFields.length > 0) {
+        missingFields.forEach((field) => {
+          form.setError(field, { type: "required", message: "This field is required" });
+        });
+        toast.error(`${missingFields.length} field${missingFields.length === 1 ? "" : "s"} required`);
+        return;
+      }
+
       await api_createMakerValuation(submissionData);
       toast.success(
         initialValues ? "Valuation updated successfully" : "Valuation created successfully",
