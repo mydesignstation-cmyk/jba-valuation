@@ -35,7 +35,6 @@ import {
   areaBasisOptions,
 } from "@/schemas/makerValuation.schema";
 import { api_createMakerValuation } from "@/data/makerValuation.functions";
-import { getSessionToken } from "@/lib/auth-client";
 import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema";
 
 interface MakerValuationFormProps {
@@ -309,9 +308,6 @@ export function MakerValuationForm({
   const handleSubmit = async (values: CreateMakerValuationInput) => {
     setIsSubmitting(true);
     try {
-      const token = await getSessionToken();
-      if (!token) throw new Error("Not authenticated");
-      
       // Calculate formula-based values
       const adoptedArea = values.adoptedArea ? Number(values.adoptedArea) : 0;
       const adoptedRate = values.adoptedRate ? Number(values.adoptedRate) : 0;
