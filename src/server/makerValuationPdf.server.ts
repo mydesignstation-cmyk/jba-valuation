@@ -36,6 +36,7 @@ class ValuationWriter {
   private bold: PDFFont;
   private page: PDFPage;
   private y: number;
+  private readonly bottomMargin = 48;
 
   private constructor(doc: PDFDocument, font: PDFFont, bold: PDFFont) {
     this.doc = doc;
@@ -55,6 +56,12 @@ class ValuationWriter {
   private drawRow(label: string, value: string): void {
     const lineHeight = 18;
     const fontSize = 11;
+
+    // Add new page if we're running out of space
+    if (this.y - lineHeight < this.bottomMargin) {
+      this.page = this.doc.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+      this.y = PAGE_HEIGHT - MARGIN;
+    }
 
     // Draw label
     this.page.drawText(label, {
