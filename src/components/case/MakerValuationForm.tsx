@@ -14,12 +14,20 @@ import type { CreateMakerValuationInput } from "@/schemas/makerValuation.schema"
 
 interface MakerValuationFormProps {
   caseId: string;
+  initialValues?: {
+    dateOfValuation: string;
+    dateOfInspection: string;
+    refNo: string;
+    branch: string;
+    bankName: string;
+  };
   onSuccess?: () => void;
   onCancel?: () => void;
 }
 
 export function MakerValuationForm({
   caseId,
+  initialValues,
   onSuccess,
   onCancel,
 }: MakerValuationFormProps) {
@@ -27,7 +35,7 @@ export function MakerValuationForm({
 
   const form = useForm<CreateMakerValuationInput>({
     resolver: zodResolver(createMakerValuationSchema),
-    defaultValues: {
+    defaultValues: initialValues || {
       caseId,
       dateOfValuation: "",
       dateOfInspection: "",

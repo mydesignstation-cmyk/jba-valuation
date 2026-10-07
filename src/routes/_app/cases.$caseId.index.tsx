@@ -198,6 +198,7 @@ function Page() {
   const [confirmSubmitToChecker, setConfirmSubmitToChecker] = useState(false);
   const [confirmSubmitToUploader, setConfirmSubmitToUploader] = useState(false);
   const [confirmMarkUploaded, setConfirmMarkUploaded] = useState(false);
+  const [showValuationForm, setShowValuationForm] = useState(false);
 
   const {
     backTo,
@@ -928,36 +929,76 @@ function Page() {
             <CardContent>
               {makerValuation ? (
                 <div className="space-y-4">
-                  <div className="flex items-center gap-2 rounded-lg border border-green-600/30 bg-green-600/5 p-4">
-                    <CheckCircle2 className="h-5 w-5 text-green-600" />
-                    <p className="text-sm font-medium text-green-600">
-                      Valuation created successfully
-                    </p>
-                  </div>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="outline"
-                      onClick={async () => {
-                        try {
-                          const result = await (
-                            await import("@/data/makerValuation.functions")
-                          ).api_downloadMakerValuationPdf(valuationCase.id);
-                          const link = document.createElement("a");
-                          link.href = `data:application/pdf;base64,${result.pdfBase64}`;
-                          link.download = result.filename;
-                          document.body.appendChild(link);
-                          link.click();
-                          document.body.removeChild(link);
-                          toast.success("PDF downloaded");
-                        } catch (error) {
-                          toast.error("Failed to download PDF");
-                          console.error("Download error:", error);
-                        }
-                      }}
-                    >
-                      <FileText className="mr-2 h-4 w-4" />
-                      Download PDF
-                    </Button>
+                  {/* Show valuation details and action buttons */}
+                  <div className="space-y-4">
+                    <div className="grid gap-4 sm:grid-cols-2">
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Date of Valuation
+                        </p>
+                        <p className="text-sm font-medium">{makerValuation.dateOfValuation}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Date of Inspection
+                        </p>
+                        <p className="text-sm font-medium">{makerValuation.dateOfInspection}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Ref. No.
+                        </p>
+                        <p className="text-sm font-medium">{makerValuation.refNo}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Branch
+                        </p>
+                        <p className="text-sm font-medium">{makerValuation.branch}</p>
+                      </div>
+                      <div className="space-y-1">
+                        <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
+                          Bank Name
+                        </p>
+                        <p className="text-sm font-medium">{makerValuation.bankName}</p>
+                      </div>
+                    </div>
+                    <div className="flex gap-2 pt-4">
+                      {isMaker &&
+                        (valuationCase.stage === "MAKER_ASSIGNED" ||
+                          valuationCase.stage === "MAKER_PENDING") && (
+                          <Button
+                            variant="outline"
+                            onClick={() => setShowValuationForm(true)}
+                          >
+                            <PenLine className="mr-2 h-4 w-4" />
+                            Edit
+                          </Button>
+                        )}
+                      <Button
+                        variant="outline"
+                        onClick={async () => {
+                          try {
+                            const result = await (
+                              await import("@/data/makerValuation.functions")
+                            ).api_downloadMakerValuationPdf(valuationCase.id);
+                            const link = document.createElement("a");
+                            link.href = `data:application/pdf;base64,${result.pdfBase64}`;
+                            link.download = result.filename;
+                            document.body.appendChild(link);
+                            link.click();
+                            document.body.removeChild(link);
+                            toast.success("PDF downloaded");
+                          } catch (error) {
+                            toast.error("Failed to download PDF");
+                            console.error("Download error:", error);
+                          }
+                        }}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        Download PDF
+                      </Button>
+                    </div>
                   </div>
                 </div>
               ) : isMaker && 
@@ -966,9 +1007,10 @@ function Page() {
                 <MakerValuationForm
                   caseId={valuationCase.id}
                   onSuccess={() => {
+                    setShowValuationForm(false);
                     refetchMakerValuation();
                   }}
-                  onCancel={() => {}}
+                  onCancel={() => setShowValuationForm(false)}
                 />
               ) : (
                 <EmptyState
@@ -980,6 +1022,34 @@ function Page() {
                       : "Valuation will appear here once created."
                   }
                 />
+              )}
+              {showValuationForm && makerValuation && (
+                <Card className="mt-6 border-primary/40 bg-primary/5">
+                  <CardHeader>
+                    <CardTitle className="flex items-center gap-2">
+                      <PenLine className="h-4 w-4" />
+                      Edit Valuation
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <MakerValuationForm
+                      caseId={valuationCase.id}
+                      initialValues={{
+                        dateOfValuation: makerValuation.dateOfValuation,
+                        dateOfInspection: makerValuation.dateOfInspection,
+                        refNo: makerValuation.refNo,
+                        branch: makerValuation.branch,
+                        bankName: makerValuation.bankName,
+                      }}
+                      onSuccess={() => {
+                        setShowValuationForm(false);
+                        refetchMakerValuation();
+                        toast.success("Valuation updated successfully");
+                      }}
+                      onCancel={() => setShowValuationForm(false)}
+                    />
+                  </CardContent>
+                </Card>
               )}
             </CardContent>
           </Card>

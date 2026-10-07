@@ -2192,27 +2192,54 @@ export async function api_createMakerValuation(
     // Generate PDF as base64
     const pdfBase64 = await generateMakerValuationPdf(valuationForPdf);
 
-    // Insert into database
     const now = new Date();
-    const rows = await getDb()
-      .insert(makerValuations)
-      .values({
-        case_id: caseId,
-        date_of_valuation: dateOfValuation,
-        date_of_inspection: dateOfInspection,
-        ref_no: refNo,
-        branch: branch,
-        bank_name: bankName,
-        pdf_bytes: pdfBase64,
-        created_by_id: user.id,
-        created_at: now,
-      })
-      .returning();
 
-    const row = rows[0];
-    if (!row) throw new Error("Failed to insert maker valuation");
+    // Check if valuation exists for this case
+    const existing = await getDb()
+      .select()
+      .from(makerValuations)
+      .where(eq(makerValuations.case_id, caseId))
+      .limit(1);
 
-    return mapMakerValuationRow(row);
+    let result;
+    if (existing.length > 0) {
+      // Update existing valuation
+      const rows = await getDb()
+        .update(makerValuations)
+        .set({
+          date_of_valuation: dateOfValuation,
+          date_of_inspection: dateOfInspection,
+          ref_no: refNo,
+          branch: branch,
+          bank_name: bankName,
+          pdf_bytes: pdfBase64,
+          created_at: now, // Update timestamp on edit
+        })
+        .where(eq(makerValuations.case_id, caseId))
+        .returning();
+      result = rows[0];
+    } else {
+      // Create new valuation
+      const rows = await getDb()
+        .insert(makerValuations)
+        .values({
+          case_id: caseId,
+          date_of_valuation: dateOfValuation,
+          date_of_inspection: dateOfInspection,
+          ref_no: refNo,
+          branch: branch,
+          bank_name: bankName,
+          pdf_bytes: pdfBase64,
+          created_by_id: user.id,
+          created_at: now,
+        })
+        .returning();
+      result = rows[0];
+    }
+
+    if (!result) throw new Error("Failed to save maker valuation");
+
+    return mapMakerValuationRow(result);
   } catch (error) {
     console.error("Failed to create maker valuation:", error);
     throw error;
