@@ -58,6 +58,7 @@ export function MakerValuationForm({
   onCancel,
 }: MakerValuationFormProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const isDev = import.meta.env.DEV;
 
   const form = useForm<CreateMakerValuationInput>({
     resolver: zodResolver(createMakerValuationSchema),
@@ -181,6 +182,131 @@ export function MakerValuationForm({
     },
   });
 
+  const handleAutoFill = () => {
+    const today = new Date().toISOString().split("T")[0];
+    form.reset({
+      caseId: caseId,
+      dateOfValuation: today,
+      dateOfInspection: today,
+      refNo: "REF-DEV-001",
+      branch: "Dev Branch",
+      bankName: "Dev Bank",
+      purchaserName: "John Developer",
+      typeOfProperty: "Apartment",
+      flatNo: "101",
+      locatedOnFloor: "1st Floor",
+      wing: "A",
+      buildingName: "Dev Towers",
+      landmark: "Near Dev Park",
+      roadNameArea: "Developer Street",
+      location: "Dev City",
+      plotNo: "123",
+      ctsNo: "456",
+      sNo: "789",
+      other: "Dev Area",
+      village: "Dev Village",
+      wardNo: "W1",
+      taluka: "Dev Taluka",
+      blockNo: "B1",
+      district: "Dev District",
+      pinCode: "123456",
+      purposeOfValuation: "Bank Loan",
+      documentsName1: "Title Deed",
+      documentsDetails1: "Document 1 details",
+      documentsName2: "Agreement",
+      documentsDetails2: "Document 2 details",
+      documentsName3: "Plan",
+      documentsDetails3: "Document 3 details",
+      nameOfOwner: "Dev Owner",
+      address: "123 Dev Street, Dev City",
+      configurationInShort: "3BHK",
+      configurationFullDescription: "3 Bedroom, Hall, Kitchen with modern amenities",
+      locality: "Dev Locality",
+      classOfLocality1: "Prime",
+      classOfLocality2: "Commercial",
+      classOfLocality3: "Residential",
+      municipalCorporation: "Dev Municipal Corp",
+      typeOfLand: "Freehold",
+      genuinenessOrAuthenticity: "Genuine",
+      anyOtherComments: "Dev property for testing",
+      nosOfFloor: "15",
+      nosOfStaircase: "2",
+      nosOfLifts: "2",
+      boundaryPropertyNorth: "Street",
+      boundaryPropertySouth: "Garden",
+      boundaryPropertyEast: "Park",
+      boundaryPropertyWest: "Building",
+      boundaryPropertyMeasured: "Measured",
+      boundarySiteNorth: "100m",
+      boundarySiteSouth: "100m",
+      boundarySiteEast: "100m",
+      boundarySiteWest: "100m",
+      boundarySiteMeasured: "Measured",
+      latitude: "19.0760",
+      longitude: "72.8777",
+      occupancy: "Owner Occupied",
+      yearOfConstruction: "2020",
+      ageOfBuilding: "4",
+      residualLife: "50",
+      typeOfStructure: "RCC",
+      nosOfUnitPerFloor: "4",
+      buildingType: "Residential",
+      appearance: "Good",
+      qualityOfConstruction: "Good",
+      maintenance: "Good",
+      protectedWaterSupply: "Yes",
+      undergroundSewerage: "Yes",
+      nosOfParking: "2",
+      compoundWall: "Yes",
+      openCoveredParking: "Covered",
+      pavementLaidAroundBuilding: "Yes",
+      flooring: "Marble",
+      doors: "Wooden",
+      windows: "Aluminum",
+      fittings: "Brass",
+      finishing: "Premium",
+      assessmentNo: "ASS-001",
+      taxAmount: "5000",
+      taxPaidInNameOf: "Owner Name",
+      electricityServiceConnectionNo: "ELEC-001",
+      meterCardInNameOf: "Owner Name",
+      meterCardDated: today,
+      undividedAreaOfLand: "250",
+      marketability: "Good",
+      positiveFactors: "Prime location, near metro",
+      negativeFactors: "Old building",
+      // Area Calculation
+      physicalMeasuredArea: "1000",
+      physicalMeasuredAreaBasis: "Measured",
+      documentedArea: "1000",
+      documentedAreaBasis: "Documented",
+      approvedPlanArea: "1000",
+      approvedPlanAreaBasis: "Plan",
+      builtUpArea: "800",
+      builtUpAreaBasis: "Measured",
+      adoptedArea: "1000",
+      adoptedAreaBasis: "Approved",
+      floorSpaceIndex: "2.5",
+      // Rate Section
+      rateRange: "5000",
+      adoptedRate: "5000",
+      buildingRate: "3000",
+      landRate: "2000",
+      insuranceValue: "",
+      // Details of Valuation
+      marketValue: "",
+      carParkingValue: "100000",
+      fairMarketValue: "",
+      realizableValue: "",
+      distressValue: "",
+      govtReadyReckonerRatePerSqMtr: "4000",
+      govtReadyReckonerRatePerSqFt: "370",
+      govtValue: "",
+      rentRangePerMonth: "25000",
+      remarks: "Dev test property - all formulas will auto-calculate",
+    } as any);
+  };
+
   const handleSubmit = async (values: CreateMakerValuationInput) => {
     setIsSubmitting(true);
     try {
@@ -228,8 +354,19 @@ export function MakerValuationForm({
 
   return (
     <Card>
-      <CardHeader>
+      <CardHeader className="flex items-center justify-between">
         <CardTitle>Create Valuation</CardTitle>
+        {isDev && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            onClick={handleAutoFill}
+            className="text-xs"
+          >
+            📝 Dev Auto-Fill
+          </Button>
+        )}
       </CardHeader>
       <CardContent>
         <Form {...form}>
