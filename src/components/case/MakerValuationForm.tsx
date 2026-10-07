@@ -186,12 +186,30 @@ interface MakerValuationPrefill {
   refNo?: string;
   branch?: string;
   bankName?: string;
+  typeOfProperty?: string | undefined;
+  locatedOnFloor?: string | undefined;
+  landmark?: string | undefined;
+  occupancy?: string | undefined;
+  yearOfConstruction?: string | undefined;
+  typeOfStructure?: string | undefined;
+  nosOfUnitPerFloor?: string | undefined;
 }
 
 interface MakerValuationFormProps {
   caseId: string;
   initialValues?: MakerValuation;
-  fieldVisit?: Pick<FieldVisit, "gpsLatitude" | "gpsLongitude"> | null | undefined;
+  fieldVisit?: Pick<
+    FieldVisit,
+    | "gpsLatitude"
+    | "gpsLongitude"
+    | "propertyType"
+    | "locatedOnFloor"
+    | "landmark"
+    | "occupancyStatus"
+    | "yearOfConstruction"
+    | "structureType"
+    | "flatsOnFloor"
+  > | null | undefined;
   prefill?: MakerValuationPrefill;
   onSuccess?: () => void;
   onCancel?: () => void;
@@ -218,13 +236,17 @@ export function MakerValuationForm({
             refNo: prefill?.refNo ?? "",
             branch: prefill?.branch ?? "",
             bankName: prefill?.bankName ?? "",
+            typeOfProperty: prefill?.typeOfProperty ?? "",
+            locatedOnFloor: prefill?.locatedOnFloor ?? "",
+            landmark: prefill?.landmark ?? "",
+            occupancy: prefill?.occupancy ?? "",
+            yearOfConstruction: prefill?.yearOfConstruction ?? "",
+            typeOfStructure: prefill?.typeOfStructure ?? "",
+            nosOfUnitPerFloor: prefill?.nosOfUnitPerFloor ?? "",
             purchaserName: "",
-            typeOfProperty: "",
             flatNo: "",
-            locatedOnFloor: "",
             wing: "",
             buildingName: "",
-            landmark: "",
             roadNameArea: "",
             location: "",
             plotNo: "",
@@ -271,12 +293,8 @@ export function MakerValuationForm({
             boundarySiteMeasured: "",
             latitude: fieldVisit?.gpsLatitude ?? "",
             longitude: fieldVisit?.gpsLongitude ?? "",
-            occupancy: "",
-            yearOfConstruction: "",
             ageOfBuilding: "",
             residualLife: "",
-            typeOfStructure: "",
-            nosOfUnitPerFloor: "",
             buildingType: "",
             appearance: "",
             qualityOfConstruction: "",
@@ -1966,6 +1984,7 @@ export function MakerValuationForm({
                 {/* Insurance Value (read-only, formula-based) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Insurance Value</label>
+                  <p className="text-xs text-muted-foreground">Built Up Area × Building Rate</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("builtUpArea") && form.watch("buildingRate")
                       ? (
@@ -1984,6 +2003,7 @@ export function MakerValuationForm({
                 {/* Market Value (formula-based) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Market Value</label>
+                  <p className="text-xs text-muted-foreground">Adopted Area × Adopted Rate</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
@@ -2005,6 +2025,7 @@ export function MakerValuationForm({
                 {/* Fair Market Value (formula-based) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Fair Market Value</label>
+                  <p className="text-xs text-muted-foreground">Market Value + Car Parking Value</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") &&
                     form.watch("adoptedRate") &&
@@ -2023,6 +2044,7 @@ export function MakerValuationForm({
                 {/* Realizable Value (formula-based: FMV × 95%) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Realizable Value</label>
+                  <p className="text-xs text-muted-foreground">Fair Market Value × 95%</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
@@ -2038,6 +2060,7 @@ export function MakerValuationForm({
                 {/* Distress Value (formula-based: FMV × 80%) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Distress Value</label>
+                  <p className="text-xs text-muted-foreground">Fair Market Value × 80%</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("adoptedRate")
                       ? (
@@ -2073,6 +2096,7 @@ export function MakerValuationForm({
                 {/* Govt. Value (calculated) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Govt. Value</label>
+                  <p className="text-xs text-muted-foreground">Adopted Area × Govt. Ready Reckoner Rate</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
                     {form.watch("adoptedArea") && form.watch("govtReadyReckonerRatePerSqMtr")
                       ? (

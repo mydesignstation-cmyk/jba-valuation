@@ -574,6 +574,13 @@ function Page() {
     refNo: valuationCase.requestNumber,
     branch: branchName,
     bankName,
+    typeOfProperty: fieldVisit?.propertyType,
+    locatedOnFloor: fieldVisit?.locatedOnFloor,
+    landmark: fieldVisit?.landmark,
+    occupancy: fieldVisit?.occupancyStatus,
+    yearOfConstruction: fieldVisit?.yearOfConstruction?.toString(),
+    typeOfStructure: fieldVisit?.structureType,
+    nosOfUnitPerFloor: fieldVisit?.flatsOnFloor,
   };
   const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
   const hasMaker = !!valuationCase.assignedMakerId;
