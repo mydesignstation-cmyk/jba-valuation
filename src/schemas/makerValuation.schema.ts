@@ -83,8 +83,11 @@ export const createMakerValuationSchema = z.object({
   // General Section Fields (all optional)
   purposeOfValuation: z.string().optional(),
   documentsName1: z.string().optional(),
+  documentsDetails1: z.string().optional(),
   documentsName2: z.string().optional(),
+  documentsDetails2: z.string().optional(),
   documentsName3: z.string().optional(),
+  documentsDetails3: z.string().optional(),
   nameOfOwner: z.string().optional(),
   address: z.string().optional(),
   configurationInShort: z.string().optional(),

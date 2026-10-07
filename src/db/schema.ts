@@ -278,8 +278,11 @@ export const makerValuations = pgTable(
     // General Section Fields
     purpose_of_valuation: varchar("purpose_of_valuation", { length: 255 }),
     documents_name_1: varchar("documents_name_1", { length: 255 }),
+    documents_details_1: text("documents_details_1"),
     documents_name_2: varchar("documents_name_2", { length: 255 }),
+    documents_details_2: text("documents_details_2"),
     documents_name_3: varchar("documents_name_3", { length: 255 }),
+    documents_details_3: text("documents_details_3"),
     name_of_owner: varchar("name_of_owner", { length: 255 }),
     address: text("address"),
     configuration_in_short: varchar("configuration_in_short", { length: 255 }),

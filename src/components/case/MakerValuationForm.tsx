@@ -80,8 +80,11 @@ export function MakerValuationForm({
       pinCode: "",
       purposeOfValuation: "",
       documentsName1: "",
+      documentsDetails1: "",
       documentsName2: "",
+      documentsDetails2: "",
       documentsName3: "",
+      documentsDetails3: "",
       nameOfOwner: "",
       address: "",
       configurationInShort: "",
@@ -420,6 +423,16 @@ export function MakerValuationForm({
                 />
                 <FormField
                   control={form.control}
+                  name="documentsDetails1"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details of Documents Name (1)</FormLabel>
+                      <Input placeholder="Enter document details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="documentsName2"
                   render={({ field }) => (
                     <FormItem>
@@ -430,11 +443,31 @@ export function MakerValuationForm({
                 />
                 <FormField
                   control={form.control}
+                  name="documentsDetails2"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details of Documents Name (2)</FormLabel>
+                      <Input placeholder="Enter document details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
                   name="documentsName3"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Documents Name (3)</FormLabel>
                       <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsDetails3"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details of Documents Name (3)</FormLabel>
+                      <Input placeholder="Enter document details" {...field} />
                     </FormItem>
                   )}
                 />

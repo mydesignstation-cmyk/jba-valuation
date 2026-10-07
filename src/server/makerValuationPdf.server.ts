@@ -111,11 +111,14 @@ class ValuationWriter {
     this.drawRow("District", show(valuation.district));
     this.drawRow("Pin Code", show(valuation.pinCode));
     
-    // General Section (16 fields)
+    // General Section (19 fields)
     this.drawRow("Purpose of Valuation", show(valuation.purposeOfValuation));
     this.drawRow("Documents Name (1)", show(valuation.documentsName1));
+    this.drawRow("Details of Documents Name (1)", show(valuation.documentsDetails1));
     this.drawRow("Documents Name (2)", show(valuation.documentsName2));
+    this.drawRow("Details of Documents Name (2)", show(valuation.documentsDetails2));
     this.drawRow("Documents Name (3)", show(valuation.documentsName3));
+    this.drawRow("Details of Documents Name (3)", show(valuation.documentsDetails3));
     this.drawRow("Name of Owner", show(valuation.nameOfOwner));
     this.drawRow("Address", show(valuation.address));
     this.drawRow("Configuration (In Short)", show(valuation.configurationInShort));

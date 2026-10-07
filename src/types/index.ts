@@ -217,8 +217,11 @@ export interface MakerValuation {
   // General Section Fields
   purposeOfValuation?: string | undefined;
   documentsName1?: string | undefined;
+  documentsDetails1?: string | undefined;
   documentsName2?: string | undefined;
+  documentsDetails2?: string | undefined;
   documentsName3?: string | undefined;
+  documentsDetails3?: string | undefined;
   nameOfOwner?: string | undefined;
   address?: string | undefined;
   configurationInShort?: string | undefined;
