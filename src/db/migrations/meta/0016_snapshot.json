@@ -1,0 +1,89 @@
+{
+  "id": "0016_add_calculation_fields",
+  "prevId": "0015_add_maker_valuations",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "maker_valuations": {
+      "name": "maker_valuations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "typeSchema": "",
+          "isArray": false,
+          "columnType": "uuid",
+          "isIdentity": false,
+          "isGenerated": false,
+          "isUpdatedAt": false,
+          "isAutoincrement": false,
+          "hasDefault": true,
+          "default": "gen_random_uuid()",
+          "onUpdate": null,
+          "isNotNull": true,
+          "comment": null
+        },
+        "case_id": {
+          "name": "case_id",
+          "type": "uuid",
+          "typeSchema": "",
+          "isArray": false,
+          "columnType": "uuid",
+          "isIdentity": false,
+          "isGenerated": false,
+          "isUpdatedAt": false,
+          "isAutoincrement": false,
+          "hasDefault": false,
+          "default": null,
+          "onUpdate": null,
+          "isNotNull": true,
+          "comment": null
+        },
+        "date_of_valuation": {
+          "name": "date_of_valuation",
+          "type": "date",
+          "typeSchema": "",
+          "isArray": false,
+          "columnType": "date",
+          "isIdentity": false,
+          "isGenerated": false,
+          "isUpdatedAt": false,
+          "isAutoincrement": false,
+          "hasDefault": false,
+          "default": null,
+          "onUpdate": null,
+          "isNotNull": true,
+          "comment": null
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "maker_valuations_case_id_unique": {
+          "name": "maker_valuations_case_id_unique",
+          "columns": ["case_id"]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "maker_valuations_case_id_fk": {
+          "name": "maker_valuations_case_id_fk",
+          "tableFrom": "maker_valuations",
+          "tableTo": "cases",
+          "schemaFrom": "",
+          "schemaTo": "",
+          "columnsFrom": ["case_id"],
+          "columnsTo": ["id"],
+          "onDelete": "restrict",
+          "onUpdate": null
+        }
+      }
+    }
+  },
+  "enums": {},
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  }
+}
