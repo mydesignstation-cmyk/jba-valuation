@@ -52,7 +52,8 @@ import { requirePermission } from "@/lib/route-guard";
 import { getSessionToken, useCurrentUser } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant, isMakerCasePending } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, stageColors, isMakerCasePending } from "@/lib/case-format";
+import { cn } from "@/lib/utils";
 import {
   api_getCase,
   api_assignMaker,
@@ -576,7 +577,7 @@ function Page() {
             </h1>
           </div>
           <div className="flex shrink-0 items-center gap-2">
-            <Badge variant={stageBadgeVariant[valuationCase.stage]} className="text-sm">
+            <Badge className={cn(stageColors[valuationCase.stage].bg, stageColors[valuationCase.stage].text, "border-0 text-sm")}>
               {stageLabels[valuationCase.stage]}
             </Badge>
             {/* Primary action at the top right of Case Detail (not in list
@@ -783,7 +784,7 @@ function Page() {
                 label="Stage"
                 icon={<Activity className="h-3.5 w-3.5" />}
                 value={
-                  <Badge variant={stageBadgeVariant[valuationCase.stage]}>
+                  <Badge className={cn(stageColors[valuationCase.stage].bg, stageColors[valuationCase.stage].text, "border-0")}>
                     {stageLabels[valuationCase.stage]}
                   </Badge>
                 }

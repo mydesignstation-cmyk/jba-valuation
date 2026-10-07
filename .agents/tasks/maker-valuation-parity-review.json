@@ -1,0 +1,17 @@
+{
+  "verdict": "CHANGES_REQUESTED",
+  "findings": [
+    {
+      "id": "E2E-001",
+      "confidence": "confirmed",
+      "issue": "The required authenticated end-to-end flow is still not evidenced: Dev Auto-Fill -> save -> reload -> edit -> change values across major sections -> save -> reload -> inspect the complete display and download/extract the PDF.",
+      "action": "Run the full flow with a valid Maker session against the approved Neon database. Verify all 115 values survive create, reload, edit hydration, update, and reload; verify the saved display accounts for every field; verify extracted PDF text contains every canonical label and saved value without clipping. Record the results in FEAT-003."
+    },
+    {
+      "id": "PERSIST-001",
+      "confidence": "confirmed",
+      "issue": "The server still duplicates the complete camelCase-to-snake_case persistence object in the update and insert branches of api_createMakerValuation. Both currently enumerate the fields, but the implementation does not satisfy the plan's single mapping/value-builder requirement and future create/update drift can silently drop fields.",
+      "action": "Extract one typed canonical storage mapping/value builder and use it for both insert and update, preserving update-only metadata behavior. Re-run the one-to-one create/update/mapper parity checks, typecheck, and build."
+    }
+  ]
+}

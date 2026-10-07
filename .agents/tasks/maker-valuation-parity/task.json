@@ -1,0 +1,7 @@
+{
+  "task_id": "task-maker-valuation-parity",
+  "task_description": "Repair Maker Valuation parity across the 115-field form, Neon/Drizzle contract, persistence and edit hydration, saved display, and PDF.",
+  "status": "pending",
+  "feature_order": ["FEAT-001", "FEAT-002", "FEAT-003"],
+  "blocked_reason": null
+}

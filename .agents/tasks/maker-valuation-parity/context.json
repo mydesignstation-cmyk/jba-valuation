@@ -1,0 +1,28 @@
+{
+  "project_type": "TanStack Start React TypeScript application with Drizzle ORM and postgres-js",
+  "language": "TypeScript/TSX",
+  "build_system": "Vite 8 with TanStack Start; npm scripts provide vite build, eslint, and prettier. TypeScript is strict with noEmit.",
+  "test_framework": "No test script or test framework is present in package.json; validation is npx tsc --noEmit, npm run lint, npm run build, plus the documented end-to-end smoke checks.",
+  "build_command": "npm run build",
+  "test_command": "npx tsc --noEmit; npm run lint",
+  "verification_instructions": "Before DB access read .env.local only to verify the host begins ep-muddy-math-b3on57py and database is neondb. Never write/destructively modify data. Run npx tsc --noEmit, npm run lint, npm run build. Smoke test the Dev Auto-Fill -> save -> reload -> edit -> save -> saved display/PDF flow.",
+  "snapshot_or_generated_files": "Drizzle metadata is under src/db/migrations/meta; do not regenerate or alter migrations for the Drizzle type-only boundary alignment. Migration 0015 creates the base table and 0016 adds all non-basic valuation columns.",
+  "environment_constraints": "Windows PowerShell; workspace is e:/codefiles/va2 and all paths in coder prompts must be absolute. Only approved Neon host is ep-muddy-math-b3on57py... / database neondb. Preserve auth/session-token checks. Do not use git stash, force push, reset --hard, or amend pushed commits.",
+  "contribution_requirements": "Lovable-connected repository: do not rewrite published history. Work directly in the shared worktree, commit locally per feature, never push from feature coders. Keep the Rate Range field as an open numeric input and do not add fake/duplicate fields.",
+  "key_patterns": "MakerValuationForm currently uses react-hook-form with zodResolver and a large defaultValues object; calculated values are read-only displays but are written into submissionData. api_createMakerValuation uses requireServerUser(token, MAKER), upserts by unique case_id, generates PDF, and maps snake_case DB rows to camelCase MakerValuation. The case route fetches api_getMakerValuation and currently passes only five basic fields to edit. The PDF uses pdf-lib and a row writer with page breaks but needs headings/wrapping/readability. Neon numeric columns are numeric(12,2), while the form/domain boundary is string-shaped.",
+  "relevant_files": [
+    "e:/codefiles/va2/.agents/tasks/maker-valuation-parity-plan.md",
+    "e:/codefiles/va2/src/components/case/MakerValuationForm.tsx",
+    "e:/codefiles/va2/src/routes/_app/cases.$caseId.index.tsx",
+    "e:/codefiles/va2/src/db/schema.ts",
+    "e:/codefiles/va2/src/db/migrations/0015_add_maker_valuations.sql",
+    "e:/codefiles/va2/src/db/migrations/0016_add_calculation_fields.sql",
+    "e:/codefiles/va2/src/types/index.ts",
+    "e:/codefiles/va2/src/schemas/makerValuation.schema.ts",
+    "e:/codefiles/va2/src/data/makerValuation.functions.ts",
+    "e:/codefiles/va2/src/server/api.server.ts",
+    "e:/codefiles/va2/src/server/makerValuationPdf.server.ts",
+    "e:/codefiles/va2/package.json"
+  ],
+  "directory_structure": "src/components/case contains form and case display UI; src/routes/_app/cases.$caseId.index.tsx hosts case tabs and Maker Valuation display/edit; src/server contains API persistence and PDF rendering; src/data contains createServerFn wrappers; src/db contains Drizzle schema and SQL migrations; src/schemas and src/types hold input/domain contracts; .agents/tasks contains this handoff and review artifacts."
+}

@@ -37,7 +37,8 @@ import { formatDisplayDate } from "@/lib/date-format";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, stageColors } from "@/lib/case-format";
+import { cn } from "@/lib/utils";
 import { getSessionToken } from "@/lib/auth-client";
 import { api_listCheckerCases, api_assignMaker } from "@/data/case.functions";
 import { listSiteEngineers } from "@/services/user.service";
@@ -265,7 +266,9 @@ function Page() {
                         <TableCell>{(c as CheckerCase).customerName ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
+                            {stageLabels[c.stage]}
+                          </Badge>
                         </TableCell>
                         <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
                         <TableCell className="text-right">{renderActions(c)}</TableCell>

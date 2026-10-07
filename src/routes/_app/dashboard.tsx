@@ -22,10 +22,12 @@ import { pageMeta } from "@/lib/page-meta";
 import {
   stageLabels,
   stageBadgeVariant,
+  stageColors,
   isEngineerCasePending,
   isMakerCasePending,
   isUploaderCasePending,
 } from "@/lib/case-format";
+import { cn } from "@/lib/utils";
 import {
   api_listCases,
   api_listMyCases,
@@ -289,7 +291,9 @@ function Page() {
                     {STAGE_ORDER.filter((stage) => (stats.byStage.get(stage) ?? 0) > 0).map(
                       (stage) => (
                         <li key={stage} className="flex items-center justify-between py-2.5">
-                          <Badge variant={stageBadgeVariant[stage]}>{stageLabels[stage]}</Badge>
+                          <Badge className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0")}>
+                            {stageLabels[stage]}
+                          </Badge>
                           <span className="text-sm font-medium tabular-nums">
                             {stats.byStage.get(stage) ?? 0}
                           </span>
@@ -329,7 +333,9 @@ function Page() {
                             {formatDisplayDate(c.createdAt)}
                           </p>
                         </div>
-                        <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                        <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
+                          {stageLabels[c.stage]}
+                        </Badge>
                       </button>
                     </li>
                   ))}

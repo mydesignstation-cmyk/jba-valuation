@@ -32,7 +32,8 @@ import { SearchInput } from "@/components/app/SearchInput";
 import { CaseListCard } from "@/components/app/CaseListCard";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant, isEngineerCasePending } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, stageColors, isEngineerCasePending } from "@/lib/case-format";
+import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/date-format";
 import type { ValuationCase } from "@/types";
 
@@ -212,7 +213,9 @@ function Page() {
                   <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
                   <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
                   <TableCell>
-                    <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                    <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
+                      {stageLabels[c.stage]}
+                    </Badge>
                   </TableCell>
                   <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
                 </TableRow>

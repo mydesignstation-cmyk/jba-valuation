@@ -17,7 +17,8 @@ import { SearchInput } from "@/components/app/SearchInput";
 import { CaseListCard } from "@/components/app/CaseListCard";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, stageColors } from "@/lib/case-format";
+import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/date-format";
 import { getSessionToken } from "@/lib/auth-client";
 import { api_listMakerCases } from "@/data/case.functions";
@@ -168,7 +169,9 @@ function Page() {
                         <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge variant={stageBadgeVariant[c.stage]}>{stageLabels[c.stage]}</Badge>
+                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
+                            {stageLabels[c.stage]}
+                          </Badge>
                         </TableCell>
                         <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
                       </TableRow>
