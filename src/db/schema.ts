@@ -83,6 +83,10 @@ export const cases = pgTable(
     // FK) since users live in the neon_auth schema.
     uploaded_by_id: uuid("uploaded_by_id"),
     stage: varchar("stage", { length: 50 }).notNull().default("CREATED"),
+    // Hold metadata: nullable until a case is placed on hold.
+    held_from_stage: varchar("held_from_stage", { length: 50 }),
+    held_by_id: uuid("held_by_id"),
+    held_at: timestamp("held_at", { withTimezone: true }),
     created_by_id: uuid("created_by_id"),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),

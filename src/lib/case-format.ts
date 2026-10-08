@@ -6,6 +6,7 @@ export const stageLabels: Record<CaseStage, string> = {
   ASSIGNED: "Assigned",
   FIELD_VISIT_PENDING: "Field Visit Pending",
   FIELD_VISIT_SUBMITTED: "Field Visit Submitted",
+  HOLD: "On Hold",
   MAKER_ASSIGNED: "Maker Assigned",
   MAKER_PENDING: "Maker Pending",
   MAKER_COMPLETED: "Maker Completed",
@@ -21,6 +22,7 @@ export const stageBadgeVariant: Record<CaseStage, "default" | "secondary" | "out
   ASSIGNED: "secondary",
   FIELD_VISIT_PENDING: "secondary",
   FIELD_VISIT_SUBMITTED: "secondary",
+  HOLD: "outline",
   MAKER_ASSIGNED: "secondary",
   MAKER_PENDING: "secondary",
   MAKER_COMPLETED: "secondary",
@@ -36,6 +38,7 @@ export const stageColors: Record<CaseStage, { bg: string; text: string }> = {
   ASSIGNED: { bg: "bg-blue-100", text: "text-blue-700" },
   FIELD_VISIT_PENDING: { bg: "bg-orange-100", text: "text-orange-700" },
   FIELD_VISIT_SUBMITTED: { bg: "bg-green-100", text: "text-green-700" },
+  HOLD: { bg: "bg-red-100", text: "text-red-700" },
   MAKER_ASSIGNED: { bg: "bg-purple-100", text: "text-purple-700" },
   MAKER_PENDING: { bg: "bg-purple-100", text: "text-purple-700" },
   MAKER_COMPLETED: { bg: "bg-purple-200", text: "text-purple-800" },
@@ -127,6 +130,9 @@ const STAGE_POSITION: Record<CaseStage, number> = {
   // the case now waits on the Checker to assign a Maker, so the first Checker
   // milestone (CHECKER_ASSIGN, index 1) becomes current.
   FIELD_VISIT_SUBMITTED: 1,
+  // Held cases retain their prior stage in held_from_stage; this fallback keeps
+  // the shared milestone formatter total until Hold/Resume behavior is wired.
+  HOLD: 1,
   // Checker assigned a Maker: CHECKER_ASSIGN done, Maker (index 2) current.
   MAKER_ASSIGNED: 2,
   MAKER_PENDING: 2,

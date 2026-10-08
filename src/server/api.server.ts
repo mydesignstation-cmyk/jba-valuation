@@ -757,6 +757,11 @@ function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
     checkedById: row.checked_by_id || "",
     uploadedById: row.uploaded_by_id || "",
     stage: row.stage as ValuationCase["stage"],
+    ...(row.held_from_stage
+      ? { heldFromStage: row.held_from_stage as ValuationCase["stage"] }
+      : {}),
+    ...(row.held_by_id ? { heldById: row.held_by_id } : {}),
+    ...(row.held_at ? { heldAt: toISO(row.held_at) } : {}),
     createdById: row.created_by_id || "",
     createdAt: toISO(row.created_at),
     updatedAt: toISO(row.updated_at),

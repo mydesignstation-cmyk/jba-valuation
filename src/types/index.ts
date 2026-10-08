@@ -10,6 +10,7 @@ export type CaseStage =
   | "ASSIGNED"
   | "FIELD_VISIT_PENDING"
   | "FIELD_VISIT_SUBMITTED"
+  | "HOLD"
   // Set when a Checker assigns a Maker to a case whose field visit is submitted.
   | "MAKER_ASSIGNED"
   | "MAKER_PENDING"
@@ -71,6 +72,12 @@ export interface ValuationCase {
   /** Neon Auth UUID of the Uploader/admin who marked the upload completed. Empty until then. */
   uploadedById: string;
   stage: CaseStage;
+  /** Stage to restore when a held case is resumed. */
+  heldFromStage?: CaseStage;
+  /** Neon Auth UUID of the user who placed the case on hold. */
+  heldById?: string;
+  /** Timestamp when the case was placed on hold. */
+  heldAt?: string;
   createdById: string;
   createdAt: string;
   updatedAt: string;
