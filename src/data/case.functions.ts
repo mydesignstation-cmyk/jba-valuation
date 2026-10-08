@@ -22,6 +22,8 @@ import {
   api_listUploaderCases as db_listUploaderCases,
   api_listUploaderDashboardCases as db_listUploaderDashboardCases,
   api_markUploadCompleted as db_markUploadCompleted,
+  api_holdCase as db_holdCase,
+  api_resumeCase as db_resumeCase,
 } from "@/server/api.server";
 import type { ValuationCase } from "@/types";
 
@@ -50,6 +52,8 @@ type ReassignSiteEngineerInput = { token: string; caseId: string; engineerId: st
 type SubmitToCheckerInput = { token: string; caseId: string };
 type SubmitToUploaderInput = { token: string; caseId: string };
 type MarkUploadCompletedInput = { token: string; caseId: string };
+type HoldCaseInput = { token: string; caseId: string };
+type ResumeCaseInput = { token: string; caseId: string };
 
 const listCasesFn = createServerFn({ method: "GET" }).handler(() => db_listCases());
 
@@ -99,6 +103,14 @@ const listUploaderDashboardCasesFn = createServerFn({ method: "GET" })
 const markUploadCompletedFn = createServerFn({ method: "POST" })
   .validator((input: MarkUploadCompletedInput) => input)
   .handler(({ data }) => db_markUploadCompleted(data.token, data.caseId));
+
+const holdCaseFn = createServerFn({ method: "POST" })
+  .validator((input: HoldCaseInput) => input)
+  .handler(({ data }) => db_holdCase(data.token, data.caseId));
+
+const resumeCaseFn = createServerFn({ method: "POST" })
+  .validator((input: ResumeCaseInput) => input)
+  .handler(({ data }) => db_resumeCase(data.token, data.caseId));
 
 const getCaseFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
@@ -230,4 +242,14 @@ export function api_listUploaderDashboardCases(token: string): Promise<Valuation
  */
 export function api_markUploadCompleted(token: string, caseId: string): Promise<ValuationCase> {
   return markUploadCompletedFn({ data: { token, caseId } });
+}
+
+/** Place a case on hold from an allowed active stage. */
+export function api_holdCase(token: string, caseId: string): Promise<ValuationCase> {
+  return holdCaseFn({ data: { token, caseId } });
+}
+
+/** Resume a held case to the exact stage it had before Hold. */
+export function api_resumeCase(token: string, caseId: string): Promise<ValuationCase> {
+  return resumeCaseFn({ data: { token, caseId } });
 }

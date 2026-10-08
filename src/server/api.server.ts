@@ -2570,3 +2570,81 @@ function mapMakerValuationRow(rawRow: typeof makerValuations.$inferSelect): Make
     createdAt: row.created_at ?? "",
   };
 }
+
+
+const HOLDABLE_CASE_STAGES = [
+  "FIELD_VISIT_SUBMITTED",
+  "MAKER_ASSIGNED",
+  "MAKER_PENDING",
+  "MAKER_COMPLETED",
+  "CHECKER_PENDING",
+  "CHECKER_COMPLETED",
+] as const;
+
+/** Place a case on hold while preserving its exact prior stage and actor metadata. */
+export async function api_holdCase(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<ValuationCase> {
+  const actor = await requireServerUser(token, "MAKER", "CHECKER", "ADMIN", "SUPER_ADMIN");
+  const now = new Date();
+
+  const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const current = rows[0];
+  if (!current) throw new Error("Case not found");
+
+  if (actor.role === "MAKER" && current.assigned_maker_id !== actor.id) {
+    throw new Error("Forbidden");
+  }
+  if (!(HOLDABLE_CASE_STAGES as readonly string[]).includes(current.stage)) {
+    throw new Error("This case cannot be placed on hold at its current stage");
+  }
+
+  const updated = await getDb()
+    .update(cases)
+    .set({
+      stage: "HOLD",
+      held_from_stage: current.stage,
+      held_by_id: actor.id,
+      held_at: now,
+      updated_at: now,
+    })
+    .where(and(eq(cases.id, caseId), eq(cases.stage, current.stage)))
+    .returning();
+
+  if (!updated[0]) throw new Error("This case changed before it could be placed on hold");
+  return mapCaseRow(updated[0]);
+}
+
+/** Resume a held case to the stage captured when it was placed on hold. */
+export async function api_resumeCase(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<ValuationCase> {
+  const actor = await requireServerUser(token, "MAKER", "CHECKER", "ADMIN", "SUPER_ADMIN");
+  const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const current = rows[0];
+  if (!current) throw new Error("Case not found");
+  if (actor.role === "MAKER" && current.assigned_maker_id !== actor.id) {
+    throw new Error("Forbidden");
+  }
+  if (current.stage !== "HOLD" || !current.held_from_stage) {
+    throw new Error("This case is not on hold");
+  }
+
+  const now = new Date();
+  const updated = await getDb()
+    .update(cases)
+    .set({
+      stage: current.held_from_stage,
+      held_from_stage: null,
+      held_by_id: null,
+      held_at: null,
+      updated_at: now,
+    })
+    .where(and(eq(cases.id, caseId), eq(cases.stage, "HOLD")))
+    .returning();
+
+  if (!updated[0]) throw new Error("This case changed before it could be resumed");
+  return mapCaseRow(updated[0]);
+}
