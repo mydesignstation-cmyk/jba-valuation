@@ -201,7 +201,7 @@ function Page() {
                   type="button"
                   variant="outline"
                   size="sm"
-                  className="w-fit"
+                  className="hidden w-fit"
                   onClick={() => setIsEditing(true)}
                 >
                   <PenLine className="mr-2 h-4 w-4" />
