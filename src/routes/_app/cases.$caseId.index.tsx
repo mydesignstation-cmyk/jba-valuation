@@ -70,7 +70,7 @@ import { requirePermission } from "@/lib/route-guard";
 import { getSessionToken, useCurrentUser } from "@/lib/auth-client";
 import { can } from "@/lib/permissions";
 import { pageMeta } from "@/lib/page-meta";
-import { stageLabels, stageBadgeVariant, stageColors, isMakerCasePending } from "@/lib/case-format";
+import { stageLabels, stageBadgeVariant, stageColors, isMakerCasePending, HOLDABLE_CASE_STAGES } from "@/lib/case-format";
 import { cn } from "@/lib/utils";
 import {
   api_getCase,
@@ -79,6 +79,8 @@ import {
   api_submitToChecker,
   api_submitToUploader,
   api_markUploadCompleted,
+  api_holdCase,
+  api_resumeCase,
 } from "@/data/case.functions";
 import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
@@ -480,6 +482,35 @@ function Page() {
   // Keep mutation hooks above the loading/error returns so every render uses
   // the same hook order. The route id is stable before the case query resolves.
   const mutationCaseId = valuationCase?.id ?? caseId;
+
+  const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
+  const canResume = valuationCase?.stage === "HOLD";
+
+  const holdCase = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_holdCase(token, mutationCaseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      toast.success("Case placed on hold");
+    },
+    onError: (error) => toast.error((error as Error).message || "Failed to place case on hold"),
+  });
+
+  const resumeCase = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_resumeCase(token, mutationCaseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      toast.success("Case resumed");
+    },
+    onError: (error) => toast.error((error as Error).message || "Failed to resume case"),
+  });
 
   // Maker action: hand the case to the Checker for review. Advances the stage
   // to CHECKER_PENDING; the server enforces the assigned-maker + stage rules.
@@ -1054,14 +1085,28 @@ function Page() {
                   }}
                   headerAction={
                     isAdminOrSuperAdmin ? (
-                      <Button
-                        type="button"
-                        size="sm"
-                        className="w-fit bg-red-600 text-white hover:bg-red-700"
-                      >
-                        <Hand className="mr-2 h-4 w-4" />
-                        Hold
-                      </Button>
+                      canResume ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="w-fit bg-green-600 text-white hover:bg-green-700"
+                          onClick={() => resumeCase.mutate()}
+                          disabled={resumeCase.isPending}
+                        >
+                          Resume
+                        </Button>
+                      ) : canHold ? (
+                        <Button
+                          type="button"
+                          size="sm"
+                          className="w-fit bg-red-600 text-white hover:bg-red-700"
+                          onClick={() => holdCase.mutate()}
+                          disabled={holdCase.isPending}
+                        >
+                          <Hand className="mr-2 h-4 w-4" />
+                          Hold
+                        </Button>
+                      ) : undefined
                     ) : undefined
                   }
                 />

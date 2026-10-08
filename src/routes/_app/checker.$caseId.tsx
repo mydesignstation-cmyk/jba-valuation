@@ -20,10 +20,11 @@ import {
 } from "@/components/ui/alert-dialog";
 import { requirePermission } from "@/lib/route-guard";
 import { pageMeta } from "@/lib/page-meta";
+import { HOLDABLE_CASE_STAGES } from "@/lib/case-format";
 import { getSessionToken } from "@/lib/auth-client";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { FieldVisitWizard, useAutoFill } from "@/routes/_app/cases.$caseId.field-visit";
-import { api_getCase, api_submitToUploader } from "@/data/case.functions";
+import { api_getCase, api_holdCase, api_resumeCase, api_submitToUploader } from "@/data/case.functions";
 import { api_getCaseFieldVisit, api_updateFieldVisitByChecker } from "@/data/fieldVisit.functions";
 import { api_getSiteEngineer, api_getMaker, api_getChecker } from "@/data/user.functions";
 
@@ -85,6 +86,35 @@ function Page() {
 
   // Checker can only edit while the case is at CHECKER_PENDING.
   const canEdit = !!valuationCase && valuationCase.stage === "CHECKER_PENDING";
+  const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
+  const canResume = valuationCase?.stage === "HOLD";
+
+  const holdCase = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_holdCase(token, caseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      toast.success("Case placed on hold");
+    },
+    onError: (error) => toast.error((error as Error).message || "Failed to place case on hold"),
+  });
+
+  const resumeCase = useMutation({
+    mutationFn: async () => {
+      const token = await getSessionToken();
+      if (!token) throw new Error("Not authenticated");
+      return api_resumeCase(token, caseId);
+    },
+    onSuccess: (updatedCase) => {
+      queryClient.setQueryData(["cases", caseId], updatedCase);
+      toast.success("Case resumed");
+    },
+    onError: (error) => toast.error((error as Error).message || "Failed to resume case"),
+  });
+
   const canSubmitToUploader = canEdit && !!fieldVisit;
 
   const submitToUploader = useMutation({
@@ -195,16 +225,30 @@ function Page() {
           updatedByName={makerEditor?.name ?? undefined}
           checkerUpdatedByName={checkerEditor?.name ?? undefined}
           headerAction={
-            canEdit ? (
+            canEdit || canResume ? (
               <div className="flex flex-col gap-2 sm:flex-row">
-                <Button
-                  type="button"
-                  size="sm"
-                  className="w-fit bg-red-600 text-white hover:bg-red-700"
-                >
-                  <Hand className="mr-2 h-4 w-4" />
-                  Hold
-                </Button>
+                {canResume ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="w-fit bg-green-600 text-white hover:bg-green-700"
+                    onClick={() => resumeCase.mutate()}
+                    disabled={resumeCase.isPending}
+                  >
+                    Resume
+                  </Button>
+                ) : canHold ? (
+                  <Button
+                    type="button"
+                    size="sm"
+                    className="w-fit bg-red-600 text-white hover:bg-red-700"
+                    onClick={() => holdCase.mutate()}
+                    disabled={holdCase.isPending}
+                  >
+                    <Hand className="mr-2 h-4 w-4" />
+                    Hold
+                  </Button>
+                ) : null}
                 {canSubmitToUploader && (
                   <Button
                     type="button"

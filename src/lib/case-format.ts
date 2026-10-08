@@ -1,5 +1,14 @@
 import type { CaseStage } from "@/types";
 
+export const HOLDABLE_CASE_STAGES: readonly CaseStage[] = [
+  "FIELD_VISIT_SUBMITTED",
+  "MAKER_ASSIGNED",
+  "MAKER_PENDING",
+  "MAKER_COMPLETED",
+  "CHECKER_PENDING",
+  "CHECKER_COMPLETED",
+];
+
 /** Human-readable labels for case stages, shared across case views. */
 export const stageLabels: Record<CaseStage, string> = {
   CREATED: "Created",
