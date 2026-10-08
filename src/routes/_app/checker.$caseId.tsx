@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, PenLine, Send } from "lucide-react";
+import { ArrowLeft, Hand, Send } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -199,13 +199,11 @@ function Page() {
               <div className="flex flex-col gap-2 sm:flex-row">
                 <Button
                   type="button"
-                  variant="outline"
                   size="sm"
-                  className="hidden w-fit"
-                  onClick={() => setIsEditing(true)}
+                  className="w-fit bg-red-600 text-white hover:bg-red-700"
                 >
-                  <PenLine className="mr-2 h-4 w-4" />
-                  Edit Field Visit
+                  <Hand className="mr-2 h-4 w-4" />
+                  Hold
                 </Button>
                 {canSubmitToUploader && (
                   <Button

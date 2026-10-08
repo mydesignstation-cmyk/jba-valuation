@@ -23,6 +23,7 @@ import {
   Compass,
   FileText,
   GitBranch,
+  Hand,
   Hash,
   Home,
   Landmark,
@@ -330,6 +331,7 @@ function Page() {
   // internal to the admin flow, so hide it for that role. Both tabs (overview
   // and field visit) are shown to everyone.
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
+  const isAdminOrSuperAdmin = currentUser?.role === "ADMIN" || currentUser?.role === "SUPER_ADMIN";
   const isChecker = currentUser?.role === "CHECKER";
   const isMaker = currentUser?.role === "MAKER";
   const isUploader = currentUser?.role === "UPLOADER";
@@ -1050,6 +1052,18 @@ function Page() {
                     customerName,
                     address: customer?.address ?? "—",
                   }}
+                  headerAction={
+                    isAdminOrSuperAdmin ? (
+                      <Button
+                        type="button"
+                        size="sm"
+                        className="w-fit bg-red-600 text-white hover:bg-red-700"
+                      >
+                        <Hand className="mr-2 h-4 w-4" />
+                        Hold
+                      </Button>
+                    ) : undefined
+                  }
                 />
               ) : (
                 <EmptyState
