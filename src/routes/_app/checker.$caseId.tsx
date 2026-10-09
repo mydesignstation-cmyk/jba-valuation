@@ -226,7 +226,7 @@ function Page() {
           checkerUpdatedByName={checkerEditor?.name ?? undefined}
           headerAction={
             canEdit || canResume ? (
-              <div className="flex flex-col gap-2 sm:flex-row">
+              <div className="flex flex-row flex-wrap gap-2">
                 {canResume ? (
                   <Button
                     type="button"

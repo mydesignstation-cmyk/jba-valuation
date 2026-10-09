@@ -176,7 +176,7 @@ export function SubmittedFieldVisit({
               )}
             </div>
           </div>
-          <div className="flex flex-col items-start gap-2 sm:items-end">
+          <div className="flex flex-row flex-wrap items-center justify-end gap-2">
             <Badge variant="secondary" className="w-fit">
               Read-only
             </Badge>
