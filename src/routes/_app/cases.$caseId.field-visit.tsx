@@ -1414,6 +1414,14 @@ function Page() {
   const backTo = listsAllCases ? "/cases" : "/my-cases";
   const backLabel = listsAllCases ? "Cases" : "My Cases";
   const engineerName = currentUser?.name ?? "—";
+  const [isEditing, setIsEditing] = useState(false);
+
+  const { data: valuationCase } = useQuery({
+    queryKey: ["cases", caseId],
+    queryFn: () => api_getCase(caseId),
+    enabled: !!caseId,
+  });
+  const canEditHeldVisit = currentUser?.role === "SITE_ENGINEER" && valuationCase?.stage === "HOLD";
 
   const autoFill = useAutoFill(caseId);
 
@@ -1493,8 +1501,34 @@ function Page() {
   return (
     <div className="space-y-6">
       {header}
-      {fieldVisit ? (
-        <SubmittedFieldVisit visit={fieldVisit} autoFill={autoFill} engineerName={engineerName} />
+      {fieldVisit && !isEditing ? (
+        <SubmittedFieldVisit
+          visit={fieldVisit}
+          autoFill={autoFill}
+          engineerName={engineerName}
+          headerAction={
+            canEditHeldVisit ? (
+              <Button type="button" variant="outline" size="sm" onClick={() => setIsEditing(true)}>
+                Edit Field Visit
+              </Button>
+            ) : undefined
+          }
+        />
+      ) : fieldVisit && isEditing ? (
+        <FieldVisitWizard
+          caseId={caseId}
+          autoFill={autoFill}
+          engineerName={engineerName}
+          mode="edit"
+          initialVisit={fieldVisit}
+          onSubmitted={(visit) => {
+            setIsEditing(false);
+            queryClient.setQueryData(["field-visit", caseId], visit);
+            queryClient.invalidateQueries({ queryKey: ["field-visit", caseId] });
+            queryClient.invalidateQueries({ queryKey: ["case-field-visit", caseId] });
+            queryClient.invalidateQueries({ queryKey: ["cases", caseId] });
+          }}
+        />
       ) : (
         <FieldVisitWizard
           caseId={caseId}

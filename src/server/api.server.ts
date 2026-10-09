@@ -1590,13 +1590,21 @@ async function requireMakerCase(
   token: string | null | undefined,
   caseId: string,
 ): Promise<{ makerId: string }> {
-  const user = await requireServerUser(token, "MAKER");
+  const user = await requireServerUser(token, "MAKER", "SITE_ENGINEER");
 
   const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
   const row = rows[0];
   if (!row) {
     throw new Error("Case not found");
   }
+
+  if (user.role === "SITE_ENGINEER") {
+    if (row.assigned_engineer_id !== user.id || row.stage !== "HOLD") {
+      throw new Error("Forbidden");
+    }
+    return { makerId: user.id };
+  }
+
   if (row.assigned_maker_id !== user.id) {
     // Do not leak whether the case exists for someone else.
     throw new Error("Forbidden");
