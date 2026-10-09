@@ -65,7 +65,7 @@ export const stageColors: Record<CaseStage, { bg: string; text: string }> = {
  * for that split, shared by My Cases and the engineer dashboard.
  */
 export function isEngineerCasePending(stage: CaseStage): boolean {
-  return stage === "CREATED" || stage === "ASSIGNED" || stage === "FIELD_VISIT_PENDING";
+  return stage === "CREATED" || stage === "ASSIGNED" || stage === "FIELD_VISIT_PENDING" || stage === "HOLD";
 }
 
 /**
