@@ -6,7 +6,7 @@
 
 import { getDb } from "@/db";
 import { customers, banks, branches, cases, fieldVisits, makerValuations } from "@/db/schema";
-import { and, eq, inArray, sql } from "drizzle-orm";
+import { and, desc, eq, inArray, sql } from "drizzle-orm";
 import type {
   Customer,
   Bank,
@@ -770,7 +770,7 @@ function mapCaseRow(row: typeof cases.$inferSelect): ValuationCase {
 
 export async function api_listCases(): Promise<ValuationCase[]> {
   try {
-    const rows = await getDb().select().from(cases).orderBy(cases.created_at);
+    const rows = await getDb().select().from(cases).orderBy(desc(cases.updated_at));
     return rows.map(mapCaseRow);
   } catch (error) {
     console.error("Failed to list cases:", error);
@@ -969,7 +969,7 @@ export async function api_listCheckerCases(
       .leftJoin(banks, eq(cases.bank_id, banks.id))
       .leftJoin(branches, eq(cases.branch_id, branches.id))
       .where(inArray(cases.stage, [...CHECKER_QUEUE_STAGES]))
-      .orderBy(cases.created_at);
+      .orderBy(desc(cases.updated_at));
 
     return rows.map((row) => {
       const baseCase = mapCaseRow(row.case);
@@ -1003,7 +1003,7 @@ export async function api_listMakerCases(
       .select()
       .from(cases)
       .where(eq(cases.assigned_maker_id, user.id))
-      .orderBy(cases.created_at);
+      .orderBy(desc(cases.updated_at));
 
     return rows.map(mapCaseRow);
   } catch (error) {
