@@ -1084,7 +1084,7 @@ function Page() {
                     address: customer?.address ?? "—",
                   }}
                   headerAction={
-                    isAdminOrSuperAdmin ? (
+                    (isAdminOrSuperAdmin || isMaker || isChecker) ? (
                       canResume ? (
                         <Button
                           type="button"
