@@ -147,14 +147,11 @@ export function SubmittedFieldVisit({
 
   const submittedOn = visit.submittedAt ? fmt(visit.submittedAt) : null;
 
-  // Show the Maker edit-audit line only when a maker actually edited after submission.
-  const makerEdited =
-    !!visit.updatedById &&
-    (!visit.submittedAt || new Date(visit.updatedAt) > new Date(visit.submittedAt));
-  const makerUpdatedOn = makerEdited ? fmt(visit.updatedAt) : null;
-
-  // Checker attribution: show independently of maker edit.
-  const checkerUpdatedOn = visit.checkerUpdatedById ? fmt(visit.updatedAt) : null;
+  // Show the last saved edit time after the original submission.
+  const lastEditedOn =
+    visit.submittedAt && new Date(visit.updatedAt) > new Date(visit.submittedAt)
+      ? fmt(visit.updatedAt)
+      : null;
 
   return (
     <div>
@@ -172,18 +169,9 @@ export function SubmittedFieldVisit({
                 <span className="font-medium text-foreground">{engineerName || "—"}</span>
                 {submittedOn ? ` on ${submittedOn}` : ""}
               </p>
-              {makerUpdatedOn && (
+              {lastEditedOn && (
                 <p className="text-sm text-muted-foreground">
-                  Updated by{" "}
-                  <span className="font-medium text-foreground">{updatedByName || "—"}</span>
-                  {` on ${makerUpdatedOn}`}
-                </p>
-              )}
-              {checkerUpdatedOn && (
-                <p className="text-sm text-muted-foreground">
-                  Reviewed by{" "}
-                  <span className="font-medium text-foreground">{checkerUpdatedByName || "—"}</span>
-                  {` on ${checkerUpdatedOn}`}
+                  Last edited on <span className="font-medium text-foreground">{lastEditedOn}</span>
                 </p>
               )}
             </div>
