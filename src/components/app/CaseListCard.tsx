@@ -14,9 +14,9 @@ interface CaseListCardProps {
   branchName: string;
   /** Optional, shown on the admin Cases list where an engineer is assigned. */
   engineerName?: string;
+  stage: CaseStage;
   /** Shows a green check and "Field Visit" for submitted visits. */
   fieldVisitIconLabel?: boolean;
-  stage: CaseStage;
   createdAt: string | Date;
   onOpen: () => void;
   /** Optional actions slot (e.g. the row actions dropdown on the admin list). */
@@ -25,9 +25,9 @@ interface CaseListCardProps {
 
 /**
  * A compact, tappable case card for mobile viewports. Shows the essentials
- * (case number + stage) with the customer as the main line and a single muted
- * supporting line (bank · branch · engineer · date). Long values truncate so
- * the layout never overflows on narrow screens.
+ * (case number + stage) with the customer as the main line and bank/branch as
+ * a compact two-line detail. Long values truncate so the layout never overflows
+ * on narrow screens.
  */
 export function CaseListCard({
   caseNumber,
@@ -36,13 +36,12 @@ export function CaseListCard({
   bankName,
   branchName,
   engineerName,
-  fieldVisitIconLabel = false,
   stage,
+  fieldVisitIconLabel = false,
   createdAt,
   onOpen,
   actions,
 }: CaseListCardProps) {
-  const supporting = [bankName, branchName, engineerName].filter((v) => v && v !== "—").join(" · ");
   const created = formatDisplayDate(createdAt);
 
   return (
@@ -69,7 +68,7 @@ export function CaseListCard({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Badge className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0")}>
+          <Badge className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0 hover:brightness-90")}>
             {fieldVisitIconLabel && stage === "FIELD_VISIT_SUBMITTED" ? (
               <span className="flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
@@ -85,8 +84,13 @@ export function CaseListCard({
 
       <p className="truncate text-sm font-medium">{customerName}</p>
 
+      <div className="min-w-0">
+        <p className="truncate text-xs font-medium">{bankName}</p>
+        <p className="truncate text-xs text-muted-foreground">{branchName}</p>
+      </div>
+
       <p className="truncate text-xs text-muted-foreground">
-        {supporting ? `${supporting} · ${created}` : created}
+        {[engineerName, created].filter((v) => v && v !== "—").join(" · ")}
       </p>
     </div>
   );

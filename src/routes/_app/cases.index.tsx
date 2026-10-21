@@ -11,10 +11,10 @@ import {
   FileText,
   User as UserIcon,
   Landmark,
-  GitBranch,
   HardHat,
   Activity,
   CalendarClock,
+  CheckCircle2,
 } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -301,6 +301,7 @@ function Page() {
                     branchName={branchName.get(c.branchId) ?? "—"}
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
                     stage={c.stage}
+                    fieldVisitIconLabel
                     createdAt={c.createdAt}
                     onOpen={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
                     actions={renderActions(c)}
@@ -337,12 +338,7 @@ function Page() {
                           Bank
                         </span>
                       </TableHead>
-                      <TableHead>
-                        <span className="flex items-center gap-1.5">
-                          <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
-                          Branch
-                        </span>
-                      </TableHead>
+
                       <TableHead>
                         <span className="flex items-center gap-1.5">
                           <HardHat className="h-3.5 w-3.5 text-muted-foreground" />
@@ -379,12 +375,23 @@ function Page() {
                         </TableCell>
                         <TableCell>{c.requestNumber}</TableCell>
                         <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                        <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                        <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
+                        <TableCell>
+                          <div className="min-w-0">
+                            <p className="truncate">{bankName.get(c.bankId) ?? "—"}</p>
+                            <p className="truncate text-xs text-muted-foreground">{branchName.get(c.branchId) ?? "—"}</p>
+                          </div>
+                        </TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
-                            {stageLabels[c.stage]}
+                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0 hover:brightness-90")}>
+                            {c.stage === "FIELD_VISIT_SUBMITTED" ? (
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                Field Visit
+                              </span>
+                            ) : (
+                              stageLabels[c.stage]
+                            )}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
