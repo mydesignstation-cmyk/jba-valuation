@@ -23,7 +23,7 @@ import {
   createMakerValuationSchema,
   type CreateMakerValuationInput,
 } from "@/schemas/makerValuation.schema";
-import { buildFieldVisitPdf } from "@/server/fieldVisitPdf.server";
+import { buildFieldVisitPdf, bytesToBase64 } from "@/server/fieldVisitPdf.server";
 import { generateMakerValuationPdf } from "@/server/makerValuationPdf.server";
 import { makerValuationSections } from "@/lib/makerValuationFields";
 
@@ -2157,7 +2157,7 @@ export async function api_getFieldVisitPdf(caseId: string): Promise<FieldVisitPd
     });
 
     // Base64-encode for JSON transport (createServerFn is JSON-only).
-    const base64 = Buffer.from(bytes).toString("base64");
+    const base64 = bytesToBase64(bytes);
 
     // Filesystem-safe filename derived from the case number.
     const safeCaseNumber = (caseRow.case_number || "field-visit").replace(/[^\w.-]+/g, "_");

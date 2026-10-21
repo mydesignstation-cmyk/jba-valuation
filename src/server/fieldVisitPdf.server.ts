@@ -52,6 +52,26 @@ const COLOR_BAND = rgb(0.93, 0.95, 0.98);
 
 const EM_DASH = "\u2014";
 
+/** Decode base64 without relying on Node's Buffer global. */
+function base64ToBytes(base64: string): Uint8Array {
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+}
+
+/** Encode bytes as base64 without relying on Node's Buffer global. */
+export function bytesToBase64(bytes: Uint8Array): string {
+  const chunkSize = 0x8000;
+  let binary = "";
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    binary += String.fromCharCode(...bytes.subarray(i, i + chunkSize));
+  }
+  return btoa(binary);
+}
+
 /** Coerce any optional value to a display string, using an em dash when empty. */
 function show(value: unknown): string {
   if (value === undefined || value === null) return EM_DASH;
@@ -119,8 +139,7 @@ class ReportWriter {
 
   async initLogoWatermark() {
     try {
-      const buffer = Buffer.from(LOGO_BASE64, "base64");
-      this.logoImage = await this.doc.embedPng(buffer);
+      this.logoImage = await this.doc.embedPng(base64ToBytes(LOGO_BASE64));
     } catch (error) {
       console.warn(
         "Logo watermark initialization skipped:",
