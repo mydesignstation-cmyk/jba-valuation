@@ -107,9 +107,21 @@ class ReportWriter {
     return writer;
   }
 
+  /** Replace characters unsupported by pdf-lib's standard WinAnsi fonts. */
+  private sanitize(text: string, font: PDFFont): string {
+    return Array.from(text, (character) => {
+      try {
+        font.encodeText(character);
+        return character;
+      } catch {
+        return "?";
+      }
+    }).join("");
+  }
+
   /** Split text into lines that fit within maxWidth at the given font size. */
   private wrap(text: string, font: PDFFont, size: number, maxWidth: number): string[] {
-    const words = text.split(/\s+/);
+    const words = this.sanitize(text, font).split(/\s+/);
     const lines: string[] = [];
     let current = "";
     for (const word of words) {
