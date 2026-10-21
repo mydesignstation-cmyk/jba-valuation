@@ -59,6 +59,8 @@ const STAGE_ORDER: CaseStage[] = [
   "ASSIGNED",
   "FIELD_VISIT_PENDING",
   "FIELD_VISIT_SUBMITTED",
+  "HOLD",
+  "MAKER_ASSIGNED",
   "MAKER_PENDING",
   "MAKER_COMPLETED",
   "CHECKER_PENDING",
@@ -107,8 +109,10 @@ function Page() {
   // pipeline-wide view.
   const isSiteEngineer = currentUser?.role === "SITE_ENGINEER";
   const isMaker = currentUser?.role === "MAKER";
+  const isChecker = currentUser?.role === "CHECKER";
   const isUploader = currentUser?.role === "UPLOADER";
   const isPersonal = isSiteEngineer || isMaker || isUploader;
+  const hideMasterDataCards = isPersonal || isChecker;
 
   const { data: cases = [], isLoading: casesLoading } = useQuery({
     // Reuse the same query keys as the Maker Queue / My Cases views so their
@@ -144,17 +148,17 @@ function Page() {
   const { data: customers = [], isLoading: customersLoading } = useQuery({
     queryKey: ["customers"],
     queryFn: api_listCustomers,
-    enabled: !isPersonal,
+    enabled: !hideMasterDataCards,
   });
   const { data: banks = [], isLoading: banksLoading } = useQuery({
     queryKey: ["banks"],
     queryFn: api_listBanks,
-    enabled: !isPersonal,
+    enabled: !hideMasterDataCards,
   });
   const { data: branches = [], isLoading: branchesLoading } = useQuery({
     queryKey: ["branches"],
     queryFn: api_listBranches,
-    enabled: !isPersonal,
+    enabled: !hideMasterDataCards,
   });
 
   const stats = useMemo(() => {
@@ -237,8 +241,31 @@ function Page() {
           />
         </div>
 
+        {/* Status totals — every case status is shown separately. */}
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+          {STAGE_ORDER.map((stage) => (
+            <Card key={stage} className="shadow-card">
+              <CardContent className="flex items-center justify-between gap-4 p-5">
+                <Badge
+                  variant={stageBadgeVariant[stage]}
+                  className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0")}
+                >
+                  {stageLabels[stage]}
+                </Badge>
+                {casesLoading ? (
+                  <Loader2 className="h-6 w-6 animate-spin text-muted-foreground" />
+                ) : (
+                  <span className="text-3xl font-semibold tracking-tight tabular-nums">
+                    {stats.byStage.get(stage) ?? 0}
+                  </span>
+                )}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+
         {/* Reference totals — org-wide master data, admins only. */}
-        {!isPersonal && (
+        {!hideMasterDataCards && (
           <div className="grid gap-4 sm:grid-cols-3">
             <KpiCard
               label="Customers"
