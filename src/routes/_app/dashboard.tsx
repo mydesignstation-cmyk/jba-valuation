@@ -319,7 +319,14 @@ function Page() {
                           </p>
                         </div>
                         <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
-                          {stageLabels[c.stage]}
+                          {c.stage === "FIELD_VISIT_SUBMITTED" ? (
+                            <span className="flex items-center gap-1">
+                              <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                              Field Visit
+                            </span>
+                          ) : (
+                            stageLabels[c.stage]
+                          )}
                         </Badge>
                       </button>
                     </li>
