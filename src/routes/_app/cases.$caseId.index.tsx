@@ -954,7 +954,7 @@ function Page() {
 
           {/* Case Information — redundant with the header + overview strip, kept
               in the tree but hidden so it's a one-word revert. */}
-          <Card className="hidden">
+          <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
