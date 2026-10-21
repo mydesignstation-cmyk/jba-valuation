@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { CheckCircle2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { formatDisplayDate } from "@/lib/date-format";
@@ -13,6 +14,8 @@ interface CaseListCardProps {
   branchName: string;
   /** Optional, shown on the admin Cases list where an engineer is assigned. */
   engineerName?: string;
+  /** Shows a green check and "Field Visit" for submitted visits. */
+  fieldVisitIconLabel?: boolean;
   stage: CaseStage;
   createdAt: string | Date;
   onOpen: () => void;
@@ -33,6 +36,7 @@ export function CaseListCard({
   bankName,
   branchName,
   engineerName,
+  fieldVisitIconLabel = false,
   stage,
   createdAt,
   onOpen,
@@ -66,7 +70,14 @@ export function CaseListCard({
         </div>
         <div className="flex shrink-0 items-center gap-1">
           <Badge className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0")}>
-            {stageLabels[stage]}
+            {fieldVisitIconLabel && stage === "FIELD_VISIT_SUBMITTED" ? (
+              <span className="flex items-center gap-1">
+                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                Field Visit
+              </span>
+            ) : (
+              stageLabels[stage]
+            )}
           </Badge>
           {actions}
         </div>

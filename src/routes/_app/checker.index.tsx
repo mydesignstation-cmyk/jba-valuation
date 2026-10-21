@@ -9,6 +9,7 @@ import {
   HardHat,
   Activity,
   CalendarClock,
+  CheckCircle2,
 } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -154,7 +155,7 @@ function Page() {
     <div className="space-y-6">
       <PageHeader
         title="My Cases"
-        description="Cases with a submitted field visit, ready for Maker assignment."
+        description="Cases with a field visit, ready for Maker assignment."
         actions={
           <SearchInput placeholder="Search cases..." value={search} onValueChange={setSearch} />
         }
@@ -182,7 +183,7 @@ function Page() {
               <p className="text-muted-foreground mt-2">
                 {search
                   ? "Try adjusting your search terms"
-                  : "Cases with a submitted field visit will appear here."}
+                  : "Cases with a field visit will appear here."}
               </p>
             </div>
           ) : (
@@ -198,6 +199,7 @@ function Page() {
                     bankName=""
                     branchName=""
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
+                    fieldVisitIconLabel
                     stage={c.stage}
                     createdAt={c.createdAt}
                     onOpen={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
@@ -267,7 +269,14 @@ function Page() {
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
                           <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
-                            {stageLabels[c.stage]}
+                            {c.stage === "FIELD_VISIT_SUBMITTED" ? (
+                              <span className="flex items-center gap-1">
+                                <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
+                                Field Visit
+                              </span>
+                            ) : (
+                              stageLabels[c.stage]
+                            )}
                           </Badge>
                         </TableCell>
                         <TableCell>{formatDisplayDate(c.createdAt)}</TableCell>
