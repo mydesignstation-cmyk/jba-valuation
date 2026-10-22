@@ -5,7 +5,6 @@ import {
   FileText,
   User as UserIcon,
   Landmark,
-  GitBranch,
   Activity,
   CalendarClock,
 } from "lucide-react";
@@ -175,12 +174,7 @@ function Page() {
                     Bank
                   </span>
                 </TableHead>
-                <TableHead>
-                  <span className="flex items-center gap-1.5">
-                    <GitBranch className="h-3.5 w-3.5 text-muted-foreground" />
-                    Branch
-                  </span>
-                </TableHead>
+
                 <TableHead>
                   <span className="flex items-center gap-1.5">
                     <Activity className="h-3.5 w-3.5 text-muted-foreground" />
@@ -210,8 +204,12 @@ function Page() {
                   </TableCell>
                   <TableCell>{c.requestNumber}</TableCell>
                   <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                  <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                  <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
+                  <TableCell>
+                    <div className="min-w-0">
+                      <p className="truncate">{bankName.get(c.bankId) ?? "—"}</p>
+                      <p className="truncate text-xs text-muted-foreground">{branchName.get(c.branchId) ?? "—"}</p>
+                    </div>
+                  </TableCell>
                   <TableCell>
                     <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
                       {stageLabels[c.stage]}

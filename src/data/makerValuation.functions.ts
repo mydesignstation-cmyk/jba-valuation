@@ -8,6 +8,7 @@ import {
   api_createMakerValuation as db_create,
   api_getMakerValuation as db_get,
   api_downloadMakerValuationPdf as db_download,
+  api_downloadMakerValuationReport as db_downloadReport,
 } from "@/server/api.server";
 import { getSessionToken } from "@/lib/auth-client";
 import type { MakerValuation } from "@/types";
@@ -32,6 +33,10 @@ const downloadMakerValuationPdfFn = createServerFn({ method: "GET" })
   .validator((caseId: string) => caseId)
   .handler(({ data }) => db_download(data));
 
+const downloadMakerValuationReportFn = createServerFn({ method: "GET" })
+  .validator((caseId: string) => caseId)
+  .handler(({ data }) => db_downloadReport(data));
+
 export async function api_createMakerValuation(
   input: CreateMakerValuationInput,
 ): Promise<MakerValuation> {
@@ -48,4 +53,14 @@ export function api_downloadMakerValuationPdf(caseId: string): Promise<{
   pdfBase64: string;
 }> {
   return downloadMakerValuationPdfFn({ data: caseId });
+}
+
+export function api_downloadMakerValuationReport(caseId: string): Promise<{
+  templateId: string;
+  pdfFilename: string;
+  pdfBase64: string;
+  docxFilename: string;
+  docxBase64: string;
+}> {
+  return downloadMakerValuationReportFn({ data: caseId });
 }

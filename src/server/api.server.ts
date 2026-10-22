@@ -25,6 +25,11 @@ import {
 } from "@/schemas/makerValuation.schema";
 import { buildFieldVisitPdf, bytesToBase64 } from "@/server/fieldVisitPdf.server";
 import { generateMakerValuationPdf } from "@/server/makerValuationPdf.server";
+import {
+  generateMakerValuationReportDocx,
+  generateMakerValuationReportPdf,
+  MAKER_VALUATION_REPORT_TEMPLATE_ID,
+} from "@/server/makerValuationReport.server";
 import { makerValuationSections } from "@/lib/makerValuationFields";
 
 // ============================================================================
@@ -2437,6 +2442,37 @@ export async function api_downloadMakerValuationPdf(
     console.error("Failed to download maker valuation PDF:", error);
     throw error;
   }
+}
+
+export async function api_downloadMakerValuationReport(
+  caseId: string,
+): Promise<{ templateId: string; pdfFilename: string; pdfBase64: string; docxFilename: string; docxBase64: string }> {
+  const valuation = await api_getMakerValuation(caseId);
+  if (!valuation) throw new Error("Maker Valuation not found");
+
+  const caseRows = await getDb()
+    .select({ caseNumber: cases.case_number })
+    .from(cases)
+    .where(eq(cases.id, caseId))
+    .limit(1);
+  const caseNumber = caseRows[0]?.caseNumber || caseId;
+  const normalizedCaseNumber = caseNumber.replace(/^VAL[-_]?/i, "");
+  const safeCaseNumber = normalizedCaseNumber.replace(/[^\w.-]+/g, "_");
+  const templateName = MAKER_VALUATION_REPORT_TEMPLATE_ID;
+  const fileBase = `VAL-${safeCaseNumber}-${templateName}`;
+
+  const [pdfBase64, docxBase64] = await Promise.all([
+    generateMakerValuationReportPdf(valuation),
+    generateMakerValuationReportDocx(valuation),
+  ]);
+
+  return {
+    templateId: MAKER_VALUATION_REPORT_TEMPLATE_ID,
+    pdfFilename: `${fileBase}.pdf`,
+    pdfBase64,
+    docxFilename: `${fileBase}.docx`,
+    docxBase64,
+  };
 }
 
 /**

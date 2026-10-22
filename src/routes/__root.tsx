@@ -49,12 +49,12 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "ValuCase — Property Valuation Operations" },
+      { title: "JBACase — Property Valuation Operations" },
       {
         name: "description",
         content: "Case management for property valuation agencies working with banks.",
       },
-      { property: "og:title", content: "ValuCase — Property Valuation Operations" },
+      { property: "og:title", content: "JBACase — Property Valuation Operations" },
       {
         property: "og:description",
         content: "Case management for property valuation agencies working with banks.",

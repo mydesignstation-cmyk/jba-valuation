@@ -39,7 +39,7 @@ export function AppSidebar() {
             <Building2 className="h-4 w-4" />
           </div>
           <div className="min-w-0 flex-1 group-data-[collapsible=icon]:hidden">
-            <p className="truncate text-sm font-semibold">ValuCase</p>
+            <p className="truncate text-sm font-semibold">JBACase</p>
             <p className="truncate text-xs text-muted-foreground">Valuation Operations</p>
           </div>
           {isMobile && (

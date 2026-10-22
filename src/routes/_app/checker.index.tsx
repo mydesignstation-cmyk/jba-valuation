@@ -199,8 +199,8 @@ function Page() {
                     bankName=""
                     branchName=""
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
-                    fieldVisitIconLabel
                     stage={c.stage}
+                    fieldVisitIconLabel
                     createdAt={c.createdAt}
                     onOpen={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
                     actions={renderActions(c)}
@@ -226,7 +226,6 @@ function Page() {
                         </span>
                       </TableHead>
                       <TableHead>Bank Name</TableHead>
-                      <TableHead>Branch Name</TableHead>
                       <TableHead>Customer Name</TableHead>
                       <TableHead>
                         <span className="flex items-center gap-1.5">
@@ -263,8 +262,12 @@ function Page() {
                           </span>
                         </TableCell>
                         <TableCell>{c.requestNumber}</TableCell>
-                        <TableCell>{(c as CheckerCase).bankName ?? "—"}</TableCell>
-                        <TableCell>{(c as CheckerCase).branchName ?? "—"}</TableCell>
+                        <TableCell>
+                          <div className="min-w-0">
+                            <p className="truncate">{(c as CheckerCase).bankName ?? "—"}</p>
+                            <p className="truncate text-xs text-muted-foreground">{(c as CheckerCase).branchName ?? "—"}</p>
+                          </div>
+                        </TableCell>
                         <TableCell>{(c as CheckerCase).customerName ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>

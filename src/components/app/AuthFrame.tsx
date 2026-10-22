@@ -18,7 +18,7 @@ export function AuthFrame({
           <div className="grid h-9 w-9 place-items-center rounded-md bg-primary text-primary-foreground">
             <Building2 className="h-5 w-5" />
           </div>
-          <span className="text-lg font-semibold">ValuCase</span>
+          <span className="text-lg font-semibold">JBACase</span>
         </div>
         <Card className="shadow-card">
           <CardHeader>

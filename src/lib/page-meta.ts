@@ -1,5 +1,5 @@
 export function pageMeta(title: string, description: string) {
-  const t = `${title} — ValuCase`;
+  const t = `${title} — JBACase`;
   return {
     meta: [
       { title: t },

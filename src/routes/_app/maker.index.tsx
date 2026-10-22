@@ -149,7 +149,6 @@ function Page() {
                       <TableHead>Request Number</TableHead>
                       <TableHead>Customer</TableHead>
                       <TableHead>Bank</TableHead>
-                      <TableHead>Branch</TableHead>
                       <TableHead>Site Engineer</TableHead>
                       <TableHead>Stage</TableHead>
                       <TableHead>Created</TableHead>
@@ -165,8 +164,12 @@ function Page() {
                         <TableCell className="font-medium">{c.caseNumber}</TableCell>
                         <TableCell>{c.requestNumber}</TableCell>
                         <TableCell>{customerName.get(c.customerId) ?? "—"}</TableCell>
-                        <TableCell>{bankName.get(c.bankId) ?? "—"}</TableCell>
-                        <TableCell>{branchName.get(c.branchId) ?? "—"}</TableCell>
+                        <TableCell>
+                          <div className="min-w-0">
+                            <p className="truncate">{bankName.get(c.bankId) ?? "—"}</p>
+                            <p className="truncate text-xs text-muted-foreground">{branchName.get(c.branchId) ?? "—"}</p>
+                          </div>
+                        </TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
                           <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>

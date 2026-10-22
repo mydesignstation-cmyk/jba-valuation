@@ -18,6 +18,7 @@ import {
   Building2,
   CalendarClock,
   CheckCircle2,
+  ChevronDown,
   ClipboardCheck,
   ClipboardList,
   Compass,
@@ -48,6 +49,15 @@ import type { MakerValuation } from "@/types";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -86,7 +96,10 @@ import { api_getCustomer } from "@/data/customer.functions";
 import { api_getBank } from "@/data/bank.functions";
 import { api_getBranch } from "@/data/branch.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
-import { api_getMakerValuation } from "@/data/makerValuation.functions";
+import {
+  api_getMakerValuation,
+  api_downloadMakerValuationReport,
+} from "@/data/makerValuation.functions";
 import { SubmittedFieldVisit } from "@/components/case/SubmittedFieldVisit";
 import { MakerValuationForm } from "@/components/case/MakerValuationForm";
 import { AssignMakerDialog } from "@/components/case/AssignMakerDialog";
@@ -900,7 +913,7 @@ function Page() {
         <TabsList className="inline-flex w-auto">
           <TabsTrigger value="overview">Case Overview</TabsTrigger>
           <TabsTrigger value="field-visit">Field Visit</TabsTrigger>
-          <TabsTrigger value="maker-valuation" className="hidden">Maker Valuation</TabsTrigger>
+          <TabsTrigger value="maker-valuation">Maker Valuation</TabsTrigger>
         </TabsList>
 
         {/* ---- Case Overview -------------------------------------------------- */}
@@ -1174,38 +1187,103 @@ function Page() {
                               Edit
                             </Button>
                           )}
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={async () => {
-                            try {
-                              const result = await (
-                                await import("@/data/makerValuation.functions")
-                              ).api_downloadMakerValuationPdf(valuationCase.id);
-                              const link = document.createElement("a");
-                              link.href = `data:application/pdf;base64,${result.pdfBase64}`;
-                              link.download = result.filename;
-                              document.body.appendChild(link);
-                              link.click();
-                              document.body.removeChild(link);
-                              toast.success("PDF downloaded");
-                            } catch (error) {
-                              toast.error("Failed to download PDF");
-                              console.error("Download error:", error);
-                            }
-                          }}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          Download PDF
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => downloadMakerValuationDocx(makerValuation)}
-                        >
-                          <FileText className="mr-2 h-4 w-4" />
-                          Download DOCX
-                        </Button>
+                        <div className="feature-hidden-download">
+                          <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="sm">
+                              <FileText className="mr-2 h-4 w-4" />
+                              Download
+                              <ChevronDown className="ml-2 h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end">
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                <FileText className="h-4 w-4" />
+                                Standard
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent>
+                                <DropdownMenuItem onSelect={() => {
+                                  void (async () => {
+                                    try {
+                                      const result = await (
+                                        await import("@/data/makerValuation.functions")
+                                      ).api_downloadMakerValuationPdf(valuationCase.id);
+                                      const link = document.createElement("a");
+                                      link.href = `data:application/pdf;base64,${result.pdfBase64}`;
+                                      link.download = result.filename;
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                      toast.success("Standard PDF downloaded");
+                                    } catch (error) {
+                                      toast.error("Failed to download standard PDF");
+                                      console.error("Download error:", error);
+                                    }
+                                  })();
+                                }}>
+                                  <FileText className="h-4 w-4" />
+                                  PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => {
+                                  void downloadMakerValuationDocx(makerValuation);
+                                }}>
+                                  <FileText className="h-4 w-4" />
+                                  DOCX
+                                </DropdownMenuItem>
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                            <DropdownMenuSub>
+                              <DropdownMenuSubTrigger>
+                                <FileText className="h-4 w-4" />
+                                BOI
+                              </DropdownMenuSubTrigger>
+                              <DropdownMenuSubContent>
+                                <DropdownMenuItem onSelect={() => {
+                                  void (async () => {
+                                    try {
+                                      const result = await api_downloadMakerValuationReport(valuationCase.id);
+                                      const link = document.createElement("a");
+                                      link.href = `data:application/pdf;base64,${result.pdfBase64}`;
+                                      link.download = result.pdfFilename;
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                      toast.success("BOI PDF downloaded");
+                                    } catch (error) {
+                                      toast.error("Failed to download BOI PDF");
+                                      console.error("BOI PDF error:", error);
+                                    }
+                                  })();
+                                }}>
+                                  <FileText className="h-4 w-4" />
+                                  PDF
+                                </DropdownMenuItem>
+                                <DropdownMenuItem onSelect={() => {
+                                  void (async () => {
+                                    try {
+                                      const result = await api_downloadMakerValuationReport(valuationCase.id);
+                                      const link = document.createElement("a");
+                                      link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${result.docxBase64}`;
+                                      link.download = result.docxFilename;
+                                      document.body.appendChild(link);
+                                      link.click();
+                                      document.body.removeChild(link);
+                                      toast.success("BOI DOCX downloaded");
+                                    } catch (error) {
+                                      toast.error("Failed to download BOI DOCX");
+                                      console.error("BOI DOCX error:", error);
+                                    }
+                                  })();
+                                }}>
+                                  <FileText className="h-4 w-4" />
+                                  DOCX
+                                </DropdownMenuItem>
+                              </DropdownMenuSubContent>
+                            </DropdownMenuSub>
+                          </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
                       </div>
 
                     </CardContent>

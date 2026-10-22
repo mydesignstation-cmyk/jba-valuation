@@ -536,7 +536,7 @@ export function MakerValuationForm({
             variant="ghost"
             size="sm"
             onClick={handleAutoFill}
-            className="text-xs text-blue-600"
+            className="feature-hidden-dev-autofill text-xs text-blue-600"
           >
             📝 Dev Auto-Fill
           </Button>

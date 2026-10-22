@@ -227,3 +227,13 @@
 .feature-hidden-search {
   display: none !important;
 }
+
+/* Feature flag — hide report downloads while the report flow is being finalized. */
+.feature-hidden-download {
+  display: none !important;
+}
+
+/* Feature flag — keep developer-only valuation autofill hidden. */
+.feature-hidden-dev-autofill {
+  display: none !important;
+}
