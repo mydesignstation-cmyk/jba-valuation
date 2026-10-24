@@ -23,7 +23,6 @@ const BODY_FONT_SIZE = 10;
 const LINE_HEIGHT = 14;
 
 const monetaryFieldKeys = new Set<MakerValuationFieldKey>([
-  "rateRange",
   "adoptedRate",
   "buildingRate",
   "landRate",
