@@ -486,6 +486,7 @@ function Page() {
     queryFn: async () => (await api_getMakerValuation(caseId)) ?? null,
     enabled: !!caseId,
   });
+  const isMakerValuationComplete = !!makerValuation?.pdfBytes;
   const { data: makerValuationCreator } = useQuery({
     queryKey: ["maker-valuation-creator", makerValuation?.createdById],
     queryFn: () => getUser(makerValuation!.createdById),
@@ -844,6 +845,7 @@ function Page() {
                 className="w-full sm:w-auto"
                 disabled={!isMakerValuationComplete}
                 onClick={() => setConfirmSubmitToChecker(true)}
+                disabled={!isMakerValuationComplete}
               >
                 <Send className="mr-2 h-4 w-4" />
                 Submit to Checker
