@@ -430,7 +430,7 @@ export function MakerValuationForm({
       yearOfConstruction: "2020",
       ageOfBuilding: "4",
       residualLife: "50",
-      typeOfStructure: "RCC, Load Bearing, Mixed",
+      typeOfStructure: "RCC",
       nosOfUnitPerFloor: "4",
       buildingType: "Residential",
       appearance: "Good",

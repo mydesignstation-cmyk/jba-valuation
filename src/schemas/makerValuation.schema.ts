@@ -37,7 +37,7 @@ export const qualityOptions = ["Good", "Average", "Poor"] as const;
 
 export const yesNoOptions = ["Yes", "No"] as const;
 
-export const typeOfStructureOptions = ["RCC, Load Bearing, Mixed"] as const;
+export const typeOfStructureOptions = ["RCC", "Load Bearing", "Mixed", "Others"] as const;
 
 export const buildingTypeOptions = [
   "Residential",
