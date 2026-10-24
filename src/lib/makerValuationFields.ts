@@ -27,6 +27,8 @@ export const makerValuationSections: readonly MakerValuationDisplaySection[] = [
       ["refNo", "Ref. No."],
       ["branch", "Branch"],
       ["bankName", "Bank Name"],
+      ["engineerName", "Engineer Name"],
+      ["processingOfficerName", "Processing Officer Name"],
     ),
   },
   {

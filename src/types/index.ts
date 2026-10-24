@@ -207,6 +207,8 @@ export interface MakerValuation {
   refNo: string;
   branch: string;
   bankName: string;
+  engineerName: string;
+  processingOfficerName: string;
   // Additional Fields
   purchaserName?: string | undefined;
   typeOfProperty?: string | undefined;

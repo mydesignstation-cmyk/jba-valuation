@@ -60,6 +60,8 @@ export const createMakerValuationSchema = z.object({
   refNo: z.string().min(1, "Ref. No. is required"),
   branch: z.string().min(1, "Branch is required"),
   bankName: z.string().min(1, "Bank Name is required"),
+  engineerName: z.string().min(1, "Engineer Name is required"),
+  processingOfficerName: z.string().min(1, "Processing Officer Name is required"),
   // Additional Fields (all optional)
   purchaserName: z.string().min(1, "This field is required"),
   typeOfProperty: z.string().min(1, "This field is required"),
