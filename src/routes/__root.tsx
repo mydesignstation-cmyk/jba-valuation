@@ -93,6 +93,33 @@ function RootShell({ children }: { children: ReactNode }) {
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
 
+  // If a browser has an older route manifest after a deployment, retry once
+  // against the current deployment instead of leaving the user on a 500 page.
+  useEffect(() => {
+    const reloadKey = "jba-dynamic-chunk-reload";
+    const reloadForFreshAssets = () => {
+      if (sessionStorage.getItem(reloadKey)) return;
+      sessionStorage.setItem(reloadKey, "1");
+      window.location.reload();
+    };
+    const onPreloadError = () => reloadForFreshAssets();
+    const onUnhandledRejection = (event: PromiseRejectionEvent) => {
+      if (String(event.reason).includes("Failed to fetch dynamically imported module")) {
+        reloadForFreshAssets();
+      }
+    };
+
+    window.addEventListener("vite:preloadError", onPreloadError);
+    window.addEventListener("unhandledrejection", onUnhandledRejection);
+    const clearReloadGuard = window.setTimeout(() => sessionStorage.removeItem(reloadKey), 10000);
+
+    return () => {
+      window.removeEventListener("vite:preloadError", onPreloadError);
+      window.removeEventListener("unhandledrejection", onUnhandledRejection);
+      window.clearTimeout(clearReloadGuard);
+    };
+  }, []);
+
   // Restore any existing Neon Auth session on first client render so the UI
   // (topbar, sidebar) reflects the logged-in user. The route guard also
   // bootstraps on demand; this keeps the two in sync without a flash.
