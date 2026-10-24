@@ -100,8 +100,14 @@ function Page() {
   const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
   const canResume = valuationCase?.stage === "HOLD";
 
-  // Check if Maker Valuation is complete (has PDF bytes, meaning it's been filled and saved)
-  const isMakerValuationComplete = !!makerValuation?.pdfBytes;
+  // Check if Maker Valuation is complete (has PDF bytes AND meaningful data)
+  // The PDF is generated even for empty forms, so we check if key required fields have values
+  const isMakerValuationComplete =
+    !!makerValuation?.pdfBytes &&
+    makerValuation.pdfBytes.trim() !== "" &&
+    !!makerValuation.refNo &&
+    !!makerValuation.branch &&
+    !!makerValuation.bankName;
 
   const holdCase = useMutation({
     mutationFn: async () => {

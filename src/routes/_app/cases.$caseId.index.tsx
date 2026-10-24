@@ -496,6 +496,14 @@ function Page() {
   // the same hook order. The route id is stable before the case query resolves.
   const mutationCaseId = valuationCase?.id ?? caseId;
 
+  // Check if Maker Valuation is complete (has PDF bytes AND meaningful data)
+  const isMakerValuationComplete =
+    !!makerValuation?.pdfBytes &&
+    makerValuation.pdfBytes.trim() !== "" &&
+    !!makerValuation.refNo &&
+    !!makerValuation.branch &&
+    !!makerValuation.bankName;
+
   const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
   const canResume = valuationCase?.stage === "HOLD";
 
@@ -832,6 +840,7 @@ function Page() {
               <Button
                 type="button"
                 className="w-full sm:w-auto"
+                disabled={!isMakerValuationComplete}
                 onClick={() => setConfirmSubmitToChecker(true)}
               >
                 <Send className="mr-2 h-4 w-4" />
