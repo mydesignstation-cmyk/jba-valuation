@@ -505,21 +505,6 @@ function Page() {
   // reliable signal because those are pre-filled from the field visit and are
   // never empty. The authoritative signal is: does a saved valuation exist?
   const isMakerValuationComplete = !!makerValuation?.id;
-  
-  // DEBUG: Log valuation state
-  console.log("Maker Valuation Debug (cases.index):", {
-    exists: !!makerValuation,
-    id: makerValuation?.id,
-    refNo: makerValuation?.refNo,
-    branch: makerValuation?.branch,
-    bankName: makerValuation?.bankName,
-    pdfBytesLength: makerValuation?.pdfBytes?.length,
-    isComplete: isMakerValuationComplete,
-    stage: valuationCase?.stage,
-    isMaker: isMaker,
-    fieldVisit: !!fieldVisit,
-    canSubmitToChecker: !!isMakerValuationComplete && fieldVisit && isMakerCasePending(valuationCase.stage),
-  });
 
   const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
   const canResume = valuationCase?.stage === "HOLD";

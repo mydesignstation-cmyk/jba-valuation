@@ -109,18 +109,6 @@ function Page() {
   // reliable signal because those are pre-filled from the field visit and are
   // never empty. The authoritative signal is: does a saved valuation exist?
   const isMakerValuationComplete = !!makerValuation?.id;
-  
-  // DEBUG: Log valuation state
-  console.log("Maker Valuation Debug:", {
-    exists: !!makerValuation,
-    id: makerValuation?.id,
-    refNo: makerValuation?.refNo,
-    branch: makerValuation?.branch,
-    bankName: makerValuation?.bankName,
-    pdfBytesLength: makerValuation?.pdfBytes?.length,
-    isComplete: isMakerValuationComplete,
-    canSubmitToChecker: canSubmitToChecker,
-  });
 
   const holdCase = useMutation({
     mutationFn: async () => {
