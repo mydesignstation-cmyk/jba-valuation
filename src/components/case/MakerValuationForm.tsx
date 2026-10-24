@@ -1979,7 +1979,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rate Range</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter range" {...field} />
+                      <Input type="text" placeholder="e.g. ₹5,000–₹6,000" {...field} />
                     </FormItem>
                   )}
                 />
