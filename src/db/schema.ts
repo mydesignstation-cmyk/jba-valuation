@@ -388,7 +388,7 @@ export const makerValuations = pgTable(
       scale: 2,
     }),
     govt_value: numeric("govt_value", { precision: 12, scale: 2 }),
-    rent_range_per_month: numeric("rent_range_per_month", { precision: 12, scale: 2 }),
+    rent_range_per_month: text("rent_range_per_month"),
     // Remarks Section
     remarks: text("remarks"),
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF

@@ -34,9 +34,7 @@ const monetaryFieldKeys = new Set<MakerValuationFieldKey>([
   "insuranceValue",
   "marketValue",
   "fairMarketValue",
-  "realizableValuePercent",
   "realizableValue",
-  "distressValuePercent",
   "distressValue",
   "govtValue",
 ]);

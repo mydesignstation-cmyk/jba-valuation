@@ -347,6 +347,16 @@ export function MakerValuationForm({
     defaultValues: formDefaultValues,
   });
 
+  const govtReadyReckonerRatePerSqMtr = form.watch("govtReadyReckonerRatePerSqMtr");
+  useEffect(() => {
+    const ratePerSqMtr = Number(govtReadyReckonerRatePerSqMtr);
+    form.setValue(
+      "govtReadyReckonerRatePerSqFt",
+      Number.isFinite(ratePerSqMtr) && ratePerSqMtr > 0 ? (ratePerSqMtr / 10.7641).toFixed(2) : "",
+      { shouldValidate: true },
+    );
+  }, [form, govtReadyReckonerRatePerSqMtr]);
+
   useEffect(() => {
     form.reset(
       initialValues ? makerValuationToFormValues(caseId, initialValues) : formDefaultValues,
@@ -475,7 +485,7 @@ export function MakerValuationForm({
       govtReadyReckonerRatePerSqMtr: "4000",
       govtReadyReckonerRatePerSqFt: "370",
       govtValue: "4000000.00",
-      rentRangePerMonth: "25000",
+      rentRangePerMonth: "₹25,000–₹30,000",
       remarks: "Dev test property - all formulas will auto-calculate",
     } as CreateMakerValuationInput);
   };
@@ -500,6 +510,7 @@ export function MakerValuationForm({
       const distressValuePercent = Number(values.distressValuePercent);
       const realizableValue = fairMarketValue * (realizableValuePercent / 100);
       const distressValue = fairMarketValue * (distressValuePercent / 100);
+      const govtReadyReckonerRatePerSqFt = govtReadyReckonerRatePerSqMtr / 10.7641;
       const govtValue = adoptedArea * govtReadyReckonerRatePerSqMtr;
 
       // Update values with calculated amounts
@@ -513,7 +524,10 @@ export function MakerValuationForm({
         realizableValue:
           realizableValue > 0 ? realizableValue.toString() : values.realizableValue || "",
         distressValue: distressValue > 0 ? distressValue.toString() : values.distressValue || "",
-        govtValue: govtValue > 0 ? govtValue.toString() : values.govtValue || "",
+        govtReadyReckonerRatePerSqFt:
+          govtReadyReckonerRatePerSqMtr > 0
+            ? govtReadyReckonerRatePerSqFt.toString()
+            : values.govtReadyReckonerRatePerSqFt || "",
       };
 
       const missingFields = makerValuationFields.filter(
@@ -2066,7 +2080,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Realizable Value Percentage</FormLabel>
-                      <Input type="number" min="0" max="100" step="0.01" placeholder="95" {...field} />
+                      <Input type="number" min="50" max="100" step="0.01" placeholder="95" {...field} />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -2089,7 +2103,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Distress Value Percentage</FormLabel>
-                      <Input type="number" min="0" max="100" step="0.01" placeholder="80" {...field} />
+                      <Input type="number" min="50" max="100" step="0.01" placeholder="80" {...field} />
                       <FormMessage />
                     </FormItem>
                   )}
@@ -2121,7 +2135,8 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Govt. Ready Reckoner Rate (Per Sq.Ft.)</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
+                      <p className="text-xs text-muted-foreground">Auto: Rate per Sq.Mtr. ÷ 10.7641</p>
+                      <Input type="number" step="0.01" placeholder="Auto-calculated" readOnly {...field} />
                     </FormItem>
                   )}
                 />
@@ -2144,7 +2159,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Rent Range Per month</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter range" {...field} />
+                      <Input type="text" placeholder="e.g. ₹25,000–₹30,000" {...field} />
                     </FormItem>
                   )}
                 />
