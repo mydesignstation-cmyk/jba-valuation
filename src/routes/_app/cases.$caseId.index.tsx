@@ -1189,8 +1189,7 @@ function Page() {
                               Edit
                             </Button>
                           )}
-                        <div className="feature-hidden-download">
-                          <DropdownMenu>
+                        <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
                               <FileText className="mr-2 h-4 w-4" />
@@ -1286,9 +1285,8 @@ function Page() {
                           </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
-                      </div>
 
-                    </CardContent>
+                      </CardContent>
                   </Card>
                   <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
                     {makerValuationSections.map((section) => (
