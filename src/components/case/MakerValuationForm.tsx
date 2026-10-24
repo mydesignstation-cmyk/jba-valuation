@@ -149,7 +149,9 @@ const makerValuationFields = [
   "marketValue",
   "carParkingValue",
   "fairMarketValue",
+  "realizableValuePercent",
   "realizableValue",
+  "distressValuePercent",
   "distressValue",
   "govtReadyReckonerRatePerSqMtr",
   "govtReadyReckonerRatePerSqFt",
@@ -327,7 +329,9 @@ export function MakerValuationForm({
             marketValue: "",
             carParkingValue: "",
             fairMarketValue: "",
+            realizableValuePercent: "95",
             realizableValue: "",
+            distressValuePercent: "80",
             distressValue: "",
             govtReadyReckonerRatePerSqMtr: "",
             govtReadyReckonerRatePerSqFt: "",
@@ -464,7 +468,9 @@ export function MakerValuationForm({
       marketValue: "5000000.00",
       carParkingValue: "100000",
       fairMarketValue: "5100000.00",
+      realizableValuePercent: "95",
       realizableValue: "4845000.00",
+      distressValuePercent: "80",
       distressValue: "4080000.00",
       govtReadyReckonerRatePerSqMtr: "4000",
       govtReadyReckonerRatePerSqFt: "370",
@@ -490,8 +496,10 @@ export function MakerValuationForm({
       const insuranceValue = builtUpArea * buildingRate;
       const marketValue = adoptedArea * adoptedRate;
       const fairMarketValue = marketValue + carParkingValue;
-      const realizableValue = fairMarketValue * 0.95;
-      const distressValue = fairMarketValue * 0.8;
+      const realizableValuePercent = Number(values.realizableValuePercent);
+      const distressValuePercent = Number(values.distressValuePercent);
+      const realizableValue = fairMarketValue * (realizableValuePercent / 100);
+      const distressValue = fairMarketValue * (distressValuePercent / 100);
       const govtValue = adoptedArea * govtReadyReckonerRatePerSqMtr;
 
       // Update values with calculated amounts
@@ -2051,35 +2059,49 @@ export function MakerValuationForm({
                         : "—"}
                   </div>
                 </div>
-                {/* Realizable Value (formula-based: FMV × 95%) */}
+                {/* Realizable Value (formula-based) */}
+                <FormField
+                  control={form.control}
+                  name="realizableValuePercent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Realizable Value Percentage</FormLabel>
+                      <Input type="number" min="0" max="100" step="0.01" placeholder="95" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Realizable Value</label>
-                  <p className="text-xs text-muted-foreground">Fair Market Value × 95%</p>
+                  <p className="text-xs text-muted-foreground">Fair Market Value × entered percentage</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
-                    {form.watch("adoptedArea") && form.watch("adoptedRate")
-                      ? (
-                          (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
-                            (form.watch("carParkingValue")
-                              ? Number(form.watch("carParkingValue"))
-                              : 0)) *
-                          0.95
-                        ).toFixed(2)
+                    {form.watch("adoptedArea") && form.watch("adoptedRate") && form.watch("realizableValuePercent")
+                      ? ((Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
+                          (form.watch("carParkingValue") ? Number(form.watch("carParkingValue")) : 0)) *
+                          Number(form.watch("realizableValuePercent")) / 100).toFixed(2)
                       : "—"}
                   </div>
                 </div>
-                {/* Distress Value (formula-based: FMV × 80%) */}
+                {/* Distress Value (formula-based) */}
+                <FormField
+                  control={form.control}
+                  name="distressValuePercent"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Distress Value Percentage</FormLabel>
+                      <Input type="number" min="0" max="100" step="0.01" placeholder="80" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Distress Value</label>
-                  <p className="text-xs text-muted-foreground">Fair Market Value × 80%</p>
+                  <p className="text-xs text-muted-foreground">Fair Market Value × entered percentage</p>
                   <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
-                    {form.watch("adoptedArea") && form.watch("adoptedRate")
-                      ? (
-                          (Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
-                            (form.watch("carParkingValue")
-                              ? Number(form.watch("carParkingValue"))
-                              : 0)) *
-                          0.8
-                        ).toFixed(2)
+                    {form.watch("adoptedArea") && form.watch("adoptedRate") && form.watch("distressValuePercent")
+                      ? ((Number(form.watch("adoptedArea")) * Number(form.watch("adoptedRate")) +
+                          (form.watch("carParkingValue") ? Number(form.watch("carParkingValue")) : 0)) *
+                          Number(form.watch("distressValuePercent")) / 100).toFixed(2)
                       : "—"}
                   </div>
                 </div>
