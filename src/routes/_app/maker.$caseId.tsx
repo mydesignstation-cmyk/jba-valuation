@@ -1,5 +1,5 @@
 import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Hand, Send } from "lucide-react";
+import { ArrowLeft, Hand, Send, Lock } from "lucide-react";
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -27,6 +27,7 @@ import { FieldVisitWizard, useAutoFill } from "@/routes/_app/cases.$caseId.field
 import { api_getCase, api_holdCase, api_resumeCase, api_submitToChecker } from "@/data/case.functions";
 import { api_getCaseFieldVisit } from "@/data/fieldVisit.functions";
 import { api_getSiteEngineer, api_getMaker, api_getChecker } from "@/data/user.functions";
+import { api_getMakerValuation } from "@/data/makerValuation.functions";
 
 export const Route = createFileRoute("/_app/maker/$caseId")({
   head: () => pageMeta("Maker Review", "Review and edit the submitted field visit."),
@@ -86,10 +87,21 @@ function Page() {
     enabled: !!fieldVisit?.checkerUpdatedById,
   });
 
+  // Fetch the Maker Valuation for this case to check if it's complete
+  // A Maker Valuation with pdfBytes indicates the form has been filled and saved
+  const { data: makerValuation } = useQuery({
+    queryKey: ["maker-valuation", caseId],
+    queryFn: () => api_getMakerValuation(caseId),
+    enabled: !!caseId,
+  });
+
   const canEdit = !!valuationCase && isMakerCasePending(valuationCase.stage);
 
   const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
   const canResume = valuationCase?.stage === "HOLD";
+
+  // Check if Maker Valuation is complete (has PDF bytes, meaning it's been filled and saved)
+  const isMakerValuationComplete = !!makerValuation?.pdfBytes;
 
   const holdCase = useMutation({
     mutationFn: async () => {
@@ -117,7 +129,7 @@ function Page() {
     onError: (error) => toast.error((error as Error).message || "Failed to resume case"),
   });
 
-  const canSubmitToChecker = canEdit && !!fieldVisit;
+  const canSubmitToChecker = canEdit && !!fieldVisit && isMakerValuationComplete;
 
   const submitToChecker = useMutation({
     mutationFn: async () => {

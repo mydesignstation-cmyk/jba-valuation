@@ -1,0 +1,11 @@
+{
+  "version": "v1",
+  "hooks": [{
+    "name": "Request PR Review from mydesignstation-cmyk",
+    "trigger": "PostTaskExec",
+    "action": {
+      "type": "command",
+      "command": "gh api repos/mydesignstation-cmyk/jba-valuation/issues/1/comments -f body=\"cc @mydesignstation-cmyk for review\" -X POST 2>/dev/null || echo 'cc @mydesignstation-cmyk for review' | gh issue comment 1 --body-file -"
+    }
+  }]
+}
