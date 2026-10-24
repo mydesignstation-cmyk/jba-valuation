@@ -621,6 +621,8 @@ function Page() {
     refNo: valuationCase.requestNumber,
     branch: branchName,
     bankName,
+    engineerName: engineer?.name ?? valuationCase.assignedEngineerId,
+    processingOfficerName: currentUser?.name ?? currentUser?.id ?? "",
   };
   const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
   const hasMaker = !!valuationCase.assignedMakerId;

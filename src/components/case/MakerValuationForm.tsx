@@ -44,6 +44,8 @@ const makerValuationFields = [
   "refNo",
   "branch",
   "bankName",
+  "engineerName",
+  "processingOfficerName",
   "purchaserName",
   "typeOfProperty",
   "flatNo",
@@ -186,6 +188,8 @@ interface MakerValuationPrefill {
   refNo?: string;
   branch?: string;
   bankName?: string;
+  engineerName?: string;
+  processingOfficerName?: string;
 }
 
 interface MakerValuationFormProps {
@@ -218,6 +222,8 @@ export function MakerValuationForm({
             refNo: prefill?.refNo ?? "",
             branch: prefill?.branch ?? "",
             bankName: prefill?.bankName ?? "",
+            engineerName: prefill?.engineerName ?? "",
+            processingOfficerName: prefill?.processingOfficerName ?? "",
             typeOfProperty: "",
             locatedOnFloor: "",
             landmark: "",
@@ -351,6 +357,8 @@ export function MakerValuationForm({
       refNo: "REF-DEV-001",
       branch: "Dev Branch",
       bankName: "Dev Bank",
+      engineerName: "Dev Engineer",
+      processingOfficerName: "Dev Processing Officer",
       purchaserName: "John Developer",
       typeOfProperty: "Residential Flat",
       flatNo: "101",
@@ -599,6 +607,28 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Bank Name *</FormLabel>
                       <Input placeholder="Enter bank name" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="engineerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Engineer Name *</FormLabel>
+                      <Input placeholder="Enter engineer name" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="processingOfficerName"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Processing Officer Name *</FormLabel>
+                      <Input placeholder="Enter processing officer name" {...field} />
                       <FormMessage />
                     </FormItem>
                   )}

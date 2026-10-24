@@ -506,7 +506,7 @@ function annexureRows(valuation: MakerValuation): AnnexureRow[] {
   return [
     { number: "1", particulars: "background information of the asset being valued;", comment: `The property under consideration is Owned by ${value(valuation.nameOfOwner)}` },
     { number: "2", particulars: "purpose of valuation and appointing authority", comment: `As per the request from ${value(valuation.bankName)} (${value(valuation.branch)}) Branch, to assess fair market value of the property for Bank purpose.` },
-    { number: "3", particulars: "identity of the valuer and any other experts involved in the valuation;", comment: "Er. Prasanna Bhat – Reg. Valuer / Name of Engineer – Valuation Engineer / Name of Processing Officer – Processing Officer" },
+    { number: "3", particulars: "identity of the valuer and any other experts involved in the valuation;", comment: `Er. Prasanna Bhat – Reg. Valuer / Name of Engineer – ${value(valuation.engineerName)} / Name of Processing Officer – ${value(valuation.processingOfficerName)}` },
     { number: "4", particulars: "disclosure of valuer interest or conflict, if any;", comment: "We have no interest, either direct or indirect, in the property valued. Further, to state that we do not have relation or any connection with property owner / applicant directly or indirectly." },
     { number: "5", particulars: "date of appointment, valuation date and date of report;", comment: `Date of Appointment – ${value(valuation.dateOfValuation)}\nInspection Date – ${value(valuation.dateOfInspection)}\nValuation Date – ${value(valuation.dateOfValuation)}` },
     { number: "6", particulars: "inspections and/or investigations undertaken;", comment: `Physical inspection done on ${value(valuation.dateOfInspection)}` },
@@ -677,6 +677,7 @@ function annexureMappedValues(valuation: MakerValuation, rowNumber: string): str
   switch (rowNumber) {
     case "1": return [value(valuation.nameOfOwner)];
     case "2": return [value(valuation.bankName), value(valuation.branch)];
+    case "3": return [value(valuation.engineerName), value(valuation.processingOfficerName)];
     case "5": return [value(valuation.dateOfValuation), value(valuation.dateOfInspection)];
     case "6": return [value(valuation.dateOfInspection)];
     default: return [];

@@ -259,6 +259,8 @@ export const makerValuations = pgTable(
     ref_no: varchar("ref_no", { length: 255 }).notNull(),
     branch: varchar("branch", { length: 255 }).notNull(),
     bank_name: varchar("bank_name", { length: 255 }).notNull(),
+    engineer_name: varchar("engineer_name", { length: 255 }),
+    processing_officer_name: varchar("processing_officer_name", { length: 255 }),
     // Additional Fields
     purchaser_name: varchar("purchaser_name", { length: 255 }),
     type_of_property: varchar("type_of_property", { length: 255 }),
