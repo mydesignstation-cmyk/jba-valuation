@@ -88,7 +88,7 @@ function Page() {
   });
 
   // Fetch the Maker Valuation for this case to check if it's complete
-  // A Maker Valuation with pdfBytes indicates the form has been filled and saved
+  // The saved Maker Valuation for this case (null until the form is submitted).
   const { data: makerValuation } = useQuery({
     queryKey: ["maker-valuation", caseId],
     queryFn: () => api_getMakerValuation(caseId),
@@ -100,14 +100,15 @@ function Page() {
   const canHold = !!valuationCase && HOLDABLE_CASE_STAGES.includes(valuationCase.stage);
   const canResume = valuationCase?.stage === "HOLD";
 
-  // Check if Maker Valuation is complete (has PDF bytes AND meaningful data)
-  // The PDF is generated even for empty forms, so we check if key required fields have values
-  const isMakerValuationComplete =
-    !!makerValuation?.pdfBytes &&
-    makerValuation.pdfBytes.trim() !== "" &&
-    !!makerValuation.refNo &&
-    !!makerValuation.branch &&
-    !!makerValuation.bankName;
+  // Check if the Maker Valuation has been completed.
+  //
+  // A Maker Valuation record is only ever created once the whole form passes
+  // validation on the server (createMakerValuationSchema requires every field),
+  // so the mere existence of a saved record means the form was filled and
+  // submitted. Checking individual fields like refNo/branch/bankName is NOT a
+  // reliable signal because those are pre-filled from the field visit and are
+  // never empty. The authoritative signal is: does a saved valuation exist?
+  const isMakerValuationComplete = !!makerValuation?.id;
 
   const holdCase = useMutation({
     mutationFn: async () => {
