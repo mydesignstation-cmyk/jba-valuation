@@ -174,7 +174,15 @@ export const createMakerValuationSchema = z.object({
   marketValue: z.string().optional(),
   carParkingValue: z.string().min(1, "This field is required"),
   fairMarketValue: z.string().optional(),
+  realizableValuePercent: z
+    .string()
+    .min(1, "Realizable Value % is required")
+    .refine((value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 100, "Enter a percentage between 0 and 100"),
   realizableValue: z.string().optional(),
+  distressValuePercent: z
+    .string()
+    .min(1, "Distress Value % is required")
+    .refine((value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 100, "Enter a percentage between 0 and 100"),
   distressValue: z.string().optional(),
   govtReadyReckonerRatePerSqMtr: z.string().min(1, "This field is required"),
   govtReadyReckonerRatePerSqFt: z.string().min(1, "This field is required"),

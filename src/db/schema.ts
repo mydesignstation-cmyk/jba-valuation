@@ -375,7 +375,9 @@ export const makerValuations = pgTable(
     market_value: numeric("market_value", { precision: 12, scale: 2 }),
     car_parking_value: numeric("car_parking_value", { precision: 12, scale: 2 }),
     fair_market_value: numeric("fair_market_value", { precision: 12, scale: 2 }),
+    realizable_value_percent: numeric("realizable_value_percent", { precision: 5, scale: 2 }),
     realizable_value: numeric("realizable_value", { precision: 12, scale: 2 }),
+    distress_value_percent: numeric("distress_value_percent", { precision: 5, scale: 2 }),
     distress_value: numeric("distress_value", { precision: 12, scale: 2 }),
     govt_ready_reckoner_rate_per_sq_mtr: numeric("govt_ready_reckoner_rate_per_sq_mtr", {
       precision: 12,

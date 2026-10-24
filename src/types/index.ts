@@ -321,7 +321,9 @@ export interface MakerValuation {
   marketValue?: string | undefined;
   carParkingValue?: string | undefined;
   fairMarketValue?: string | undefined;
+  realizableValuePercent?: string | undefined;
   realizableValue?: string | undefined;
+  distressValuePercent?: string | undefined;
   distressValue?: string | undefined;
   govtReadyReckonerRatePerSqMtr?: string | undefined;
   govtReadyReckonerRatePerSqFt?: string | undefined;
