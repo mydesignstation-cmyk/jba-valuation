@@ -79,8 +79,8 @@ function tableRows(valuation: MakerValuation): ReportFieldRow[] {
     { type: "field", label: "Type of asset", binding: "typeOfProperty", value: value(valuation.typeOfProperty) },
     { type: "field", label: "Address of the property", binding: "address", value: address(valuation) },
     { type: "field", label: "Fair Market Value of the Property 100%", binding: "fairMarketValue", value: money(valuation.fairMarketValue) },
-    { type: "field", label: `Realizable Market Value of the Property ${value(valuation.realizableValuePercent)}%`, binding: "realizableValue", value: money(valuation.realizableValue) },
-    { type: "field", label: `Force / Distress Sale Value of the Property ${value(valuation.distressValuePercent)}%`, binding: "distressValue", value: money(valuation.distressValue) },
+    { type: "field", label: `Realizable Market Value ${value(valuation.realizableValuePercent || "95")}%`, binding: "realizableValue", value: money(valuation.realizableValue) },
+    { type: "field", label: `Distress Sale Value ${value(valuation.distressValuePercent || "80")}%`, binding: "distressValue", value: money(valuation.distressValue) },
     { type: "field", label: "Govt. Value", binding: "govtValue", value: money(valuation.govtValue) },
     { type: "field", label: "Insurance Value", binding: "insuranceValue", value: money(valuation.insuranceValue) },
   ];
