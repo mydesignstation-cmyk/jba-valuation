@@ -30,7 +30,7 @@ function money(input: unknown): string {
   if (text === EM_DASH) return text;
   const number = Number(text.replace(/,/g, ""));
   return Number.isFinite(number)
-    ? `Rs. ${number.toLocaleString("en-IN", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}/-`
+    ? `Rs. ${number.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/-`
     : text;
 }
 
@@ -45,11 +45,11 @@ function address(valuation: MakerValuation): string {
     valuation.plotNo && `Plot No. ${valuation.plotNo}`,
     valuation.ctsNo && `C.T.S. No. ${valuation.ctsNo}`,
     valuation.sNo && `S. No. ${valuation.sNo}`,
-    valuation.village,
+    valuation.village && `Village: ${valuation.village}`,
     valuation.location,
-    valuation.taluka,
-    valuation.district,
-    valuation.pinCode && `PIN ${valuation.pinCode}`,
+    valuation.taluka && `Taluka: ${valuation.taluka}`,
+    valuation.district && `District: ${valuation.district}`,
+    valuation.pinCode,
   ].filter(Boolean).join(", ");
 }
 
@@ -177,12 +177,12 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
   const signature = "Authorised Signature";
   page.drawText(signature, { x: PAGE_WIDTH - margin - bold.widthOfTextAtSize(signature, 8), y, size: 8, font: bold, color: black });
   y -= 11;
-  for (const line of ["(Approved panel valuer)", "VJ. Prasanna Bhat - MICS", "B-Tech (Civil), MSc Valuation, MBA in Finance", "Govt. Registered Valuer (IBBI), Chartered Surveyor,"]) {
+  for (const line of ["(Approved panel valuer)", "Vr. Jasmin Bhatt - MRICS", "B-Tech (Civil), MSc Valuation, MBA in Finance", "Govt. Registered Valuer (IBBI), Chartered Surveyor,"]) {
     page.drawText(line, { x: PAGE_WIDTH - margin - regular.widthOfTextAtSize(line, 7), y, size: 7, font: regular, color: black });
     y -= 10;
   }
   page.drawText("Structural Engineer, Town Planner, Project Management Consultant.", { x: PAGE_WIDTH - margin - regular.widthOfTextAtSize("Structural Engineer, Town Planner, Project Management Consultant.", 7), y, size: 7, font: regular, color: black });
-  page.drawText("JBA Consulting & Advisory Services LLP", { x: 255, y: 28, size: 7, font: regular, color: rgb(0.45, 0.45, 0.45) });
+  page.drawText("JBA Consulting & Advisory Services LLP", { x: PAGE_WIDTH - margin - regular.widthOfTextAtSize("JBA Consulting & Advisory Services LLP", 7), y: 18, size: 7, font: regular, color: rgb(0.45, 0.45, 0.45) });
 
   renderPageTwo(document, regular, bold, valuation);
   renderStructuredPage(document, regular, bold, pageThreeRows(valuation), 3);
