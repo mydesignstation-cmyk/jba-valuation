@@ -70,16 +70,17 @@ type ReportFieldRow = {
   label: string;
   binding: ReportFieldKey;
   value: string;
+  valueBold?: boolean;
 };
 
 function tableRows(valuation: MakerValuation): ReportFieldRow[] {
   return [
-    { type: "field", label: "Borrower / Owner", binding: "nameOfOwner", value: value(valuation.nameOfOwner) },
+    { type: "field", label: "Borrower / Owner", binding: "nameOfOwner", value: value(valuation.nameOfOwner), valueBold: true },
     { type: "field", label: "Type of asset", binding: "typeOfProperty", value: value(valuation.typeOfProperty) },
     { type: "field", label: "Address of the property", binding: "address", value: address(valuation) },
-    { type: "field", label: "Fair Market Value of the Property", binding: "fairMarketValue", value: money(valuation.fairMarketValue) },
-    { type: "field", label: "Realizable Market Value of the Property", binding: "realizableValue", value: money(valuation.realizableValue) },
-    { type: "field", label: "Force / Distress Sale Value of the Property", binding: "distressValue", value: money(valuation.distressValue) },
+    { type: "field", label: "Fair Market Value of the Property 100%", binding: "fairMarketValue", value: money(valuation.fairMarketValue) },
+    { type: "field", label: `Realizable Market Value of the Property ${value(valuation.realizableValuePercent)}%`, binding: "realizableValue", value: money(valuation.realizableValue) },
+    { type: "field", label: `Force / Distress Sale Value of the Property ${value(valuation.distressValuePercent)}%`, binding: "distressValue", value: money(valuation.distressValue) },
     { type: "field", label: "Govt. Value", binding: "govtValue", value: money(valuation.govtValue) },
     { type: "field", label: "Insurance Value", binding: "insuranceValue", value: money(valuation.insuranceValue) },
   ];
@@ -166,7 +167,7 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
     page.drawRectangle({ x: tableX, y: y - height, width: tableWidth, height, borderColor: black, borderWidth: 0.5 });
     page.drawLine({ start: { x: tableX + labelWidth, y }, end: { x: tableX + labelWidth, y: y - height }, thickness: 0.5, color: black });
     labelLines.forEach((line, index) => page.drawText(line, { x: tableX + padding, y: y - padding - lineHeight * index - labelFontSize, size: labelFontSize, font: bold, color: black }));
-    valueLines.forEach((line, index) => page.drawText(line, { x: tableX + labelWidth + padding, y: y - padding - lineHeight * index - valueFontSize, size: valueFontSize, font: regular, color: black }));
+    valueLines.forEach((line, index) => page.drawText(line, { x: tableX + labelWidth + padding, y: y - padding - lineHeight * index - valueFontSize, size: valueFontSize, font: row.valueBold ? bold : regular, color: black }));
     y -= height;
   }
 
@@ -201,7 +202,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
   const rows = tableRows(valuation).map((row) =>
     new TableRow({ children: [
       new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.label, bold: true, size: 24, font: "Arial" })] })] }),
-      new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 24) })] }),
+      new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 24, row.valueBold) })] }),
     ]}),
   );
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
