@@ -136,7 +136,7 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
   y -= 40;
   page.drawText("To", { x: margin, y, size: 9, font: bold, color: black });
   y -= 14;
-  page.drawText("The Branch Manager", { x: margin, y, size: 9, font: regular, color: black });
+  page.drawText("The Branch Manager", { x: margin, y, size: 9, font: bold, color: black });
   y -= 12;
   page.drawText(value(valuation.bankName), { x: margin, y, size: 9, font: regular, color: black });
   y -= 12;
@@ -207,7 +207,11 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
     new Paragraph({ spacing: { after: 2600 }, text: "" }),
     new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date       :  ${formatDisplayDate(value(valuation.dateOfValuation))}\nRef. No.  :  ${value(valuation.refNo)}`, 24) }),
-    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`To\nThe Branch Manager\n${value(valuation.bankName)}\n${value(valuation.branch)} Branch,\n${value(valuation.district)}.`, 24) }),
+    new Paragraph({ spacing: { before: 500 }, children: [new TextRun({ text: "To", size: 24, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: "The Branch Manager", bold: true, size: 24, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: value(valuation.bankName), size: 24, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: `${value(valuation.branch)} Branch,`, size: 24, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: `${value(valuation.district)}.`, size: 24, font: "Arial" })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500, after: 260 }, children: [new TextRun({ text: "CERTIFICATE", bold: true, underline: {}, size: 22 })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 220 }, children: [new TextRun({ text: "We certify that we have surveyed the said immovable property", size: 24 })] }),
     new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows }),
