@@ -212,7 +212,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 220 }, children: [new TextRun({ text: "We certify that we have surveyed the said immovable property", size: 24 })] }),
     new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows }),
     new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 550 }, children: [new TextRun({ text: "For JBA Consulting & Advisory Services LLP", size: 24 })] }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 650 }, children: textRunsWithBreaks("Authorised Signature\n(Approved panel valuer)\nVJ. Prasanna Bhat - MICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 24) }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 650 }, children: textRunsWithBreaks("Authorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 24) }),
     new Paragraph({ alignment: AlignmentType.CENTER, pageBreakBefore: true, spacing: { after: 220 }, children: [new TextRun({ text: "VALUATION REPORT", bold: true, underline: {}, size: 20 })] }),
     structuredDocxTable(
       [...pageTwoRows(valuation), ...pageThreeRows(valuation), ...pageFourRows(valuation), ...pageFiveRows(valuation)],
