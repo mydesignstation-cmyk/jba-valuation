@@ -263,6 +263,7 @@ type PageTwoRow = {
   description: string;
   value?: string;
   section?: boolean;
+  sectionNumber?: string;
   placeholder?: boolean;
   descriptionBold?: boolean;
 };
@@ -326,6 +327,8 @@ function renderPageTwo(
       : Math.max(descriptionLines.length, valueLines.length, 1) * lineHeight + padding * 2;
     page.drawRectangle({ x: tableX, y: y - height, width: PAGE_WIDTH - tableX * 2, height, borderColor: black, borderWidth: 0.45 });
     if (row.section) {
+      page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
+      page.drawText(row.sectionNumber ?? "", { x: tableX + 8, y: y - padding - fontSize, size: fontSize, font: bold, color: black });
       page.drawText(row.description, { x: tableX + numberWidth + padding, y: y - padding - fontSize, size: fontSize, font: bold, color: black });
     } else {
       page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
@@ -469,6 +472,8 @@ function renderStructuredPage(
     if (y - height < 42) break;
     page.drawRectangle({ x: tableX, y: y - height, width: PAGE_WIDTH - tableX * 2, height, borderColor: black, borderWidth: 0.45 });
     if (row.section) {
+      page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
+      page.drawText(row.sectionNumber ?? "", { x: tableX + 8, y: y - padding - fontSize, size: fontSize, font: bold, color: black });
       page.drawText(row.description, { x: tableX + numberWidth + padding, y: y - padding - fontSize, size: fontSize, font: bold, color: black });
     } else {
       page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
@@ -489,7 +494,7 @@ function structuredDocxTable(
 ): Table {
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows: rows.map((row) => {
-    if (row.section) return new TableRow({ children: [new TableCell({ columnSpan: 3, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
+    if (row.section) return new TableRow({ children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 24, font: "Arial" })] })] }), new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
     return new TableRow({ children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 24) })] }),
@@ -511,16 +516,15 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "i) Building", value: rate(valuation.buildingRate) },
     { description: "ii) Land", value: rate(valuation.landRate) },
     { number: "4.", description: "Guideline rate obtained from registrar office (evidence thereof to be enclosed)", value: `${rate(valuation.govtReadyReckonerRatePerSqMtr)} Per Sq. mtr.\n${rate(valuation.govtReadyReckonerRatePerSqFt)} Per Sq. ft.` },
-    { description: "VI.   COMPOSITE RATE ADOPTED AFTER DEPRECIATION", section: true },
-    { description: "a.", value: "" },
-    { description: "Depreciated building rate", value: rate(valuation.buildingRate) },
+    { number: "VI.", description: "COMPOSITE RATE ADOPTED AFTER DEPRECIATION", section: true, sectionNumber: "VI." },
+    { number: "a.", description: "Depreciated building rate", value: rate(valuation.buildingRate) },
     { description: "Replacement cost / Insurance Value of Flat with Services / Insurance Value (v (3) ii)", value: `Rs. ${value(valuation.insuranceValue)} /-` },
     { description: "Age of the building", value: `${value(valuation.ageOfBuilding)} Years` },
     { description: "Life of the building estimated", value: `${value(valuation.residualLife)} Years (Subject to proper maintenance)` },
     { description: "Actual works completed", value: `${value(valuation.actualWorksCompleted)}%` },
     { description: "Depreciation percentage assuming salvage value as 15% say", value: `${value(valuation.depreciationPercentage)}%` },
     { description: "Depreciated Ratio of the building", value: "N.A." },
-    { description: "b. Total composite rate arrived for valuation", value: "" },
+    { number: "b.", description: "Total composite rate arrived for valuation", value: "" },
     { description: "Depreciated building rate (V (a))", value: rate(valuation.buildingRate) },
     { description: "Rate for Land and other V (3) ii", value: rate(valuation.landRate) },
     { description: "Total Composite Rate", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
