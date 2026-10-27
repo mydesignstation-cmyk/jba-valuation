@@ -273,12 +273,6 @@ function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "h) Whether genuineness or authenticity of approved map / plan is verified", value: value(valuation.genuinenessOrAuthenticity) },
     { description: "i) Any other comments by our employee / valuer on authentic of approved plan", value: value(valuation.anyOtherComments) },
     { description: "Postal address of the property", value: `Flat No. ${value(valuation.flatNo)}, ${value(valuation.locatedOnFloor)} Floor, Wing ${value(valuation.wing)}, Building Name, Landmark, Road Name & Area, Plot No. ${value(valuation.plotNo)}, C.T.S. No. ${value(valuation.ctsNo)}, Survey No. ${value(valuation.sNo)}, Village ${value(valuation.village)}, ${value(valuation.location)}, Taluka ${value(valuation.taluka)}, District ${value(valuation.district)} (Pin Code ${value(valuation.pinCode)}).` },
-    { number: "7.", description: "City / Town", value: value(valuation.location) },
-    { description: "Residential Area", value: value(valuation.locality) },
-    { description: "Commercial Area", value: "" },
-    { description: "Industrial Area", value: "" },
-    { number: "8.", description: "Classification of area", value: "" },
-    { description: "i) High / Middle / Poor", value: value(valuation.classOfLocality1) },
   ];
 }
 
@@ -345,6 +339,12 @@ function pageTwoDocxTable(
 
 function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
   return [
+    { number: "7.", description: "City / Town", value: value(valuation.location) },
+    { description: "Residential Area", value: value(valuation.locality) },
+    { description: "Commercial Area", value: "" },
+    { description: "Industrial Area", value: "" },
+    { number: "8.", description: "Classification of area", value: "" },
+    { description: "i) High / Middle / Poor", value: value(valuation.classOfLocality1) },
     { description: "ii) Urban / Semi Urban / Rural", value: value(valuation.classOfLocality2) },
     { number: "9.", description: "Coming under Corporation / Village Panchayat / Municipality / CIDCO", value: value(valuation.municipalCorporation) },
     { number: "10.", description: "If leasehold, the name of lessee, nature of lease, dates of commencement and termination of lease and terms of renewal of lease.", value: value(valuation.typeOfLand) },
