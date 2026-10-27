@@ -25,6 +25,13 @@ function value(input: unknown): string {
   return text || EM_DASH;
 }
 
+function reportDate(input: unknown): string {
+  const text = value(input);
+  if (text === EM_DASH) return text;
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : text;
+}
+
 function formattedNumber(input: unknown): string {
   const text = value(input);
   if (text === EM_DASH) return text;
@@ -240,10 +247,11 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 24, font: "Arial" })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "DECLARATION FROM VALUERS", bold: true, size: 24, font: "Arial" })] }),
-    ...annexureParagraphs(valuation).map((paragraph) => new Paragraph({ spacing: { after: 100, line: 240 }, children: emphasizedTextRuns(paragraph, [value(valuation.dateOfValuation), value(valuation.dateOfInspection)], 24) })),
+    ...annexureParagraphs(valuation).map((paragraph) => new Paragraph({ spacing: { after: 100, line: 240 }, children: emphasizedTextRuns(paragraph, [reportDate(valuation.dateOfValuation), reportDate(valuation.dateOfInspection)], 24) })),
     annexureDocxTable(valuation, borders, cellMargins),
-    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`Date: ${value(valuation.dateOfValuation)}\nPlace: Mumbai`, 20, true) }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks("JBA Consulting & Advisory Services LLP\n\nAuthorised Signature\n(Approved panel valuer)", 24) }),
+    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`Date: ${reportDate(valuation.dateOfValuation)}\nPlace: Mumbai`, 20, true) }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks("JBA Consulting & Advisory Services LLP\n\nAuthorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 20) }),
+    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: - -------------------------------------------------------------------------------)`, 20, true) }),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500 }, children: [new TextRun({ text: "Property Photos", bold: true, size: 24, font: "Arial" })] }),
   ] }] });
@@ -516,6 +524,16 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "Depreciated building rate (V (a))", value: rate(valuation.buildingRate) },
     { description: "Rate for Land and other V (3) ii", value: rate(valuation.landRate) },
     { description: "Total Composite Rate", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
+    { description: "DETAILS OF VALUATION", section: true },
+    { number: "A.", description: "Market Value of the flat", value: `${rate(valuation.marketValue)}` },
+    { number: "B.", description: "Car Parking", value: `${rate(valuation.carParkingValue)}` },
+    { description: "Total / Fair Market Value", value: money(valuation.fairMarketValue) },
+    { number: "1.", description: `Fair Market Value of the Property 100%`, value: money(valuation.fairMarketValue) },
+    { number: "2.", description: `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, value: money(valuation.realizableValue) },
+    { number: "3.", description: `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, value: money(valuation.distressValue) },
+    { description: "Govt. Value", value: money(valuation.govtValue) },
+    { description: "Rental Value", value: `Approx. ${value(valuation.rentRangePerMonth)} /- per month` },
+    { description: "Insurance Value", value: money(valuation.insuranceValue) },
   ];
 }
 
@@ -525,9 +543,9 @@ function annexureRows(valuation: MakerValuation): AnnexureRow[] {
   return [
     { number: "1", particulars: "background information of the asset being valued;", comment: `The property under consideration is Owned by ${value(valuation.nameOfOwner)}` },
     { number: "2", particulars: "purpose of valuation and appointing authority", comment: `As per the request from ${value(valuation.bankName)} (${value(valuation.branch)}) Branch, to assess fair market value of the property for Bank purpose.` },
-    { number: "3", particulars: "identity of the valuer and any other experts involved in the valuation;", comment: `Er. Prasanna Bhat – Reg. Valuer / Name of Engineer – ${value(valuation.engineerName)} / Name of Processing Officer – ${value(valuation.processingOfficerName)}` },
+    { number: "3", particulars: "identity of the valuer and any other experts involved in the valuation;", comment: `Reg. Valuer - Er. Jasmin A. Bhatt\nName of Engineer - ${value(valuation.engineerName)}\nName of Processing Officer - ${value(valuation.processingOfficerName)}` },
     { number: "4", particulars: "disclosure of valuer interest or conflict, if any;", comment: "We have no interest, either direct or indirect, in the property valued. Further, to state that we do not have relation or any connection with property owner / applicant directly or indirectly." },
-    { number: "5", particulars: "date of appointment, valuation date and date of report;", comment: `Date of Appointment – ${value(valuation.dateOfValuation)}\nInspection Date – ${value(valuation.dateOfInspection)}\nValuation Date – ${value(valuation.dateOfValuation)}` },
+    { number: "5", particulars: "date of appointment, valuation date and date of report;", comment: `Date of Appointment - ${reportDate(valuation.dateOfValuation)}\nInspection Date - ${reportDate(valuation.dateOfInspection)}\nValuation Date - ${reportDate(valuation.dateOfValuation)}` },
     { number: "6", particulars: "inspections and/or investigations undertaken;", comment: `Physical inspection done on ${value(valuation.dateOfInspection)}` },
     { number: "7", particulars: "nature and sources of the information used or relied upon;", comment: "Market survey at the time of site visit / Online Price Indicators on real estate portals / Enquiries with Real estate agents / Ready Reckoner rates / Circle rates / Online Search for Registered Transactions" },
     { number: "8", particulars: "procedures adopted in carrying out the valuation and valuation standards followed;", comment: "Sales Comparison Method" },
@@ -540,9 +558,9 @@ function annexureRows(valuation: MakerValuation): AnnexureRow[] {
 function annexureParagraphs(valuation: MakerValuation): string[] {
   return [
     "I hereby declare that",
-    `a) The information furnished in my valuation report dated ${value(valuation.dateOfValuation)} is true and correct to the best of my knowledge and belief and I have made an impartial and true valuation of the property.`,
+    `a) The information furnished in my valuation report dated ${reportDate(valuation.dateOfValuation)} is true and correct to the best of my knowledge and belief and I have made an impartial and true valuation of the property.`,
     "b) I have no direct or indirect interest in the property valued;",
-    `c) I have personally inspected the property on ${value(valuation.dateOfInspection)}. The work is not subcontracted to any other valuer and carried out by myself.`,
+    `c) I have personally inspected the property on ${reportDate(valuation.dateOfInspection)}. The work is not subcontracted to any other valuer and carried out by myself.`,
     "d) I have not been convicted of any offence and sentenced to a term of imprisonment;",
     "e) I have not been found guilty of misconduct in my professional capacity.",
     "f) I have read the IBA Circular No. LEGAL/CIR/9229 dated 10.04.2014 on Creation of Portal/Central Registry for Collecting and Disseminating Details of Recalcitrant Chartered Accountants, Advocates and Valuers and understand that same is adopted by the Bank and agree to be bound by the same",
@@ -607,12 +625,13 @@ function renderAnnexurePdf(document: PDFDocument, regular: PDFFont, bold: PDFFon
 
   if (y < 175) newPage();
   y -= 25;
-  page.drawText(`Date: ${value(valuation.dateOfValuation)}`, { x: 70, y, size: 9, font: bold, color: red });
+  page.drawText(`Date: ${reportDate(valuation.dateOfValuation)}`, { x: 70, y, size: 9, font: bold, color: red });
   page.drawText("Place: Mumbai", { x: 70, y: y - 14, size: 9, font: bold, color: black });
   page.drawText("JBA Consulting & Advisory Services LLP", { x: 350, y, size: 9, font: regular, color: black });
   page.drawText("Authorised Signature", { x: 400, y: y - 50, size: 9, font: bold, color: black });
   page.drawText("(Approved panel valuer)", { x: 395, y: y - 64, size: 8, font: regular, color: black });
-  page.drawText(`The undersigned has inspected the property detailed in the Valuation Report dated ${value(valuation.dateOfValuation)}.`, { x: 70, y: y - 108, size: 9, font: regular, color: black });
+  page.drawText(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.`, { x: 70, y: y - 108, size: 9, font: bold, color: black });
+  page.drawText("(In words: - -------------------------------------------------------------------------------)", { x: 70, y: y - 124, size: 9, font: bold, color: black });
 }
 
 function renderPropertyPhotosPage(document: PDFDocument, regular: PDFFont, bold: PDFFont): void {
