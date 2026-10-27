@@ -371,6 +371,8 @@ export const makerValuations = pgTable(
     building_rate: numeric("building_rate", { precision: 12, scale: 2 }),
     land_rate: numeric("land_rate", { precision: 12, scale: 2 }),
     insurance_value: numeric("insurance_value", { precision: 12, scale: 2 }),
+    actual_works_completed: numeric("actual_works_completed", { precision: 5, scale: 2 }),
+    depreciation_percentage: numeric("depreciation_percentage", { precision: 5, scale: 2 }),
     // Details of Valuation Section
     market_value: numeric("market_value", { precision: 12, scale: 2 }),
     car_parking_value: numeric("car_parking_value", { precision: 12, scale: 2 }),

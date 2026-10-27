@@ -106,6 +106,8 @@ export const makerValuationSections: readonly MakerValuationDisplaySection[] = [
       ["yearOfConstruction", "Year of Construction"],
       ["ageOfBuilding", "Age of Building"],
       ["residualLife", "Residual Life"],
+      ["actualWorksCompleted", "Actual Works Completed"],
+      ["depreciationPercentage", "Depreciation Percentage"],
       ["typeOfStructure", "Type of Structure"],
       ["nosOfUnitPerFloor", "Nos. of unit per floor"],
       ["buildingType", "Building"],

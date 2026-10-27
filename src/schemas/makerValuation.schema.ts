@@ -170,6 +170,8 @@ export const createMakerValuationSchema = z.object({
   buildingRate: z.string().min(1, "This field is required"),
   landRate: z.string().min(1, "This field is required"),
   insuranceValue: z.string().optional(),
+  actualWorksCompleted: z.string().min(1, "This field is required").refine((value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 100, "Enter a percentage between 0 and 100"),
+  depreciationPercentage: z.string().min(1, "This field is required").refine((value) => Number.isFinite(Number(value)) && Number(value) >= 0 && Number(value) <= 100, "Enter a percentage between 0 and 100"),
   // Details of Valuation Section
   marketValue: z.string().optional(),
   carParkingValue: z.string().min(1, "This field is required"),

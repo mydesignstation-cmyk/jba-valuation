@@ -256,6 +256,7 @@ type PageTwoRow = {
   value?: string;
   section?: boolean;
   placeholder?: boolean;
+  descriptionBold?: boolean;
 };
 
 function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
@@ -322,7 +323,7 @@ function renderPageTwo(
       page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
       page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: tableX + numberWidth + descriptionWidth, y: y - height }, thickness: 0.45, color: black });
       if (row.number) page.drawText(row.number, { x: tableX + 8, y: y - padding - fontSize, size: fontSize, font: regular, color: black });
-      descriptionLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: regular, color: black }));
+      descriptionLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.descriptionBold ? bold : regular, color: black }));
       valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.placeholder ? bold : regular, color: row.placeholder ? rgb(0.8, 0, 0) : black }));
     }
     y -= height;
@@ -342,7 +343,7 @@ function pageTwoDocxTable(
       ? [new TableCell({ columnSpan: 3, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })]
       : [
           new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
-          new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.description, size: 24, font: "Arial" })] })] }),
+          new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: row.descriptionBold ?? false, size: 24, font: "Arial" })] })] }),
           new TableCell({ width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 24, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 24) })] }),
         ];
     return new TableRow({ children: cells });
@@ -415,7 +416,7 @@ function pageFourRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "Windows", value: value(valuation.windows) },
     { description: "Fittings", value: value(valuation.fittings) },
     { description: "Finishing", value: value(valuation.finishing) },
-    { number: "4.", description: "House Tax", value: "" },
+    { number: "4.", description: "House Tax", value: "", descriptionBold: true },
     { description: "Assessment No.", value: value(valuation.assessmentNo) },
     { description: "Tax Paid in the name of", value: value(valuation.taxPaidInNameOf) },
     { description: "Tax Amount", value: money(valuation.taxAmount) },
@@ -426,7 +427,7 @@ function pageFourRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "8.", description: "What is the undivided area of land as per sale Deed?", value: value(valuation.undividedAreaOfLand) },
     { number: "9.", description: "What is the plinth area of the flat?", value: `Adopted Area: ${value(valuation.adoptedArea)} Sq.Ft.` },
     { number: "10.", description: "What is the floor space index (app.)", value: value(valuation.floorSpaceIndex) },
-    { number: "11.", description: "What is the carpet area of the flat?", value: `Physical Measured Area: ${value(valuation.physicalMeasuredArea)} Sq.Ft.\nDocumented Area: ${value(valuation.documentedArea)} Sq.Ft.` },
+    { number: "11.", description: "What is the carpet area of the flat?", value: `Physical Measured Area: ${formattedNumber(valuation.physicalMeasuredArea)} Sq.Ft.\nDocumented Area: ${formattedNumber(valuation.documentedArea)} Sq.Ft.` },
     { number: "12.", description: "Is it Posh / class/Medium/ Ordinary?", value: value(valuation.classOfLocality3) },
     { number: "13.", description: "Is it being used for Residential or Commercial purpose?", value: value(valuation.typeOfProperty) },
     { number: "14.", description: "Is it Owner-occupied or let out?", value: value(valuation.occupancy) },
@@ -465,7 +466,7 @@ function renderStructuredPage(
       page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
       page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: tableX + numberWidth + descriptionWidth, y: y - height }, thickness: 0.45, color: black });
       if (row.number) page.drawText(row.number, { x: tableX + 8, y: y - padding - fontSize, size: fontSize, font: regular, color: black });
-      descriptionLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: regular, color: black }));
+      descriptionLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.descriptionBold ? bold : regular, color: black }));
       valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.placeholder ? bold : regular, color: row.placeholder ? rgb(0.8, 0, 0) : black }));
     }
     y -= height;
@@ -508,8 +509,8 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "Replacement cost / Insurance Value of Flat with Services / Insurance Value (v (3) ii)", value: `Rs. ${value(valuation.insuranceValue)} /-` },
     { description: "Age of the building", value: `${value(valuation.ageOfBuilding)} Years` },
     { description: "Life of the building estimated", value: `${value(valuation.residualLife)} Years (Subject to proper maintenance)` },
-    { description: "Actual works completed", value: "{{Stage of Construction %}}", placeholder: true },
-    { description: "Depreciation percentage assuming salvage value as 15% say", value: "{{deperciation percentage}}", placeholder: true },
+    { description: "Actual works completed", value: `${value(valuation.actualWorksCompleted)}%` },
+    { description: "Depreciation percentage assuming salvage value as 15% say", value: `${value(valuation.depreciationPercentage)}%` },
     { description: "Depreciated Ratio of the building", value: "N.A." },
     { description: "b. Total composite rate arrived for valuation", value: "" },
     { description: "Depreciated building rate (V (a))", value: rate(valuation.buildingRate) },
