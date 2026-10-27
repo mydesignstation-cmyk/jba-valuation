@@ -270,6 +270,8 @@ export interface MakerValuation {
   yearOfConstruction?: string | undefined;
   ageOfBuilding?: string | undefined;
   residualLife?: string | undefined;
+  actualWorksCompleted?: string | undefined;
+  depreciationPercentage?: string | undefined;
   typeOfStructure?: string | undefined;
   nosOfUnitPerFloor?: string | undefined;
   buildingType?: string | undefined;

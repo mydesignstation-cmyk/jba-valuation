@@ -103,6 +103,8 @@ const makerValuationFields = [
   "yearOfConstruction",
   "ageOfBuilding",
   "residualLife",
+  "actualWorksCompleted",
+  "depreciationPercentage",
   "typeOfStructure",
   "nosOfUnitPerFloor",
   "buildingType",
@@ -285,6 +287,8 @@ export function MakerValuationForm({
             longitude: fieldVisit?.gpsLongitude ?? "",
             ageOfBuilding: "",
             residualLife: "",
+            actualWorksCompleted: "",
+            depreciationPercentage: "",
             buildingType: "",
             appearance: "",
             qualityOfConstruction: "",
@@ -430,6 +434,8 @@ export function MakerValuationForm({
       yearOfConstruction: "2020",
       ageOfBuilding: "4",
       residualLife: "50",
+      actualWorksCompleted: "100",
+      depreciationPercentage: "16",
       typeOfStructure: "RCC",
       nosOfUnitPerFloor: "4",
       buildingType: "Residential",
@@ -1387,6 +1393,28 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Residual Life</FormLabel>
                       <Input placeholder="Enter residual life" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="actualWorksCompleted"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Actual Works Completed (%)</FormLabel>
+                      <Input type="number" min="0" max="100" step="0.01" placeholder="Enter percentage" {...field} />
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="depreciationPercentage"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Depreciation Percentage (%)</FormLabel>
+                      <Input type="number" min="0" max="100" step="0.01" placeholder="Enter percentage" {...field} />
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
