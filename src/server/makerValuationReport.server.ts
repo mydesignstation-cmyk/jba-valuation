@@ -260,7 +260,7 @@ function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
     { description: `a) ${value(valuation.documentsName1)}`, value: value(valuation.documentsDetails1) },
     { description: `b) ${value(valuation.documentsName2)}`, value: value(valuation.documentsDetails2) },
     { description: `c) ${value(valuation.documentsName3)}`, value: value(valuation.documentsDetails3) },
-    { number: "4.", description: "Name of owner(s) and his/their address (with phone no., details of share of each owner in case of joint ownership)", value: `${value(valuation.nameOfOwner)}\nAdd: ${value(valuation.address)}` },
+    { number: "4.", description: "Name of owner(s) and his/their address (with phone no., details of share of each owner in case of joint ownership)", value: `${value(valuation.nameOfOwner)}.\nAdd: ${value(valuation.address)}` },
     { number: "5.", description: "Brief description of property.", value: `The property is a ${value(valuation.configurationInShort)} ${value(valuation.typeOfProperty)}, located on ${value(valuation.locatedOnFloor)} Floor in the ${value(valuation.buildingName)} Building comprises of ${value(valuation.nosOfFloor)} Floors with ${value(valuation.nosOfLifts)} Lifts & ${value(valuation.nosOfStaircase)} Staircase.` },
     { number: "6.", description: "Location of property", value: "" },
     { description: "a) Plot No. / Survey No.", value: `Plot No. ${value(valuation.plotNo)}, C.T.S. No. ${value(valuation.ctsNo)}, Survey No. ${value(valuation.sNo)}.` },
