@@ -622,7 +622,7 @@ function Page() {
     branch: branchName,
     bankName,
     engineerName: engineer?.name ?? valuationCase.assignedEngineerId,
-    processingOfficerName: currentUser?.name ?? currentUser?.id ?? "",
+    processingOfficerName: maker?.name ?? valuationCase.assignedMakerId ?? "",
   };
   const engineerName = engineer?.name ?? valuationCase.assignedEngineerId;
   const hasMaker = !!valuationCase.assignedMakerId;

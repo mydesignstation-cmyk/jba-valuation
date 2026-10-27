@@ -123,7 +123,9 @@ export const createMakerValuationSchema = z.object({
   yearOfConstruction: z.string().min(1, "This field is required"),
   ageOfBuilding: z.string().min(1, "This field is required"),
   residualLife: z.string().min(1, "This field is required"),
-  typeOfStructure: z.string().min(1, "This field is required"),
+  typeOfStructure: z.enum([...typeOfStructureOptions], {
+    message: "Select a valid type of structure",
+  }),
   nosOfUnitPerFloor: z.string().min(1, "This field is required"),
   buildingType: z.string().min(1, "This field is required"),
   appearance: z.string().min(1, "This field is required"),

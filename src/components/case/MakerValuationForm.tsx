@@ -233,7 +233,7 @@ export function MakerValuationForm({
             landmark: "",
             occupancy: "",
             yearOfConstruction: "",
-            typeOfStructure: "",
+            typeOfStructure: "" as CreateMakerValuationInput["typeOfStructure"],
             nosOfUnitPerFloor: "",
             purchaserName: "",
             flatNo: "",
@@ -1425,7 +1425,8 @@ export function MakerValuationForm({
                     <FormItem>
                       <FormLabel>Type of Structure</FormLabel>
                       <Select value={field.value || ""} onValueChange={field.onChange}>
-                        <SelectTrigger >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select type of structure" />
                         </SelectTrigger>
                         <SelectContent>
                           {typeOfStructureOptions.map((option) => (
