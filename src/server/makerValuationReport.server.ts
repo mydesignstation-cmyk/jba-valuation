@@ -25,6 +25,19 @@ function value(input: unknown): string {
   return text || EM_DASH;
 }
 
+function formattedNumber(input: unknown): string {
+  const text = value(input);
+  if (text === EM_DASH) return text;
+  const number = Number(text.replace(/,/g, ""));
+  return Number.isFinite(number)
+    ? number.toLocaleString("en-IN", { minimumFractionDigits: 0, maximumFractionDigits: 2 })
+    : text;
+}
+
+function rate(input: unknown): string {
+  return `Rs. ${formattedNumber(input)}/-`;
+}
+
 function money(input: unknown): string {
   const text = value(input);
   if (text === EM_DASH) return text;
@@ -346,7 +359,7 @@ function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "9.", description: "Classification of area", value: "" },
     { description: "i) High / Middle / Poor", value: value(valuation.classOfLocality1) },
     { description: "ii) Urban / Semi Urban / Rural", value: value(valuation.classOfLocality2) },
-    { number: "10.", description: "Coming under Corporation / Village Panchayat / Municipality / CIDCO", value: value(valuation.municipalCorporation) },
+    { number: "10.", description: "Coming under Corporation limit / Village Panchayat / Municipality/CIDCO", value: value(valuation.municipalCorporation) },
     { number: "11.", description: "If leasehold, the name of lessee, nature of lease, dates of commencement and termination of lease and terms of renewal of lease.", value: value(valuation.typeOfLand) },
     { number: "12.", description: "Boundaries of the property", value: "As per site" },
     { description: "North", value: value(valuation.boundaryPropertyNorth) },
@@ -358,12 +371,12 @@ function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "South", value: value(valuation.boundarySiteSouth) },
     { description: "East", value: value(valuation.boundarySiteEast) },
     { description: "West", value: value(valuation.boundarySiteWest) },
-    { number: "14.", description: "Extent of the site", value: `Physical Measured Area: ${value(valuation.physicalMeasuredArea)} Sq.Ft.\nDocumented Area: ${value(valuation.documentedArea)} Sq.Ft.\nApproved Plan Area: ${value(valuation.approvedPlanArea)} Sq.Ft.\nBuilt Up Area: ${value(valuation.builtUpArea)} Sq.Ft.\nAdopted Area: ${value(valuation.adoptedArea)} Sq.Ft.` },
+    { number: "14.", description: "Extent of the site", value: `Physical Measured Area: ${formattedNumber(valuation.physicalMeasuredArea)} Sq.Ft.\nDocumented Area: ${formattedNumber(valuation.documentedArea)} Sq.Ft.\nApproved Plan Area: ${formattedNumber(valuation.approvedPlanArea)} Sq.Ft.\nBuilt Up Area: ${formattedNumber(valuation.builtUpArea)} Sq.Ft.\nAdopted Area: ${formattedNumber(valuation.adoptedArea)} Sq.Ft.` },
     { number: "15.", description: "Latitude, Longitude and Coordinates of the site", value: `Latitude: ${value(valuation.latitude)}\nLongitude: ${value(valuation.longitude)}` },
     { number: "16.", description: "Extent of the site considered for valuation", value: `Adopted Area: ${value(valuation.adoptedArea)} Sq.Ft.` },
     { number: "17.", description: "Whether occupied by the owner / tenant? If occupied by tenant, since how long? Rent received per month.", value: value(valuation.occupancy) },
     { description: "II.   APARTMENT BUILDING", section: true },
-    { number: "1.", description: "Nature of the Apartment", value: `${value(valuation.configurationInShort)}\n${value(valuation.typeOfProperty)}\n${value(valuation.configurationFullDescription)}` },
+    { number: "1.", description: "Nature of the Apartment", value: `${value(valuation.configurationInShort)}\n${value(valuation.typeOfProperty)}: ${value(valuation.configurationFullDescription)}` },
     { number: "2.", description: "Location", value: value(valuation.location) },
     { description: "C.T.S. No.", value: value(valuation.ctsNo) },
     { description: "Block No.", value: value(valuation.blockNo) },
@@ -483,15 +496,15 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "2.", description: "What are the factors favoring for an extra potential value?", value: value(valuation.positiveFactors) },
     { number: "3.", description: "Any negative factors are observed which affect the market value in general?", value: value(valuation.negativeFactors) },
     { description: "V.   RATE", section: true },
-    { number: "1.", description: "After analyzing the comparable sale instances, what is the composite rate for similar flat with same specifications in the adjoining locality? (Along with details of reference of at least two latest deals/transactions with respect to adjacent properties in the areas)", value: `Prevailing rate of flats in the locality is Rs. ${value(valuation.rateRange)} /- to Rs. ${value(valuation.rateRange)} /- Per Sq. ft. on BUA` },
-    { number: "2.", description: "Assuming it is a new construction, what is the adopted basic composite rate of the flat under valuation after comparing with the specifications and other factors with the flat under comparison (give details).", value: `Rs. ${value(valuation.adoptedRate)} /- Per Sq. ft. on BUA` },
+    { number: "1.", description: "After analyzing the comparable sale instances, what is the composite rate for similar flat with same specifications in the adjoining locality? (Along with details of reference of at least two latest deals/transactions with respect to adjacent properties in the areas)", value: `Prevailing rate of flats in the locality is ${rate(valuation.rateRange)} to ${rate(valuation.rateRange)} Per Sq. ft. on BUA` },
+    { number: "2.", description: "Assuming it is a new construction, what is the adopted basic composite rate of the flat under valuation after comparing with the specifications and other factors with the flat under comparison (give details).", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
     { number: "3.", description: "Break-up for the rate", value: "" },
-    { description: "i) Building", value: `Rs. ${value(valuation.buildingRate)} /-` },
-    { description: "ii) Land", value: `Rs. ${value(valuation.landRate)} /-` },
+    { description: "i) Building", value: rate(valuation.buildingRate) },
+    { description: "ii) Land", value: rate(valuation.landRate) },
     { number: "4.", description: "Guideline rate obtained from registrar office (evidence thereof to be enclosed)", value: `Rs. ${value(valuation.govtReadyReckonerRatePerSqMtr)} /- Per Sq. mtr.\nRs. ${value(valuation.govtReadyReckonerRatePerSqFt)} /- Per Sq. ft.` },
     { description: "VI.   COMPOSITE RATE ADOPTED AFTER DEPRECIATION", section: true },
     { description: "a.", value: "" },
-    { description: "Depreciated building rate", value: `Rs. ${value(valuation.buildingRate)} /-` },
+    { description: "Depreciated building rate", value: rate(valuation.buildingRate) },
     { description: "Replacement cost / Insurance Value of Flat with Services / Insurance Value (v (3) ii)", value: `Rs. ${value(valuation.insuranceValue)} /-` },
     { description: "Age of the building", value: `${value(valuation.ageOfBuilding)} Years` },
     { description: "Life of the building estimated", value: `${value(valuation.residualLife)} Years (Subject to proper maintenance)` },
@@ -499,9 +512,9 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "Depreciation percentage assuming salvage value as 15% say", value: "{{deperciation percentage}}", placeholder: true },
     { description: "Depreciated Ratio of the building", value: "N.A." },
     { description: "b. Total composite rate arrived for valuation", value: "" },
-    { description: "Depreciated building rate (V (a))", value: `Rs. ${value(valuation.buildingRate)} /-` },
-    { description: "Rate for Land and other V (3) ii", value: `Rs. ${value(valuation.landRate)} /-` },
-    { description: "Total Composite Rate", value: `Rs. ${value(valuation.adoptedRate)} /- Per Sq. ft. on BUA` },
+    { description: "Depreciated building rate (V (a))", value: rate(valuation.buildingRate) },
+    { description: "Rate for Land and other V (3) ii", value: rate(valuation.landRate) },
+    { description: "Total Composite Rate", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
   ];
 }
 
