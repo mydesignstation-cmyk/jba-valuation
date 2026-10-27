@@ -232,6 +232,7 @@
 .feature-hidden-download {
   display: none !important;
 }
+.maker-valuation-pdf-download { display: none !important; }
 
 /* Feature flag — keep developer-only valuation autofill hidden. */
 .feature-hidden-dev-autofill {

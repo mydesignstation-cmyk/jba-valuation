@@ -1206,7 +1206,7 @@ function Page() {
                                 Standard
                               </DropdownMenuSubTrigger>
                               <DropdownMenuSubContent>
-                                <DropdownMenuItem onSelect={() => {
+                                <DropdownMenuItem className="maker-valuation-pdf-download" onSelect={() => {
                                   void (async () => {
                                     try {
                                       const result = await (
@@ -1242,7 +1242,7 @@ function Page() {
                                 BOI
                               </DropdownMenuSubTrigger>
                               <DropdownMenuSubContent>
-                                <DropdownMenuItem onSelect={() => {
+                                <DropdownMenuItem className="maker-valuation-pdf-download" onSelect={() => {
                                   void (async () => {
                                     try {
                                       const result = await api_downloadMakerValuationReport(valuationCase.id);
