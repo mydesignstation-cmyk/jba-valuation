@@ -1195,8 +1195,10 @@ function Page() {
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
                         {isMaker &&
+                          valuationCase.assignedMakerId === currentUser?.id &&
                           (valuationCase.stage === "MAKER_ASSIGNED" ||
-                            valuationCase.stage === "MAKER_PENDING") && (
+                            valuationCase.stage === "MAKER_PENDING" ||
+                            valuationCase.stage === "CHECKER_PENDING") && (
                             <Button variant="outline" size="sm" onClick={() => setShowValuationForm(true)}>
                               <PenLine className="mr-2 h-4 w-4" />
                               Edit
@@ -1314,8 +1316,10 @@ function Page() {
                 </div>
                 )
               ) : isMaker &&
+                valuationCase.assignedMakerId === currentUser?.id &&
                 (valuationCase.stage === "MAKER_ASSIGNED" ||
-                  valuationCase.stage === "MAKER_PENDING") ? (
+                  valuationCase.stage === "MAKER_PENDING" ||
+                  valuationCase.stage === "CHECKER_PENDING") ? (
                 <MakerValuationForm
                   caseId={valuationCase.id}
                   fieldVisit={fieldVisit}
