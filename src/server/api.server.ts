@@ -2199,6 +2199,27 @@ const makerValuationFieldKeys = makerValuationSections.flatMap((section) =>
   section.fields.map((field) => field.key),
 );
 
+const MAKER_VALUATION_EDITABLE_STAGES = [
+  "MAKER_ASSIGNED",
+  "MAKER_PENDING",
+  "CHECKER_PENDING",
+] as const;
+
+async function requireMakerValuationCase(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<{ makerId: string }> {
+  const user = await requireServerUser(token, "MAKER");
+  const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const row = rows[0];
+  if (!row) throw new Error("Case not found");
+  if (row.assigned_maker_id !== user.id) throw new Error("Forbidden");
+  if (!(MAKER_VALUATION_EDITABLE_STAGES as readonly string[]).includes(row.stage)) {
+    throw new Error("This case is not in a stage where the Maker Valuation can be edited");
+  }
+  return { makerId: user.id };
+}
+
 function camelToSnake(value: string): string {
   return value
     .replace(/([a-z0-9])([A-Z])/g, "$1_$2")
@@ -2232,6 +2253,16 @@ export async function api_createMakerValuation(
 
   try {
     input = createMakerValuationSchema.parse(normalizeMakerValuationInput(input));
+
+    const existingRows = await getDb()
+      .select()
+      .from(makerValuations)
+      .where(eq(makerValuations.case_id, input.caseId))
+      .limit(1);
+    if (existingRows[0]) {
+      await requireMakerValuationCase(token, input.caseId);
+    }
+
     // Build the valuation object for PDF generation
     const valuationForPdf: MakerValuation = {
       id: "",
@@ -2376,13 +2407,12 @@ export async function api_createMakerValuation(
 
     let result;
     if (existing.length > 0) {
-      // Update existing valuation
+      // Update existing valuation without changing its original creation time.
       const rows = await getDb()
         .update(makerValuations)
         .set({
           ...buildMakerValuationStorageValues(input),
           pdf_bytes: pdfBase64,
-          created_at: now,
         })
         .where(eq(makerValuations.case_id, input.caseId))
         .returning();
