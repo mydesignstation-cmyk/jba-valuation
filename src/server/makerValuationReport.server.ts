@@ -288,9 +288,9 @@ function renderPageTwo(
   const numberWidth = 28;
   const descriptionWidth = 235;
   const valueWidth = PAGE_WIDTH - tableX * 2 - numberWidth - descriptionWidth;
-  const fontSize = 12;
-  const lineHeight = 14;
-  const padding = 3;
+  const fontSize = 11;
+  const lineHeight = 13;
+  const padding = 2;
   let y = PAGE_HEIGHT - 72;
   const title = "VALUATION REPORT";
   page.drawText(title, { x: (PAGE_WIDTH - bold.widthOfTextAtSize(title, 10)) / 2, y, size: 10, font: bold, color: black });
@@ -315,7 +315,7 @@ function renderPageTwo(
     y -= height;
   }
 
-  page.drawText("JBA Consulting & Advisory Services LLP", { x: 255, y: 28, size: 7, font: regular, color: rgb(0.45, 0.45, 0.45) });
+  page.drawText("JBA Consulting & Advisory Services LLP", { x: PAGE_WIDTH - 70 - regular.widthOfTextAtSize("JBA Consulting & Advisory Services LLP", 7), y: 18, size: 7, font: regular, color: rgb(0.45, 0.45, 0.45) });
 }
 
 function pageTwoDocxTable(
@@ -433,10 +433,13 @@ function renderStructuredPage(
   const numberWidth = 28;
   const descriptionWidth = 235;
   const valueWidth = PAGE_WIDTH - tableX * 2 - numberWidth - descriptionWidth;
-  const fontSize = 12;
-  const lineHeight = 14;
-  const padding = 3;
+  const fontSize = 11;
+  const lineHeight = 13;
+  const padding = 2;
   let y = PAGE_HEIGHT - 58;
+  const title = "VALUATION REPORT";
+  page.drawText(title, { x: (PAGE_WIDTH - bold.widthOfTextAtSize(title, 10)) / 2, y, size: 10, font: bold, color: black });
+  y -= 18;
   for (const row of rows) {
     const descriptionLines = wrap(row.description, regular, fontSize, descriptionWidth - padding * 2);
     const valueLines = wrap(row.value ?? "", regular, fontSize, valueWidth - padding * 2);
@@ -454,7 +457,7 @@ function renderStructuredPage(
     }
     y -= height;
   }
-  page.drawText("JBA Consulting & Advisory Services LLP", { x: 255, y: 28, size: 7, font: regular, color: rgb(0.45, 0.45, 0.45) });
+  page.drawText("JBA Consulting & Advisory Services LLP", { x: PAGE_WIDTH - 70 - regular.widthOfTextAtSize("JBA Consulting & Advisory Services LLP", 7), y: 18, size: 7, font: regular, color: rgb(0.45, 0.45, 0.45) });
 }
 
 function structuredDocxTable(
