@@ -502,7 +502,7 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "3.", description: "Break-up for the rate", value: "" },
     { description: "i) Building", value: rate(valuation.buildingRate) },
     { description: "ii) Land", value: rate(valuation.landRate) },
-    { number: "4.", description: "Guideline rate obtained from registrar office (evidence thereof to be enclosed)", value: `Rs. ${value(valuation.govtReadyReckonerRatePerSqMtr)} /- Per Sq. mtr.\nRs. ${value(valuation.govtReadyReckonerRatePerSqFt)} /- Per Sq. ft.` },
+    { number: "4.", description: "Guideline rate obtained from registrar office (evidence thereof to be enclosed)", value: `${rate(valuation.govtReadyReckonerRatePerSqMtr)} Per Sq. mtr.\n${rate(valuation.govtReadyReckonerRatePerSqFt)} Per Sq. ft.` },
     { description: "VI.   COMPOSITE RATE ADOPTED AFTER DEPRECIATION", section: true },
     { description: "a.", value: "" },
     { description: "Depreciated building rate", value: rate(valuation.buildingRate) },
