@@ -293,6 +293,11 @@ type PageTwoRow = {
   sectionNumber?: string;
   placeholder?: boolean;
   descriptionBold?: boolean;
+  boundarySite?: {
+    deed?: string;
+    actuals?: string;
+    header?: "columns" | "labels";
+  };
 };
 
 function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
@@ -405,11 +410,12 @@ function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "South", value: value(valuation.boundaryPropertySouth) },
     { description: "East", value: value(valuation.boundaryPropertyEast) },
     { description: "West", value: value(valuation.boundaryPropertyWest) },
-    { number: "13.", description: "Boundaries of the site", value: "A                 B\nAs per Deed       As Per Actuals" },
-    { description: "North", value: value(valuation.boundarySiteNorth) },
-    { description: "South", value: value(valuation.boundarySiteSouth) },
-    { description: "East", value: value(valuation.boundarySiteEast) },
-    { description: "West", value: value(valuation.boundarySiteWest) },
+    { number: "13.", description: "Boundaries of the site", boundarySite: { deed: "A", actuals: "B", header: "columns" } },
+    { description: "", boundarySite: { deed: "As per the Deed", actuals: "As per the Actuals", header: "labels" } },
+    { description: "North", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteNorth) } },
+    { description: "South", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteSouth) } },
+    { description: "East", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteEast) } },
+    { description: "West", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteWest) } },
     { number: "14.", description: "Extent of the site", value: `Physical Measured Area: ${formattedNumber(valuation.physicalMeasuredArea)} Sq.Ft.\nDocumented Area: ${formattedNumber(valuation.documentedArea)} Sq.Ft.\nApproved Plan Area: ${formattedNumber(valuation.approvedPlanArea)} Sq.Ft.\nBuilt Up Area: ${formattedNumber(valuation.builtUpArea)} Sq.Ft.\nAdopted Area: ${formattedNumber(valuation.adoptedArea)} Sq.Ft.` },
     { number: "15.", description: "Latitude, Longitude and Coordinates of the site", value: `Latitude: ${value(valuation.latitude)}\nLongitude: ${value(valuation.longitude)}` },
     { number: "16.", description: "Extent of the site considered for valuation", value: `Adopted Area: ${value(valuation.adoptedArea)} Sq.Ft.` },
@@ -495,7 +501,9 @@ function renderStructuredPage(
   for (const row of rows) {
     const descriptionLines = wrap(row.description, regular, fontSize, descriptionWidth - padding * 2);
     const valueLines = wrap(row.value ?? "", regular, fontSize, valueWidth - padding * 2);
-    const height = row.section ? lineHeight + padding * 2 : Math.max(descriptionLines.length, valueLines.length, 1) * lineHeight + padding * 2;
+    const boundaryDeedLines = row.boundarySite ? wrap(row.boundarySite.deed ?? "", regular, fontSize, valueWidth / 2 - padding * 2) : [];
+    const boundaryActualLines = row.boundarySite ? wrap(row.boundarySite.actuals ?? "", regular, fontSize, valueWidth / 2 - padding * 2) : [];
+    const height = row.section ? lineHeight + padding * 2 : Math.max(descriptionLines.length, valueLines.length, boundaryDeedLines.length, boundaryActualLines.length, 1) * lineHeight + padding * 2;
     if (y - height < 42) break;
     page.drawRectangle({ x: tableX, y: y - height, width: PAGE_WIDTH - tableX * 2, height, borderColor: black, borderWidth: 0.45 });
     if (row.section) {
@@ -505,9 +513,15 @@ function renderStructuredPage(
     } else {
       page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
       page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: tableX + numberWidth + descriptionWidth, y: y - height }, thickness: 0.45, color: black });
+      if (row.boundarySite) page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth + valueWidth / 2, y }, end: { x: tableX + numberWidth + descriptionWidth + valueWidth / 2, y: y - height }, thickness: 0.45, color: black });
       if (row.number) page.drawText(row.number, { x: tableX + 8, y: y - padding - fontSize, size: fontSize, font: regular, color: black });
       descriptionLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.descriptionBold ? bold : regular, color: black }));
-      valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.placeholder ? bold : regular, color: row.placeholder ? rgb(0.8, 0, 0) : black }));
+      if (row.boundarySite) {
+        boundaryDeedLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.boundarySite?.header ? bold : regular, color: black }));
+        boundaryActualLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + valueWidth / 2 + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.boundarySite?.header ? bold : regular, color: black }));
+      } else {
+        valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.placeholder ? bold : regular, color: row.placeholder ? rgb(0.8, 0, 0) : black }));
+      }
     }
     y -= height;
   }
@@ -522,6 +536,12 @@ function structuredDocxTable(
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows: rows.map((row) => {
     if (row.section) return new TableRow({ children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 24, font: "Arial" })] })] }), new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
+    if (row.boundarySite) return new TableRow({ children: [
+      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 24) })] }),
+      new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.boundarySite.deed ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.boundarySite.actuals ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
+    ] });
     return new TableRow({ children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 24) })] }),
