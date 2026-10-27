@@ -209,6 +209,7 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
   renderStructuredPage(document, regular, bold, pageThreeRows(valuation), 3);
   renderStructuredPage(document, regular, bold, pageFourRows(valuation), 4);
   renderStructuredPage(document, regular, bold, pageFiveRows(valuation), 5);
+  renderDetailsOfValuationPdf(document, regular, bold, valuation);
   renderAnnexurePdf(document, regular, bold, valuation);
   renderPropertyPhotosPage(document, regular, bold);
   addDynamicPageNumbers(document, regular);
@@ -528,16 +529,6 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "Depreciated building rate (V (a))", value: rate(valuation.buildingRate) },
     { description: "Rate for Land and other V (3) ii", value: rate(valuation.landRate) },
     { description: "Total Composite Rate", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
-    { description: "DETAILS OF VALUATION", section: true },
-    { number: "A.", description: "Market Value of the flat", value: `${rate(valuation.marketValue)}` },
-    { number: "B.", description: "Car Parking", value: `${rate(valuation.carParkingValue)}` },
-    { description: "Total / Fair Market Value", value: money(valuation.fairMarketValue) },
-    { number: "1.", description: `Fair Market Value of the Property 100%`, value: money(valuation.fairMarketValue) },
-    { number: "2.", description: `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, value: money(valuation.realizableValue) },
-    { number: "3.", description: `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, value: money(valuation.distressValue) },
-    { description: "Govt. Value", value: money(valuation.govtValue) },
-    { description: "Rental Value", value: `Approx. ${value(valuation.rentRangePerMonth)} /- per month` },
-    { description: "Insurance Value", value: money(valuation.insuranceValue) },
   ];
 }
 
@@ -575,6 +566,35 @@ function annexureParagraphs(valuation: MakerValuation): string[] {
     "k) Further, I hereby provide the following information.",
     "l) I/we have inspected and valued the right property.",
   ];
+}
+
+function renderDetailsOfValuationPdf(document: PDFDocument, regular: PDFFont, bold: PDFFont, valuation: MakerValuation): void {
+  const page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  const black = rgb(0.08, 0.08, 0.08);
+  const x = 36;
+  const widths = [34, 166, 100, 100, 129];
+  const headers = ["Sr. No.", "Description", "Built up Area Sq. ft.", "Rate per unit Rs.", "Estimated Value Rs."];
+  const rows = [
+    ["A.", "Market Value of the flat", formattedNumber(valuation.adoptedArea), rate(valuation.adoptedRate)],
+    ["B.", "Car Parking", formattedNumber(valuation.nosOfParking), ""],
+    ["", "Total / Fair Market Value", "", "", money(valuation.fairMarketValue)],
+    ["1.", `Fair Market Value of the Property 100%`, "", "", money(valuation.fairMarketValue)],
+    ["2.", `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, "", "", money(valuation.realizableValue)],
+    ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
+    ["", "Govt. Value", "", "", money(valuation.govtValue)],
+    ["", "Rental Value", "", "", `Approx. ${value(valuation.rentRangePerMonth)} /- per month`],
+    ["", "Insurance Value", formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
+  ];
+  let y = PAGE_HEIGHT - 70;
+  page.drawText("Details of Valuation", { x, y, size: 14, font: bold, color: black }); y -= 18;
+  const drawRow = (cells: string[], heights: number, header = false) => {
+    let cursor = x;
+    cells.forEach((cell, index) => { page.drawRectangle({ x: cursor, y: y - heights, width: widths[index]!, height: heights, borderColor: black, borderWidth: 0.45 }); const lines = wrap(cell, header || index === 1 ? bold : regular, 9, widths[index]! - 8); lines.forEach((line, lineIndex) => page.drawText(line, { x: cursor + 4, y: y - 11 - lineIndex * 10, size: 9, font: header || index === 1 ? bold : regular, color: black })); cursor += widths[index]!; }); y -= heights;
+  };
+  drawRow(headers, 34, true);
+  rows.forEach((row) => drawRow(row, Math.max(24, ...row.map((cell, index) => wrap(cell, index === 1 ? bold : regular, 9, widths[index]! - 8).length * 10 + 8))));
+  page.drawText("Remarks:-", { x, y: y - 20, size: 12, font: bold, color: black });
+  page.drawText(value(valuation.remarks), { x: x + 40, y: y - 20, size: 10, font: regular, color: black });
 }
 
 function renderAnnexurePdf(document: PDFDocument, regular: PDFFont, bold: PDFFont, valuation: MakerValuation): void {
