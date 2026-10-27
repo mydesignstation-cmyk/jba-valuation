@@ -216,6 +216,31 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
   return Buffer.from(await document.save()).toString("base64");
 }
 
+function detailsOfValuationDocxTable(
+  valuation: MakerValuation,
+  borders: { style: "single"; size: number; color: string },
+  cellMargins: { top: number; bottom: number; left: number; right: number },
+): Table {
+  const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
+  const rows = [
+    ["Sr. No.", "Description", "Built up Area Sq. ft.", "Rate per unit Rs.", "Estimated Value Rs."],
+    ["A.", "Market Value of the flat", formattedNumber(valuation.adoptedArea), rate(valuation.adoptedRate), money(valuation.marketValue)],
+    ["B.", "Car Parking", formattedNumber(valuation.nosOfParking), "", money(valuation.carParkingValue)],
+    ["", "Total / Fair Market Value", "", "", money(valuation.fairMarketValue)],
+    ["1.", "Fair Market Value of the Property 100%", "", "", money(valuation.fairMarketValue)],
+    ["2.", `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, "", "", money(valuation.realizableValue)],
+    ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
+    ["", "Govt. Value", "", "", money(valuation.govtValue)],
+    ["", "Rental Value", "", "", `Approx. ${value(valuation.rentRangePerMonth)} /- per month`],
+    ["", "Insurance Value", formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
+  ];
+  return new Table({
+    width: { size: 100, type: WidthType.PERCENTAGE },
+    borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
+    rows: rows.map((row, rowIndex) => new TableRow({ children: row.map((cell) => new TableCell({ margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: cell, bold: rowIndex === 0 || cell === row[1], size: 20, font: "Arial" })] })] })) }))
+  });
+}
+
 export async function generateMakerValuationReportDocx(valuation: MakerValuation): Promise<string> {
   const borders = { style: BorderStyle.SINGLE, size: 4, color: "666666" } as const;
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
@@ -245,6 +270,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
       borders,
       cellMargins,
     ),
+    detailsOfValuationDocxTable(valuation, borders, cellMargins),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 24, font: "Arial" })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "DECLARATION FROM VALUERS", bold: true, size: 24, font: "Arial" })] }),
