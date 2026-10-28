@@ -13,6 +13,7 @@ import {
   api_listSiteEngineers as db_listSiteEngineers,
   api_getSiteEngineer as db_getSiteEngineer,
   api_listMakers as db_listMakers,
+  api_listAssignmentUsers as db_listAssignmentUsers,
   api_getMaker as db_getMaker,
   api_getChecker as db_getChecker,
   api_getAssigner as db_getAssigner,
@@ -25,6 +26,8 @@ const listSiteEngineersFn = createServerFn({ method: "GET" }).handler(() => db_l
 const getSiteEngineerFn = createServerFn({ method: "GET" })
   .validator((id: string) => id)
   .handler(({ data }) => db_getSiteEngineer(data));
+
+const listAssignmentUsersFn = createServerFn({ method: "GET" }).handler(() => db_listAssignmentUsers());
 
 const listMakersFn = createServerFn({ method: "GET" }).handler(() => db_listMakers());
 
@@ -50,6 +53,10 @@ export function api_listSiteEngineers(): Promise<User[]> {
 
 export function api_getSiteEngineer(id: string): Promise<User | undefined> {
   return getSiteEngineerFn({ data: id });
+}
+
+export function api_listAssignmentUsers(): Promise<User[]> {
+  return listAssignmentUsersFn();
 }
 
 /** Real Neon Auth users with the MAKER role (for the Assign Maker picker). */

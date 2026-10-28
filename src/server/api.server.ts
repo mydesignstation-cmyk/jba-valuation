@@ -103,6 +103,29 @@ export async function api_getSiteEngineer(id: string): Promise<User | undefined>
  * Maker" picker. Banned users are excluded. Mirrors api_listSiteEngineers —
  * reads directly from neon_auth."user"; no app-owned users table.
  */
+export async function api_listAssignmentUsers(): Promise<User[]> {
+  try {
+    const result = await getDb().execute(
+      sql`SELECT id, name, email, role
+          FROM neon_auth."user"
+          WHERE role IN ('MAKER', 'CHECKER')
+            AND banned IS NOT TRUE
+          ORDER BY name`,
+    );
+
+    const rows = result as unknown as (NeonAuthUserRow & { role: "MAKER" | "CHECKER" })[];
+    return rows.map((row) => ({
+      id: row.id,
+      name: row.name ?? row.email,
+      email: row.email,
+      role: row.role,
+    }));
+  } catch (error) {
+    console.error("Failed to list assignment users:", error);
+    throw new Error("Failed to load assignment users from database");
+  }
+}
+
 export async function api_listMakers(): Promise<User[]> {
   try {
     const result = await getDb().execute(

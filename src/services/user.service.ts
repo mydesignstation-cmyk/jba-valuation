@@ -3,6 +3,7 @@ import {
   api_listSiteEngineers,
   api_getSiteEngineer,
   api_listMakers,
+  api_listAssignmentUsers,
   api_getMaker,
   api_getChecker,
   api_getAssigner,
@@ -23,6 +24,10 @@ export async function listSiteEngineers(): Promise<User[]> {
 
 export async function getSiteEngineer(id: string): Promise<User | undefined> {
   return api_getSiteEngineer(id);
+}
+
+export async function listAssignmentUsers(): Promise<User[]> {
+  return api_listAssignmentUsers();
 }
 
 export async function listMakers(): Promise<User[]> {
