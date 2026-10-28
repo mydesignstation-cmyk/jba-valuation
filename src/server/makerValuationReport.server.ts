@@ -306,11 +306,8 @@ type PageTwoRow = {
   sectionNumber?: string;
   placeholder?: boolean;
   descriptionBold?: boolean;
-  boundarySite?: {
-    deed?: string;
-    actuals?: string;
-    header?: "columns" | "labels";
-  };
+  boundarySite?: { deed?: string; actuals?: string; header?: "columns" | "labels"; };
+  labeledValue?: [string, string][];
 };
 
 function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
