@@ -280,7 +280,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
       borders,
       cellMargins,
     ),
-    new Paragraph({ spacing: { before: 300, after: 120 }, children: [new TextRun({ text: "Details of Valuation", bold: true, size: 23, font: "Arial" })] }),
+    new Paragraph({ pageBreakBefore: true, spacing: { before: 120, after: 120 }, children: [new TextRun({ text: "Details of Valuation", bold: true, size: 23, font: "Arial" })] }),
     detailsOfValuationDocxTable(valuation, borders, cellMargins),
     new Paragraph({ spacing: { before: 250 }, children: [new TextRun({ text: "Remark:-", bold: true, size: 23, font: "Arial" })] }),
     new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: value(valuation.remarks), size: 23, font: "Arial" })] }),
