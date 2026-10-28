@@ -232,7 +232,7 @@ function detailsOfValuationDocxTable(
     ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
     ["", "Govt. Value", "", "", money(valuation.govtValue)],
     ["", "Rental Value", "", "", `Approx. ${formattedNumber(valuation.rentRangePerMonth)} /- per month`],
-    ["", "Insurance Value", `Area in Sq. Ft.\n${formattedNumber(valuation.adoptedArea)}`, `Rate per\nSq. Ft.\n${rate(valuation.buildingRate)}`, money(valuation.insuranceValue)],
+    ["", "Insurance Value", "Area in Sq. Ft.\n(Built up)", "Rate per\nSq. Ft.", "Amount in Rs."],
     ["", `Flat on ${value(valuation.locatedOnFloor)} Floor`, formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
   ];
   return new Table({
@@ -655,7 +655,7 @@ function renderDetailsOfValuationPdf(document: PDFDocument, regular: PDFFont, bo
     ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
     ["", "Govt. Value", "", "", money(valuation.govtValue)],
     ["", "Rental Value", "", "", `Approx. ${formattedNumber(valuation.rentRangePerMonth)} /- per month`],
-    ["", "Insurance Value", `Area in Sq. Ft.\n${formattedNumber(valuation.adoptedArea)}`, `Rate per\nSq. Ft.\n${rate(valuation.buildingRate)}`, money(valuation.insuranceValue)],
+    ["", "Insurance Value", "Area in Sq. Ft.\n(Built up)", "Rate per\nSq. Ft.", "Amount in Rs."],
     ["", `Flat on ${value(valuation.locatedOnFloor)} Floor`, formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
   ];
   let y = PAGE_HEIGHT - 70;
