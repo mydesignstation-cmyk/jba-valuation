@@ -42,7 +42,7 @@ import { stageLabels, stageBadgeVariant, stageColors } from "@/lib/case-format";
 import { cn } from "@/lib/utils";
 import { getSessionToken } from "@/lib/auth-client";
 import { api_listCheckerCases, api_assignMaker } from "@/data/case.functions";
-import { listSiteEngineers } from "@/services/user.service";
+import { listSiteEngineers, listAssignmentUsers } from "@/services/user.service";
 import type { ValuationCase } from "@/types";
 
 type CheckerCase = ValuationCase & {
@@ -81,6 +81,13 @@ function Page() {
     queryKey: ["site-engineers"],
     queryFn: listSiteEngineers,
   });
+
+  const { data: assignmentUsers = [] } = useQuery({
+    queryKey: ["assignment-users"],
+    queryFn: listAssignmentUsers,
+  });
+
+  const assignmentUserName = useMemo(() => new Map(assignmentUsers.map((u) => [u.id, u.name])), [assignmentUsers]);
 
   const engineerName = useMemo(() => new Map(engineers.map((e) => [e.id, e.name])), [engineers]);
 
@@ -199,6 +206,7 @@ function Page() {
                     bankName=""
                     branchName=""
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
+                    assignmentTooltip={c.assignedMakerId ? `Maker: ${assignmentUserName.get(c.assignedMakerId) ?? "Unknown"}` : undefined}
                     stage={c.stage}
                     fieldVisitIconLabel
                     createdAt={c.createdAt}
@@ -271,7 +279,7 @@ function Page() {
                         <TableCell>{(c as CheckerCase).customerName ?? "—"}</TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
+                          <Badge title={c.assignedMakerId ? `Maker: ${assignmentUserName.get(c.assignedMakerId) ?? "Unknown"}` : undefined} className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
                             {c.stage === "FIELD_VISIT_SUBMITTED" ? (
                               <span className="flex items-center gap-1">
                                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />

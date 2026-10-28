@@ -25,7 +25,7 @@ import { api_listMakerCases } from "@/data/case.functions";
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
-import { listSiteEngineers } from "@/services/user.service";
+import { listSiteEngineers, listAssignmentUsers } from "@/services/user.service";
 
 export const Route = createFileRoute("/_app/maker/")({
   head: () => pageMeta("My Cases", "Cases assigned to you for review."),
@@ -60,6 +60,13 @@ function Page() {
     queryKey: ["site-engineers"],
     queryFn: listSiteEngineers,
   });
+
+  const { data: assignmentUsers = [] } = useQuery({
+    queryKey: ["assignment-users"],
+    queryFn: listAssignmentUsers,
+  });
+
+  const assignmentUserName = useMemo(() => new Map(assignmentUsers.map((u) => [u.id, u.name])), [assignmentUsers]);
 
   const customerName = useMemo(() => new Map(customers.map((c) => [c.id, c.name])), [customers]);
   const bankName = useMemo(() => new Map(banks.map((b) => [b.id, b.name])), [banks]);
@@ -133,6 +140,7 @@ function Page() {
                     bankName={bankName.get(c.bankId) ?? "—"}
                     branchName={branchName.get(c.branchId) ?? "—"}
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
+                    assignmentTooltip={c.assignedByCheckerId ? `Checker: ${assignmentUserName.get(c.assignedByCheckerId) ?? "Unknown"}` : undefined}
                     stage={c.stage}
                     createdAt={c.createdAt}
                     onOpen={() => navigate({ to: "/cases/$caseId", params: { caseId: c.id } })}
@@ -172,7 +180,7 @@ function Page() {
                         </TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
+                          <Badge title={c.assignedByCheckerId ? `Checker: ${assignmentUserName.get(c.assignedByCheckerId) ?? "Unknown"}` : undefined} className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0")}>
                             {stageLabels[c.stage]}
                           </Badge>
                         </TableCell>

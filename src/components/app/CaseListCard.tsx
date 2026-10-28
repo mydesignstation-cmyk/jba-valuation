@@ -15,7 +15,7 @@ interface CaseListCardProps {
   /** Optional, shown on the admin Cases list where an engineer is assigned. */
   engineerName?: string;
   /** Names of assigned Maker/Checker shown on hover. */
-  assignmentTooltip?: string;
+  assignmentTooltip?: string | undefined;
   stage: CaseStage;
   /** Shows a green check and "Field Visit" for submitted visits. */
   fieldVisitIconLabel?: boolean;
