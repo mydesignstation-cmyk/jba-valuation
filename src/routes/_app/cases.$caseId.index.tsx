@@ -350,6 +350,13 @@ function Page() {
   const isChecker = currentUser?.role === "CHECKER";
   const isMaker = currentUser?.role === "MAKER";
   const isUploader = currentUser?.role === "UPLOADER";
+  const checkerValuationEditableStages = [
+    "MAKER_COMPLETED",
+    "CHECKER_PENDING",
+    "CHECKER_COMPLETED",
+    "UPLOADER_PENDING",
+    "COMPLETED",
+  ] as const;
   // Who may assign vs reassign a Maker. These are UI gates only; the server
   // (api_assignMaker) is the authority on the same rules.
   //  - assign  : Checker + admins, only when no Maker is assigned yet.
@@ -615,6 +622,18 @@ function Page() {
   const customerName = customer?.name ?? valuationCase.customerId;
   const bankName = bank?.name ?? valuationCase.bankId;
   const branchName = branch?.name ?? valuationCase.branchId;
+  const canEditValuation =
+    (isMaker &&
+      valuationCase?.assignedMakerId === currentUser?.id &&
+      (valuationCase.stage === "MAKER_ASSIGNED" ||
+        valuationCase.stage === "MAKER_PENDING" ||
+        valuationCase.stage === "CHECKER_PENDING")) ||
+    (isChecker &&
+      !!valuationCase &&
+      checkerValuationEditableStages.includes(
+        valuationCase.stage as (typeof checkerValuationEditableStages)[number],
+      ));
+
   const makerValuationPrefill = {
     dateOfValuation: new Date().toISOString().slice(0, 10),
     dateOfInspection: fieldVisit?.submittedAt?.slice(0, 10),
@@ -1183,11 +1202,7 @@ function Page() {
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">
-                        {isMaker &&
-                          valuationCase.assignedMakerId === currentUser?.id &&
-                          (valuationCase.stage === "MAKER_ASSIGNED" ||
-                            valuationCase.stage === "MAKER_PENDING" ||
-                            valuationCase.stage === "CHECKER_PENDING") && (
+                        {canEditValuation && (
                             <Button variant="outline" size="sm" onClick={() => setShowValuationForm(true)}>
                               <PenLine className="mr-2 h-4 w-4" />
                               Edit
