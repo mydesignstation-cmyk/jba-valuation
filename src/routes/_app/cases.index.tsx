@@ -42,7 +42,7 @@ import {
 import { api_listCustomers } from "@/data/customer.functions";
 import { api_listBanks } from "@/data/bank.functions";
 import { api_listBranches } from "@/data/branch.functions";
-import { listSiteEngineers } from "@/services/user.service";
+import { listSiteEngineers, listAssignmentUsers } from "@/services/user.service";
 import { formatDisplayDate } from "@/lib/date-format";
 import { useMemo, useState } from "react";
 import { toast } from "sonner";
@@ -97,6 +97,16 @@ function Page() {
     queryKey: ["site-engineers"],
     queryFn: listSiteEngineers,
   });
+
+  const { data: assignmentUsers = [] } = useQuery({
+    queryKey: ["assignment-users"],
+    queryFn: listAssignmentUsers,
+  });
+
+  const assignmentUserName = useMemo(
+    () => new Map(assignmentUsers.map((u) => [u.id, u.name])),
+    [assignmentUsers],
+  );
 
   const customerName = useMemo(() => new Map(customers.map((c) => [c.id, c.name])), [customers]);
   const bankName = useMemo(() => new Map(banks.map((b) => [b.id, b.name])), [banks]);
@@ -300,6 +310,14 @@ function Page() {
                     bankName={bankName.get(c.bankId) ?? "—"}
                     branchName={branchName.get(c.branchId) ?? "—"}
                     engineerName={engineerName.get(c.assignedEngineerId) ?? "—"}
+                    assignmentTooltip={[
+                      c.assignedMakerId && assignmentUserName.get(c.assignedMakerId)
+                        ? `Maker: ${assignmentUserName.get(c.assignedMakerId)}`
+                        : "",
+                      c.assignedByCheckerId && assignmentUserName.get(c.assignedByCheckerId)
+                        ? `Checker: ${assignmentUserName.get(c.assignedByCheckerId)}`
+                        : "",
+                    ].filter(Boolean).join(" · ")}
                     stage={c.stage}
                     fieldVisitIconLabel
                     createdAt={c.createdAt}
@@ -383,8 +401,17 @@ function Page() {
                         </TableCell>
                         <TableCell>{engineerName.get(c.assignedEngineerId) ?? "—"}</TableCell>
                         <TableCell>
-                          <Badge className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0 hover:brightness-90")}>
-                            {c.stage === "FIELD_VISIT_SUBMITTED" ? (
+                          <Badge
+                            title={[
+                              c.assignedMakerId && assignmentUserName.get(c.assignedMakerId)
+                                ? `Maker: ${assignmentUserName.get(c.assignedMakerId)}`
+                                : "",
+                              c.assignedByCheckerId && assignmentUserName.get(c.assignedByCheckerId)
+                                ? `Checker: ${assignmentUserName.get(c.assignedByCheckerId)}`
+                                : "",
+                            ].filter(Boolean).join(" · ") || undefined}
+                            className={cn(stageColors[c.stage].bg, stageColors[c.stage].text, "border-0 hover:brightness-90")}
+                          >                            {c.stage === "FIELD_VISIT_SUBMITTED" ? (
                               <span className="flex items-center gap-1">
                                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
                                 Field Visit

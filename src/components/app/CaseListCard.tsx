@@ -14,6 +14,8 @@ interface CaseListCardProps {
   branchName: string;
   /** Optional, shown on the admin Cases list where an engineer is assigned. */
   engineerName?: string;
+  /** Names of assigned Maker/Checker shown on hover. */
+  assignmentTooltip?: string;
   stage: CaseStage;
   /** Shows a green check and "Field Visit" for submitted visits. */
   fieldVisitIconLabel?: boolean;
@@ -36,6 +38,7 @@ export function CaseListCard({
   bankName,
   branchName,
   engineerName,
+  assignmentTooltip,
   stage,
   fieldVisitIconLabel = false,
   createdAt,
@@ -68,7 +71,10 @@ export function CaseListCard({
           ) : null}
         </div>
         <div className="flex shrink-0 items-center gap-1">
-          <Badge className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0 hover:brightness-90")}>
+          <Badge
+            title={assignmentTooltip || undefined}
+            className={cn(stageColors[stage].bg, stageColors[stage].text, "border-0 hover:brightness-90")}
+          >
             {fieldVisitIconLabel && stage === "FIELD_VISIT_SUBMITTED" ? (
               <span className="flex items-center gap-1">
                 <CheckCircle2 className="h-3.5 w-3.5" aria-hidden="true" />
