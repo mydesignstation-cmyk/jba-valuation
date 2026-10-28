@@ -238,7 +238,7 @@ function detailsOfValuationDocxTable(
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
-    rows: rows.map((row, rowIndex) => new TableRow({ children: row.map((cell) => new TableCell({ margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: cell, bold: rowIndex === 0 || cell === row[1], size: 20, font: "Arial" })] })] })) }))
+    rows: rows.map((row, rowIndex) => new TableRow({ cantSplit: true, children: row.map((cell) => new TableCell({ margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: cell, bold: rowIndex === 0 || cell === row[1], size: 20, font: "Arial" })] })] })) }))
   });
 }
 
@@ -247,7 +247,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   const cellMargins = { top: 70, bottom: 70, left: 90, right: 90 };
   const rows = tableRows(valuation).map((row) =>
-    new TableRow({ children: [
+    new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.label, bold: true, size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 24, row.valueBold) })] }),
     ]}),
@@ -393,7 +393,7 @@ function pageTwoDocxTable(
           new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: row.descriptionBold ?? false, size: 24, font: "Arial" })] })] }),
           new TableCell({ width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 24, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 24) })] }),
         ];
-    return new TableRow({ children: cells });
+    return new TableRow({ cantSplit: true, children: cells });
   });
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows });
 }
@@ -555,14 +555,14 @@ function structuredDocxTable(
 ): Table {
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows: rows.map((row) => {
-    if (row.section) return new TableRow({ children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 24, font: "Arial" })] })] }), new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
+    if (row.section) return new TableRow({ cantSplit: true, children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 24, font: "Arial" })] })] }), new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
     if (row.boundarySite) return new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 24) })] }),
       new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.boundarySite.deed ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.boundarySite.actuals ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
     ] });
-    return new TableRow({ children: [
+    return new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 24) })] }),
       new TableCell({ width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 24, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 24) })] }),
@@ -766,7 +766,7 @@ function annexureDocxTable(
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
-    rows: annexureRows(valuation).map((row) => new TableRow({ children: [
+    rows: annexureRows(valuation).map((row) => new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number, size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.particulars, 24) })] }),
       new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: emphasizedTextRuns(row.comment, annexureMappedValues(valuation, row.number), 24) })] }),
