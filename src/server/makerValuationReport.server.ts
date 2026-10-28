@@ -239,13 +239,10 @@ function detailsOfValuationDocxTable(
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
     rows: rows.map((row, rowIndex) => {
-      if (rowIndex === 7 || rowIndex === 8) {
-        return new TableRow({ cantSplit: true, children: [
-          new TableCell({ columnSpan: 3, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row[1] ?? "", bold: true, size: 20, font: "Arial" })] })] }),
-          new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row[4] ?? "", size: 20, font: "Arial" })] })] }),
-        ] });
-      }
-      return new TableRow({ cantSplit: true, children: row.map((cell) => new TableCell({ margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: cell, bold: rowIndex === 0, size: 20, font: "Arial" })] })] })) });
+      const cell = (text: string, width: number, bold = false, span?: number) => new TableCell({ width: { size: width, type: WidthType.PERCENTAGE }, ...(span ? { columnSpan: span } : {}), margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text, bold, size: 20, font: "Arial" })] })] });
+      if (rowIndex === 7 || rowIndex === 8) return new TableRow({ cantSplit: true, children: [cell(row[1] ?? "", 60, true, 3), cell(row[4] ?? "", 40, false, 2)] });
+      if (rowIndex >= 4 && rowIndex <= 6) return new TableRow({ cantSplit: true, children: [cell(row[0] ?? "", 8), cell(row[1] ?? "", 72, false, 3), cell(row[4] ?? "", 20)] });
+      return new TableRow({ cantSplit: true, children: [cell(row[0] ?? "", 8, rowIndex === 0), cell(row[1] ?? "", 32, rowIndex === 0), cell(row[2] ?? "", 20, rowIndex === 0), cell(row[3] ?? "", 20, rowIndex === 0), cell(row[4] ?? "", 20, rowIndex === 0)] });
     })
   });
 }
