@@ -499,6 +499,12 @@ function Page() {
     queryFn: () => getUser(makerValuation!.createdById),
     enabled: !!makerValuation?.createdById,
   });
+  // Resolve the Checker editor name (for the attribution banner in the Maker Valuation tab).
+  const { data: makerValuationCheckerEditor } = useQuery({
+    queryKey: ["maker-valuation-checker-editor", makerValuation?.checkerUpdatedById],
+    queryFn: () => getChecker(makerValuation!.checkerUpdatedById!),
+    enabled: !!makerValuation?.checkerUpdatedById,
+  });
 
   // Keep mutation hooks above the loading/error returns so every render uses
   // the same hook order. The route id is stable before the case query resolves.
@@ -1199,6 +1205,15 @@ function Page() {
                             </span>{" "}
                             on {formatDisplayDateTime(makerValuation.createdAt)}
                           </p>
+                          {makerValuation.checkerUpdatedAt && (
+                            <p className="text-sm text-muted-foreground">
+                              Last edited by{" "}
+                              <span className="font-medium text-foreground">
+                                {makerValuationCheckerEditor?.name || "—"}
+                              </span>{" "}
+                              on {formatDisplayDateTime(makerValuation.checkerUpdatedAt)}
+                            </p>
+                          )}
                         </div>
                       </div>
                       <div className="flex shrink-0 flex-wrap items-center justify-end gap-2">

@@ -246,8 +246,8 @@ export const fieldVisits = pgTable(
 // Maker Valuations table
 //
 // One Maker Valuation per Case (case_id is UNIQUE). Stores the 5 Basic Details
-// fields and the generated PDF as bytes. No DRAFT status, no updates—created
-// once at submission, PDF generated and stored immediately.
+// fields and the generated PDF as bytes. Edit attribution tracked separately
+// for Maker and Checker updates (like field visits).
 export const makerValuations = pgTable(
   "maker_valuations",
   {
@@ -396,6 +396,9 @@ export const makerValuations = pgTable(
     pdf_bytes: text("pdf_bytes").notNull(), // Base64-encoded PDF
     created_by_id: uuid("created_by_id").notNull(),
     created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    // Checker edit attribution
+    checker_updated_by_id: uuid("checker_updated_by_id"),
+    checker_updated_at: timestamp("checker_updated_at", { withTimezone: true }),
   },
   (table) => [
     foreignKey({
