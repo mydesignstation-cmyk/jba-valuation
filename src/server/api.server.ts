@@ -2228,6 +2228,14 @@ const MAKER_VALUATION_EDITABLE_STAGES = [
   "CHECKER_PENDING",
 ] as const;
 
+const CHECKER_VALUATION_EDITABLE_STAGES = [
+  "MAKER_COMPLETED",
+  "CHECKER_PENDING",
+  "CHECKER_COMPLETED",
+  "UPLOADER_PENDING",
+  "COMPLETED",
+] as const;
+
 async function requireMakerValuationCase(
   token: string | null | undefined,
   caseId: string,
@@ -2241,6 +2249,19 @@ async function requireMakerValuationCase(
     throw new Error("This case is not in a stage where the Maker Valuation can be edited");
   }
   return { makerId: user.id };
+}
+
+async function requireCheckerValuationCase(
+  token: string | null | undefined,
+  caseId: string,
+): Promise<void> {
+  await requireServerUser(token, "CHECKER");
+  const rows = await getDb().select().from(cases).where(eq(cases.id, caseId)).limit(1);
+  const row = rows[0];
+  if (!row) throw new Error("Case not found");
+  if (!(CHECKER_VALUATION_EDITABLE_STAGES as readonly string[]).includes(row.stage)) {
+    throw new Error("This case is not in a stage where the Maker Valuation can be edited");
+  }
 }
 
 function camelToSnake(value: string): string {
@@ -2272,7 +2293,7 @@ export async function api_createMakerValuation(
   token: string | null | undefined,
   input: CreateMakerValuationInput,
 ): Promise<MakerValuation> {
-  const user = await requireServerUser(token, "MAKER");
+  const user = await requireServerUser(token, "MAKER", "CHECKER");
 
   try {
     input = createMakerValuationSchema.parse(normalizeMakerValuationInput(input));
@@ -2283,7 +2304,13 @@ export async function api_createMakerValuation(
       .where(eq(makerValuations.case_id, input.caseId))
       .limit(1);
     if (existingRows[0]) {
-      await requireMakerValuationCase(token, input.caseId);
+      if (user.role === "CHECKER") {
+        await requireCheckerValuationCase(token, input.caseId);
+      } else {
+        await requireMakerValuationCase(token, input.caseId);
+      }
+    } else if (user.role !== "MAKER") {
+      throw new Error("A Checker can only edit an existing Maker Valuation");
     }
 
     // Build the valuation object for PDF generation
