@@ -239,7 +239,7 @@ function detailsOfValuationDocxTable(
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
     rows: rows.map((row, rowIndex) => {
-      const cell = (text: string, width: number, bold = false, span?: number) => new TableCell({ width: { size: width, type: WidthType.PERCENTAGE }, ...(span ? { columnSpan: span } : {}), margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text, bold, size: 20, font: "Arial" })] })] });
+      const cell = (text: string, width: number, bold = false, span?: number) => new TableCell({ width: { size: width, type: WidthType.PERCENTAGE }, ...(span ? { columnSpan: span } : {}), margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text, bold, size: 19, font: "Arial" })] })] });
       const isTotal = rowIndex === 3;
       if (rowIndex === 9) return new TableRow({ cantSplit: true, children: [cell(row[1] ?? "", 40, true, 2), cell(row[2] ?? "", 20, true), cell(row[3] ?? "", 20, true), cell(row[4] ?? "", 20, true)] });
       if (rowIndex === 10) return new TableRow({ cantSplit: true, children: [cell(row[1] ?? "", 40, true, 2), cell(row[2] ?? "", 20), cell(row[3] ?? "", 20), cell(row[4] ?? "", 20)] });
@@ -257,43 +257,43 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
   const cellMargins = { top: 70, bottom: 70, left: 90, right: 90 };
   const rows = tableRows(valuation).map((row) =>
     new TableRow({ cantSplit: true, children: [
-      new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.label, bold: true, size: 24, font: "Arial" })] })] }),
-      new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 24, row.valueBold) })] }),
+      new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.label, bold: true, size: 23, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 23, row.valueBold) })] }),
     ]}),
   );
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
     new Paragraph({ spacing: { after: 2600 }, text: "" }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date       :  ${formatDisplayDate(value(valuation.dateOfValuation))}\nRef. No.  :  ${value(valuation.refNo)}`, 24) }),
-    new Paragraph({ spacing: { before: 500 }, children: [new TextRun({ text: "To", size: 24, font: "Arial" })] }),
-    new Paragraph({ children: [new TextRun({ text: "The Branch Manager", bold: true, size: 24, font: "Arial" })] }),
-    new Paragraph({ children: [new TextRun({ text: value(valuation.bankName), size: 24, font: "Arial" })] }),
-    new Paragraph({ children: [new TextRun({ text: `${value(valuation.branch)} Branch,`, size: 24, font: "Arial" })] }),
-    new Paragraph({ children: [new TextRun({ text: `${value(valuation.district)}.`, size: 24, font: "Arial" })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500, after: 260 }, children: [new TextRun({ text: "CERTIFICATE", bold: true, underline: {}, size: 22 })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 220 }, children: [new TextRun({ text: "We certify that we have surveyed the said immovable property", size: 24 })] }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date       :  ${formatDisplayDate(value(valuation.dateOfValuation))}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
+    new Paragraph({ spacing: { before: 500 }, children: [new TextRun({ text: "To", size: 23, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: "The Branch Manager", bold: true, size: 23, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: value(valuation.bankName), size: 23, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: `${value(valuation.branch)} Branch,`, size: 23, font: "Arial" })] }),
+    new Paragraph({ children: [new TextRun({ text: `${value(valuation.district)}.`, size: 23, font: "Arial" })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500, after: 260 }, children: [new TextRun({ text: "CERTIFICATE", bold: true, underline: {}, size: 21 })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { after: 220 }, children: [new TextRun({ text: "We certify that we have surveyed the said immovable property", size: 23 })] }),
     new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 550 }, children: [new TextRun({ text: "For JBA Consulting & Advisory Services LLP", size: 24 })] }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 300 }, children: textRunsWithBreaks("Authorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 20) }),
-    new Paragraph({ alignment: AlignmentType.CENTER, pageBreakBefore: true, spacing: { after: 220 }, children: [new TextRun({ text: "VALUATION REPORT", bold: true, underline: {}, size: 20 })] }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 550 }, children: [new TextRun({ text: "For JBA Consulting & Advisory Services LLP", size: 23 })] }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 300 }, children: textRunsWithBreaks("Authorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 19) }),
+    new Paragraph({ alignment: AlignmentType.CENTER, pageBreakBefore: true, spacing: { after: 220 }, children: [new TextRun({ text: "VALUATION REPORT", bold: true, underline: {}, size: 19 })] }),
     structuredDocxTable(
       [...pageTwoRows(valuation), ...pageThreeRows(valuation), ...pageFourRows(valuation), ...pageFiveRows(valuation)],
       borders,
       cellMargins,
     ),
-    new Paragraph({ spacing: { before: 300, after: 120 }, children: [new TextRun({ text: "Details of Valuation", bold: true, size: 24, font: "Arial" })] }),
+    new Paragraph({ spacing: { before: 300, after: 120 }, children: [new TextRun({ text: "Details of Valuation", bold: true, size: 23, font: "Arial" })] }),
     detailsOfValuationDocxTable(valuation, borders, cellMargins),
-    new Paragraph({ spacing: { before: 250 }, children: [new TextRun({ text: "Remark:-", bold: true, size: 24, font: "Arial" })] }),
-    new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: value(valuation.remarks), size: 24, font: "Arial" })] }),
+    new Paragraph({ spacing: { before: 250 }, children: [new TextRun({ text: "Remark:-", bold: true, size: 23, font: "Arial" })] }),
+    new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: value(valuation.remarks), size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new PageBreak()] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 24, font: "Arial" })] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "DECLARATION FROM VALUERS", bold: true, size: 24, font: "Arial" })] }),
-    ...annexureParagraphs(valuation).map((paragraph) => new Paragraph({ spacing: { after: 100, line: 240 }, children: emphasizedTextRuns(paragraph, [reportDate(valuation.dateOfValuation), reportDate(valuation.dateOfInspection)], 24) })),
+    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 23, font: "Arial" })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "DECLARATION FROM VALUERS", bold: true, size: 23, font: "Arial" })] }),
+    ...annexureParagraphs(valuation).map((paragraph) => new Paragraph({ spacing: { after: 100, line: 230 }, children: emphasizedTextRuns(paragraph, [reportDate(valuation.dateOfValuation), reportDate(valuation.dateOfInspection)], 23) })),
     annexureDocxTable(valuation, borders, cellMargins),
-    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`Date: ${reportDate(valuation.dateOfValuation)}\nPlace: Mumbai`, 20, true) }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks("JBA Consulting & Advisory Services LLP\n\nAuthorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 20) }),
-    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: - -------------------------------------------------------------------------------)`, 20, true) }),
+    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`Date: ${reportDate(valuation.dateOfValuation)}\nPlace: Mumbai`, 19, true) }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks("JBA Consulting & Advisory Services LLP\n\nAuthorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 19) }),
+    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: - -------------------------------------------------------------------------------)`, 19, true) }),
     new Paragraph({ children: [new PageBreak()] }),
-    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500 }, children: [new TextRun({ text: "Property Photos", bold: true, size: 24, font: "Arial" })] }),
+    new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500 }, children: [new TextRun({ text: "Property Photos", bold: true, size: 23, font: "Arial" })] }),
   ] }] });
   return Buffer.from(await Packer.toBuffer(doc)).toString("base64");
 }
@@ -564,17 +564,17 @@ function structuredDocxTable(
 ): Table {
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows: rows.map((row) => {
-    if (row.section) return new TableRow({ cantSplit: true, children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 24, font: "Arial" })] })] }), new TableCell({ columnSpan: 3, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
+    if (row.section) return new TableRow({ cantSplit: true, children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 23, font: "Arial" })] })] }), new TableCell({ columnSpan: 3, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 23, font: "Arial" })] })] })] });
     if (row.boundarySite) return new TableRow({ cantSplit: true, children: [
-      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
-      new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 24) })] }),
-      new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: [new TextRun({ text: row.boundarySite.deed ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
-      new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: [new TextRun({ text: row.boundarySite.actuals ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 23, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 23) })] }),
+      new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: [new TextRun({ text: row.boundarySite.deed ?? "", bold: Boolean(row.boundarySite.header), size: 23, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: [new TextRun({ text: row.boundarySite.actuals ?? "", bold: Boolean(row.boundarySite.header), size: 23, font: "Arial" })] })] }),
     ] });
     return new TableRow({ cantSplit: true, children: [
-      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
-      new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 24) })] }),
-      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 24, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 24) })] }),
+      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 23, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 23) })] }),
+      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 23, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 23) })] }),
     ] });
   }) });
 }
@@ -776,9 +776,9 @@ function annexureDocxTable(
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
     rows: annexureRows(valuation).map((row) => new TableRow({ cantSplit: true, children: [
-      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number, size: 24, font: "Arial" })] })] }),
-      new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.particulars, 24) })] }),
-      new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: emphasizedTextRuns(row.comment, annexureMappedValues(valuation, row.number), 24) })] }),
+      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number, size: 23, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 42, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.particulars, 23) })] }),
+      new TableCell({ width: { size: 50, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: emphasizedTextRuns(row.comment, annexureMappedValues(valuation, row.number), 23) })] }),
     ] })),
   });
 }
