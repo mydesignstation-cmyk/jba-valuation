@@ -231,8 +231,9 @@ function detailsOfValuationDocxTable(
     ["2.", `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, "", "", money(valuation.realizableValue)],
     ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
     ["", "Govt. Value", "", "", money(valuation.govtValue)],
-    ["", "Rental Value", "", "", `Approx. ${value(valuation.rentRangePerMonth)} /- per month`],
-    ["", "Insurance Value", formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
+    ["", "Rental Value", "", "", `Approx. ${formattedNumber(valuation.rentRangePerMonth)} /- per month`],
+    ["", "Insurance Value", "Area in Sq. Ft.\n${formattedNumber(valuation.adoptedArea)}", `Rate per\nSq. Ft.\n${rate(valuation.buildingRate)}`, money(valuation.insuranceValue)],
+    ["", `Flat on ${value(valuation.locatedOnFloor)} Floor`, formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
   ];
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
@@ -270,6 +271,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
       borders,
       cellMargins,
     ),
+    new Paragraph({ children: [new TextRun({ text: "Details of Valuation", bold: true, size: 24, font: "Arial" })] }),
     detailsOfValuationDocxTable(valuation, borders, cellMargins),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 24, font: "Arial" })] }),
@@ -485,7 +487,7 @@ function renderStructuredPage(
   rows: PageTwoRow[],
   pageNumber: number,
 ): void {
-  const page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+  let page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   const black = rgb(0.08, 0.08, 0.08);
   const tableX = 70;
   const numberWidth = 28;
@@ -498,7 +500,23 @@ function renderStructuredPage(
   const title = "VALUATION REPORT";
   page.drawText(title, { x: (PAGE_WIDTH - bold.widthOfTextAtSize(title, 10)) / 2, y, size: 10, font: bold, color: black });
   y -= 18;
-  for (const row of rows) {
+  for (let rowIndex = 0; rowIndex < rows.length; rowIndex += 1) {
+    const row = rows[rowIndex]!;
+    if (row.boundarySite?.header === "columns") {
+      const boundaryRows = rows.slice(rowIndex, rowIndex + 6);
+      const boundaryHeight = boundaryRows.reduce((total, boundaryRow) => {
+        const boundaryDescriptionLines = wrap(boundaryRow.description, regular, fontSize, descriptionWidth - padding * 2);
+        const boundaryDeedLines = wrap(boundaryRow.boundarySite?.deed ?? "", regular, fontSize, valueWidth / 2 - padding * 2);
+        const boundaryActualLines = wrap(boundaryRow.boundarySite?.actuals ?? "", regular, fontSize, valueWidth / 2 - padding * 2);
+        return total + Math.max(boundaryDescriptionLines.length, boundaryDeedLines.length, boundaryActualLines.length, 1) * lineHeight + padding * 2;
+      }, 0);
+      if (y - boundaryHeight < 42) {
+        page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
+        y = PAGE_HEIGHT - 58;
+        page.drawText(title, { x: (PAGE_WIDTH - bold.widthOfTextAtSize(title, 10)) / 2, y, size: 10, font: bold, color: black });
+        y -= 18;
+      }
+    }
     const descriptionLines = wrap(row.description, regular, fontSize, descriptionWidth - padding * 2);
     const valueLines = wrap(row.value ?? "", regular, fontSize, valueWidth - padding * 2);
     const boundaryDeedLines = row.boundarySite ? wrap(row.boundarySite.deed ?? "", regular, fontSize, valueWidth / 2 - padding * 2) : [];
@@ -536,7 +554,7 @@ function structuredDocxTable(
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   return new Table({ width: { size: 100, type: WidthType.PERCENTAGE }, borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders }, rows: rows.map((row) => {
     if (row.section) return new TableRow({ children: [new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.sectionNumber ?? "", bold: true, size: 24, font: "Arial" })] })] }), new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, shading: { type: ShadingType.CLEAR, fill: "EDEDED" }, children: [new Paragraph({ children: [new TextRun({ text: row.description, bold: true, size: 24, font: "Arial" })] })] })] });
-    if (row.boundarySite) return new TableRow({ children: [
+    if (row.boundarySite) return new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 24) })] }),
       new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.boundarySite.deed ?? "", bold: Boolean(row.boundarySite.header), size: 24, font: "Arial" })] })] }),
@@ -628,8 +646,9 @@ function renderDetailsOfValuationPdf(document: PDFDocument, regular: PDFFont, bo
     ["2.", `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, "", "", money(valuation.realizableValue)],
     ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
     ["", "Govt. Value", "", "", money(valuation.govtValue)],
-    ["", "Rental Value", "", "", `Approx. ${value(valuation.rentRangePerMonth)} /- per month`],
-    ["", "Insurance Value", formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
+    ["", "Rental Value", "", "", `Approx. ${formattedNumber(valuation.rentRangePerMonth)} /- per month`],
+    ["", "Insurance Value", "Area in Sq. Ft.\n${formattedNumber(valuation.adoptedArea)}", `Rate per\nSq. Ft.\n${rate(valuation.buildingRate)}`, money(valuation.insuranceValue)],
+    ["", `Flat on ${value(valuation.locatedOnFloor)} Floor`, formattedNumber(valuation.adoptedArea), rate(valuation.buildingRate), money(valuation.insuranceValue)],
   ];
   let y = PAGE_HEIGHT - 70;
   page.drawText("Details of Valuation", { x, y, size: 14, font: bold, color: black }); y -= 18;
