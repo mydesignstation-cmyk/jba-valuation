@@ -574,7 +574,7 @@ function structuredDocxTable(
     return new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 24, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 24) })] }),
-      new TableCell({ width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 24, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 24) })] }),
+      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 24, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 24) })] }),
     ] });
   }) });
 }
