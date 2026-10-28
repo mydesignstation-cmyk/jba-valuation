@@ -238,7 +238,15 @@ function detailsOfValuationDocxTable(
   return new Table({
     width: { size: 100, type: WidthType.PERCENTAGE },
     borders: { top: borders, bottom: borders, left: borders, right: borders, insideHorizontal: borders, insideVertical: borders },
-    rows: rows.map((row, rowIndex) => new TableRow({ cantSplit: true, children: row.map((cell) => new TableCell({ margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: cell, bold: rowIndex === 0, size: 20, font: "Arial" })] })] })) }))
+    rows: rows.map((row, rowIndex) => {
+      if (rowIndex === 7 || rowIndex === 8) {
+        return new TableRow({ cantSplit: true, children: [
+          new TableCell({ columnSpan: 3, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row[1] ?? "", bold: true, size: 20, font: "Arial" })] })] }),
+          new TableCell({ columnSpan: 2, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row[4] ?? "", size: 20, font: "Arial" })] })] }),
+        ] });
+      }
+      return new TableRow({ cantSplit: true, children: row.map((cell) => new TableCell({ margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: cell, bold: rowIndex === 0, size: 20, font: "Arial" })] })] })) });
+    })
   });
 }
 
