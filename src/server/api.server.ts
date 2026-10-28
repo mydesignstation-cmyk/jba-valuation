@@ -2273,7 +2273,7 @@ function camelToSnake(value: string): string {
 
 type MakerValuationStorageValues = Omit<
   typeof makerValuations.$inferInsert,
-  "id" | "case_id" | "pdf_bytes" | "created_by_id" | "created_at"
+  "id" | "case_id" | "pdf_bytes" | "created_by_id" | "created_at" | "checker_updated_by_id" | "checker_updated_at"
 >;
 
 function buildMakerValuationStorageValues(
@@ -2458,26 +2458,38 @@ export async function api_createMakerValuation(
     let result;
     if (existing.length > 0) {
       // Update existing valuation without changing its original creation time.
+      const updates: Record<string, unknown> = {
+        ...buildMakerValuationStorageValues(input),
+        pdf_bytes: pdfBase64,
+      };
+      // Record Checker edit attribution if the user is a Checker
+      if (user.role === "CHECKER") {
+        updates["checker_updated_by_id"] = user.id;
+        updates["checker_updated_at"] = now;
+      }
       const rows = await getDb()
         .update(makerValuations)
-        .set({
-          ...buildMakerValuationStorageValues(input),
-          pdf_bytes: pdfBase64,
-        })
+        .set(updates)
         .where(eq(makerValuations.case_id, input.caseId))
         .returning();
       result = rows[0];
     } else {
       // Create new valuation
+      const values: Record<string, unknown> = {
+        case_id: input.caseId,
+        ...buildMakerValuationStorageValues(input),
+        pdf_bytes: pdfBase64,
+        created_by_id: user.id,
+        created_at: now,
+      };
+      // Record Checker edit attribution if the user is a Checker
+      if (user.role === "CHECKER") {
+        values["checker_updated_by_id"] = user.id;
+        values["checker_updated_at"] = now;
+      }
       const rows = await getDb()
         .insert(makerValuations)
-        .values({
-          case_id: input.caseId,
-          ...buildMakerValuationStorageValues(input),
-          pdf_bytes: pdfBase64,
-          created_by_id: user.id,
-          created_at: now,
-        })
+        .values(values as any)
         .returning();
       result = rows[0];
     }
@@ -2577,7 +2589,7 @@ function mapMakerValuationRow(rawRow: typeof makerValuations.$inferSelect): Make
 
   const required = (key: keyof typeof makerValuations.$inferSelect): string => row[key] ?? "";
 
-  return {
+  const result = {
     id: required("id"),
     caseId: required("case_id"),
     dateOfValuation: required("date_of_valuation"),
@@ -2704,7 +2716,11 @@ function mapMakerValuationRow(rawRow: typeof makerValuations.$inferSelect): Make
     pdfBytes: required("pdf_bytes"),
     createdById: required("created_by_id"),
     createdAt: row.created_at ?? "",
+    checkerUpdatedById: row.checker_updated_by_id === undefined ? undefined : row.checker_updated_by_id,
+    checkerUpdatedAt: row.checker_updated_at === undefined ? undefined : row.checker_updated_at,
   };
+
+  return result as MakerValuation;
 }
 
 

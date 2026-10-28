@@ -229,6 +229,26 @@ export interface MakerValuation {
   blockNo?: string | undefined;
   district?: string | undefined;
   pinCode?: string | undefined;
+  // Audit Fields
+  /**
+   * Neon Auth UUID of the Maker/admin who created this valuation.
+   * Immutable original creation record.
+   */
+  createdById: string;
+  /**
+   * Timestamp when the valuation was originally created.
+   * Immutable original creation record.
+   */
+  createdAt: string;
+  /**
+   * Neon Auth UUID of the Checker who edited this valuation during their review.
+   * Absent when the valuation has only ever been submitted (never edited by Checker).
+   */
+  checkerUpdatedById?: string;
+  /**
+   * Timestamp when the Checker last edited this valuation.
+   */
+  checkerUpdatedAt?: string;
   // General Section Fields
   purposeOfValuation?: string | undefined;
   documentsName1?: string | undefined;
@@ -334,6 +354,4 @@ export interface MakerValuation {
   // Remarks Section
   remarks?: string | undefined;
   pdfBytes: string; // Base64-encoded PDF
-  createdById: string;
-  createdAt: string;
 }

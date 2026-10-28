@@ -2,7 +2,13 @@ import type { MakerValuation } from "@/types";
 
 export type MakerValuationFieldKey = Exclude<
   keyof MakerValuation,
-  "id" | "caseId" | "pdfBytes" | "createdById" | "createdAt"
+  | "id"
+  | "caseId"
+  | "pdfBytes"
+  | "createdById"
+  | "createdAt"
+  | "checkerUpdatedById"
+  | "checkerUpdatedAt"
 >;
 
 export interface MakerValuationDisplayField {
