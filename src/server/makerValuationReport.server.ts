@@ -429,7 +429,13 @@ function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "South", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteSouth) } },
     { description: "East", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteEast) } },
     { description: "West", boundarySite: { deed: "NA", actuals: value(valuation.boundarySiteWest) } },
-    { number: "14.", description: "Extent of the site", value: `Physical Measured Area: ${formattedNumber(valuation.physicalMeasuredArea)} Sq.Ft.\nDocumented Area: ${formattedNumber(valuation.documentedArea)} Sq.Ft.\nApproved Plan Area: ${formattedNumber(valuation.approvedPlanArea)} Sq.Ft.\nBuilt Up Area: ${formattedNumber(valuation.builtUpArea)} Sq.Ft.\nAdopted Area: ${formattedNumber(valuation.adoptedArea)} Sq.Ft.` },
+    { number: "14.", description: "Extent of the site", labeledValue: [
+      ["Physical Measured Area: ", `${formattedNumber(valuation.physicalMeasuredArea)} Sq.Ft.`],
+      ["Documented Area: ", `${formattedNumber(valuation.documentedArea)} Sq.Ft.`],
+      ["Approved Plan Area: ", `${formattedNumber(valuation.approvedPlanArea)} Sq.Ft.`],
+      ["Built Up Area: ", `${formattedNumber(valuation.builtUpArea)} Sq.Ft.`],
+      ["Adopted Area: ", `${formattedNumber(valuation.adoptedArea)} Sq.Ft.`],
+    ] },
     { number: "15.", description: "Latitude, Longitude and Coordinates of the site", value: `Latitude: ${value(valuation.latitude)}\nLongitude: ${value(valuation.longitude)}` },
     { number: "16.", description: "Extent of the site considered for valuation", value: `Adopted Area: ${value(valuation.adoptedArea)} Sq.Ft.` },
     { number: "17.", description: "Whether occupied by the owner / tenant? If occupied by tenant, since how long? Rent received per month.", value: value(valuation.occupancy) },
@@ -574,7 +580,7 @@ function structuredDocxTable(
     return new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 23, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 23) })] }),
-      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 23, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 23) })] }),
+      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: row.labeledValue ? row.labeledValue.map(([label, val]) => new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 23, font: "Arial" }), new TextRun({ text: val, size: 23, font: "Arial" })] })) : [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 23, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 23) })] }),
     ] });
   }) });
 }
