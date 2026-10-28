@@ -241,8 +241,8 @@ function Page() {
           />
         </div>
 
-        {/* Status totals — every case status is shown separately. */}
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        {/* Status totals — hidden for Makers; their top three workload KPIs are enough. */}
+        <div className={cn("grid gap-4 sm:grid-cols-2 lg:grid-cols-4", isMaker && "hidden")}>
           {STAGE_ORDER.map((stage) => (
             <Card key={stage} className="shadow-card">
               <CardContent className="flex items-center justify-between gap-4 p-5">
