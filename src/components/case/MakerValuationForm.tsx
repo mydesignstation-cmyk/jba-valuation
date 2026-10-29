@@ -1471,8 +1471,8 @@ export function MakerValuationForm({
                   name="occupancy"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Occupancy</FormLabel>
-                      <Select value={field.value || ""} onValueChange={field.onChange}>
+                      <FormLabel>Occupancy *</FormLabel>
+                      <Select value={field.value ?? undefined} onValueChange={field.onChange}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select occupancy status" />
                         </SelectTrigger>
@@ -1484,6 +1484,7 @@ export function MakerValuationForm({
                           ))}
                         </SelectContent>
                       </Select>
+                      <FormMessage />
                     </FormItem>
                   )}
                 />
