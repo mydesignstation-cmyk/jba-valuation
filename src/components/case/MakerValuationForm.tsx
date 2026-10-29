@@ -517,7 +517,6 @@ export function MakerValuationForm({
       const realizableValue = fairMarketValue * (realizableValuePercent / 100);
       const distressValue = fairMarketValue * (distressValuePercent / 100);
       const govtReadyReckonerRatePerSqFt = govtReadyReckonerRatePerSqMtr / 10.7641;
-      const govtValue = adoptedArea * govtReadyReckonerRatePerSqMtr;
 
       // Update values with calculated amounts
       const submissionData: CreateMakerValuationInput = {
@@ -534,6 +533,7 @@ export function MakerValuationForm({
           govtReadyReckonerRatePerSqMtr > 0
             ? govtReadyReckonerRatePerSqFt.toString()
             : values.govtReadyReckonerRatePerSqFt || "",
+        govtValue: values.govtValue || "",
       };
 
       const missingFields = makerValuationFields.filter(
@@ -658,7 +658,7 @@ export function MakerValuationForm({
           distressValue: "Distress Value",
           govtReadyReckonerRatePerSqMtr: "Govt Ready Reckoner Rate Per Sq Mtr",
           govtReadyReckonerRatePerSqFt: "Govt Ready Reckoner Rate Per Sq Ft",
-          govtValue: "Govt Value",
+          govtValue: "Govt. Value",
           rentRangePerMonth: "Rent Range Per Month",
           remarks: "Remarks",
         };
@@ -2298,19 +2298,17 @@ export function MakerValuationForm({
                     </FormItem>
                   )}
                 />
-                {/* Govt. Value (calculated) */}
-                <div className="space-y-2">
-                  <label className="text-sm font-medium text-gray-700">Govt. Value</label>
-                  <p className="text-xs text-muted-foreground">Adopted Area × Govt. Ready Reckoner Rate</p>
-                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
-                    {form.watch("adoptedArea") && form.watch("govtReadyReckonerRatePerSqMtr")
-                      ? (
-                          Number(form.watch("adoptedArea")) *
-                          Number(form.watch("govtReadyReckonerRatePerSqMtr"))
-                        ).toFixed(2)
-                      : "—"}
-                  </div>
-                </div>
+                <FormField
+                  control={form.control}
+                  name="govtValue"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Govt. Value *</FormLabel>
+                      <p className="text-xs text-muted-foreground">Adopted Area × Govt. Ready Reckoner Rate</p>
+                      <Input type="number" step="0.01" placeholder="Enter government value" {...field} />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="rentRangePerMonth"
