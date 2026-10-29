@@ -118,7 +118,7 @@ export const createMakerValuationSchema = z.object({
   boundarySiteMeasured: z.string().min(1, "This field is required"),
   latitude: z.string().min(1, "This field is required"),
   longitude: z.string().min(1, "This field is required"),
-  occupancy: z.string().min(1, "This field is required"),
+  occupancy: z.string().min(1, "Occupancy is required"),
   // Apartment Section
   yearOfConstruction: z.string().min(1, "This field is required"),
   ageOfBuilding: z.string().min(1, "This field is required"),
