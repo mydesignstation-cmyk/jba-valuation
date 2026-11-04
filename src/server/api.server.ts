@@ -2548,6 +2548,14 @@ export async function api_downloadMakerValuationReport(
   const valuation = await api_getMakerValuation(caseId);
   if (!valuation) throw new Error("Maker Valuation not found");
 
+  // Fetch the field visit to get the visit date (for Date of Appointment)
+  const visitRows = await getDb()
+    .select({ visitDate: fieldVisits.visit_date })
+    .from(fieldVisits)
+    .where(eq(fieldVisits.case_id, caseId))
+    .limit(1);
+  const fieldVisitDate = visitRows[0]?.visitDate ?? undefined;
+
   const caseRows = await getDb()
     .select({ caseNumber: cases.case_number })
     .from(cases)
@@ -2560,8 +2568,8 @@ export async function api_downloadMakerValuationReport(
   const fileBase = `VAL-${safeCaseNumber}-${templateName}`;
 
   const [pdfBase64, docxBase64] = await Promise.all([
-    generateMakerValuationReportPdf(valuation),
-    generateMakerValuationReportDocx(valuation),
+    generateMakerValuationReportPdf(valuation, fieldVisitDate),
+    generateMakerValuationReportDocx(valuation, fieldVisitDate),
   ]);
 
   return {
