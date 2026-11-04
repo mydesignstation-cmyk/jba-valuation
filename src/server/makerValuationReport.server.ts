@@ -63,38 +63,34 @@ function money(input: unknown): string {
 }
 
 function numberToWords(num: number): string {
-  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
-  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  const ones: string[] = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens: string[] = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
   
   if (num === 0) return "Zero";
   
   const words: string[] = [];
+  const n = num;
   
-  if (num >= 10000000) {
-    words.push(ones[Math.floor((num as number) / 10000000)] + " Crore");
-    num %= 10000000;
+  if (n >= 10000000) {
+    words.push(ones[Math.floor(n / 10000000)] + " Crore");
   }
   
-  if (num >= 100000) {
-    words.push(ones[Math.floor((num as number) / 100000)] + " Lakh");
-    num %= 100000;
-  } else if (num >= 1000 && words.length === 0) {
-    words.push(ones[Math.floor((num as number) / 1000)] + " Thousand");
-    num %= 1000;
+  if (n >= 100000) {
+    words.push(ones[Math.floor(n / 100000)] + " Lakh");
+  } else if (n >= 1000 && words.length === 0) {
+    words.push(ones[Math.floor(n / 1000)] + " Thousand");
   }
   
-  if (num >= 100) {
-    words.push(ones[Math.floor((num as number) / 100)] + " Hundred");
-    num %= 100;
+  if (n >= 100) {
+    words.push(ones[Math.floor(n / 100)] + " Hundred");
   }
   
-  if (num >= 20) {
-    words.push(tens[Math.floor((num as number) / 10)]);
-    num %= 10;
+  if (n >= 20) {
+    words.push(tens[Math.floor(n / 10)]);
   }
   
-  if (num > 0 && num < 20) {
-    words.push(ones[num as number]);
+  if (n > 0 && n < 20) {
+    words.push(ones[n]);
   }
   
   return words.join(" ");
@@ -645,7 +641,7 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "2.", description: "What are the factors favoring for an extra potential value?", value: value(valuation.positiveFactors) },
     { number: "3.", description: "Any negative factors are observed which affect the market value in general?", value: value(valuation.negativeFactors) },
     { description: "V.   RATE", section: true },
-    { number: "1.", description: "After analyzing the comparable sale instances, what is the composite rate for similar flat with same specifications in the adjoining locality? (Along with details of reference of at least two latest deals/transactions with respect to adjacent properties in the areas)", value: `Prevailing rate of flats in the locality is ${value(valuation.rateRange)} Per Sq. ft. on BUA` },
+    { number: "1.", description: "After analyzing the comparable sale instances, what is the composite rate for similar flat with same specifications in the adjoining locality? (Along with details of reference of at least two latest deals/transactions with respect to adjacent properties in the areas)", value: `Prevailing rate of flats in the locality is ${value(valuation.rateRange!)} Per Sq. ft. on BUA` },
     { number: "2.", description: "Assuming it is a new construction, what is the adopted basic composite rate of the flat under valuation after comparing with the specifications and other factors with the flat under comparison (give details).", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
     { number: "3.", description: "Break-up for the rate", value: "" },
     { description: "i) Building", value: rate(valuation.buildingRate) },
