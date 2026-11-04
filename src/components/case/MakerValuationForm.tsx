@@ -167,8 +167,17 @@ function formString(value: unknown): string {
 }
 
 function formDate(value: unknown): string {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
-  return formString(value).slice(0, 10);
+  if (value instanceof Date) {
+    const d = value;
+    return `${d.getDate().toString().padStart(2, '0')}-${(d.getMonth() + 1).toString().padStart(2, '0')}-${d.getFullYear()}`;
+  }
+  const str = formString(value).slice(0, 10);
+  // Convert YYYY-MM-DD to DD-MM-YYYY if input is in ISO format
+  if (/^\d{4}-\d{2}-\d{2}$/.test(str)) {
+    const [year, month, day] = str.split('-');
+    return `${day}-${month}-${year}`;
+  }
+  return str;
 }
 
 function makerValuationToFormValues(
