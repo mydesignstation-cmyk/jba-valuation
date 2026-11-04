@@ -493,7 +493,16 @@ function Page() {
     queryFn: async () => (await api_getMakerValuation(caseId)) ?? null,
     enabled: !!caseId,
   });
-  const isMakerValuationComplete = !!makerValuation?.pdfBytes;
+
+  // Check if the Maker Valuation has been completed.
+  //
+  // A Maker Valuation record is only ever created once the whole form passes
+  // validation on the server (createMakerValuationSchema requires every field),
+  // so the mere existence of a saved record means the form was filled and
+  // submitted. Checking individual fields like refNo/branch/bankName is NOT a
+  // reliable signal because those are pre-filled from the field visit and are
+  // never empty. The authoritative signal is: does a saved valuation exist?
+  const isMakerValuationComplete = !!makerValuation?.id;
   const { data: makerValuationCreator } = useQuery({
     queryKey: ["maker-valuation-creator", makerValuation?.createdById],
     queryFn: () => getUser(makerValuation!.createdById),
