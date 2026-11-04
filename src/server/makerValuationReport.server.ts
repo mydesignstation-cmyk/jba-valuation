@@ -54,6 +54,52 @@ function money(input: unknown): string {
     : text;
 }
 
+function numberToWords(num: number): string {
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+  
+  if (num === 0) return "Zero";
+  
+  const words: string[] = [];
+  
+  if (num >= 10000000) {
+    words.push(ones[Math.floor(num / 10000000)] + " Crore");
+    num %= 10000000;
+  }
+  
+  if (num >= 100000) {
+    words.push(ones[Math.floor(num / 100000)] + " Lakh");
+    num %= 100000;
+  } else if (num >= 1000 && words.length === 0) {
+    words.push(ones[Math.floor(num / 1000)] + " Thousand");
+    num %= 1000;
+  }
+  
+  if (num >= 100) {
+    words.push(ones[Math.floor(num / 100)] + " Hundred");
+    num %= 100;
+  }
+  
+  if (num >= 20) {
+    words.push(tens[Math.floor(num / 10)]);
+    num %= 10;
+  }
+  
+  if (num > 0 && num < 20) {
+    words.push(ones[num]);
+  }
+  
+  return words.join(" ");
+}
+
+function valueInWords(input: unknown): string {
+  const text = value(input);
+  if (text === EM_DASH) return text;
+  const number = Number(text.replace(/,/g, ""));
+  if (!Number.isFinite(number)) return text;
+  return numberToWords(Math.floor(number));
+}
+
 function address(valuation: MakerValuation): string {
   return [
     valuation.flatNo && `Flat No. ${valuation.flatNo}`,
@@ -291,7 +337,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     annexureDocxTable(valuation, borders, cellMargins),
     new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`Date: ${reportDate(valuation.dateOfValuation)}\nPlace: Mumbai`, 19, true) }),
     new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks("JBA Consulting & Advisory Services LLP\n\nAuthorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 19) }),
-    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: - -------------------------------------------------------------------------------)`, 19, true) }),
+    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: ${valueInWords(valuation.marketValue)})`, 19, true) }),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500 }, children: [new TextRun({ text: "Property Photos", bold: true, size: 23, font: "Arial" })] }),
   ] }] });
@@ -734,7 +780,7 @@ function renderAnnexurePdf(document: PDFDocument, regular: PDFFont, bold: PDFFon
   page.drawText("Authorised Signature", { x: 400, y: y - 50, size: 9, font: bold, color: black });
   page.drawText("(Approved panel valuer)", { x: 395, y: y - 64, size: 8, font: regular, color: black });
   page.drawText(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.`, { x: 70, y: y - 108, size: 9, font: bold, color: black });
-  page.drawText("(In words: - -------------------------------------------------------------------------------)", { x: 70, y: y - 124, size: 9, font: bold, color: black });
+  page.drawText(`(In words: ${valueInWords(valuation.marketValue)})`, { x: 70, y: y - 124, size: 9, font: bold, color: black });
 }
 
 function renderPropertyPhotosPage(document: PDFDocument, regular: PDFFont, bold: PDFFont): void {
