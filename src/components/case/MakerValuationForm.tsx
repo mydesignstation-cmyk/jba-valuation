@@ -167,7 +167,12 @@ function formString(value: unknown): string {
 }
 
 function formDate(value: unknown): string {
-  if (value instanceof Date) return value.toISOString().slice(0, 10);
+  if (value instanceof Date) {
+    const day = value.getDate().toString().padStart(2, "0");
+    const month = (value.getMonth() + 1).toString().padStart(2, "0");
+    const year = value.getFullYear();
+    return `${day}-${month}-${year}`;
+  }
   return formString(value).slice(0, 10);
 }
 
