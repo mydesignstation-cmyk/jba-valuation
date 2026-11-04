@@ -32,6 +32,14 @@ function reportDate(input: unknown): string {
   return match ? `${match[3]}-${match[2]}-${match[1]}` : text;
 }
 
+function reportDateFromISOString(input?: string): string {
+  if (!input) return EM_DASH;
+  const text = value(input);
+  if (text === EM_DASH) return text;
+  const match = text.match(/^(\d{4})-(\d{2})-(\d{2})/);
+  return match ? `${match[3]}-${match[2]}-${match[1]}` : text;
+}
+
 function formattedNumber(input: unknown): string {
   const text = value(input);
   if (text === EM_DASH) return text;
@@ -63,30 +71,30 @@ function numberToWords(num: number): string {
   const words: string[] = [];
   
   if (num >= 10000000) {
-    words.push(ones[Math.floor(num / 10000000)] + " Crore");
+    words.push(ones[Math.floor((num as number) / 10000000)] + " Crore");
     num %= 10000000;
   }
   
   if (num >= 100000) {
-    words.push(ones[Math.floor(num / 100000)] + " Lakh");
+    words.push(ones[Math.floor((num as number) / 100000)] + " Lakh");
     num %= 100000;
   } else if (num >= 1000 && words.length === 0) {
-    words.push(ones[Math.floor(num / 1000)] + " Thousand");
+    words.push(ones[Math.floor((num as number) / 1000)] + " Thousand");
     num %= 1000;
   }
   
   if (num >= 100) {
-    words.push(ones[Math.floor(num / 100)] + " Hundred");
+    words.push(ones[Math.floor((num as number) / 100)] + " Hundred");
     num %= 100;
   }
   
   if (num >= 20) {
-    words.push(tens[Math.floor(num / 10)]);
+    words.push(tens[Math.floor((num as number) / 10)]);
     num %= 10;
   }
   
   if (num > 0 && num < 20) {
-    words.push(ones[num]);
+    words.push(ones[num as number]);
   }
   
   return words.join(" ");
@@ -177,7 +185,7 @@ function textRunsWithBreaks(text: string, size: number, bold = false): TextRun[]
   ]);
 }
 
-export async function generateMakerValuationReportPdf(valuation: MakerValuation): Promise<string> {
+export async function generateMakerValuationReportPdf(valuation: MakerValuation, fieldVisitDate?: string): Promise<string> {
   const document = await PDFDocument.create();
   const page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   const regular = await document.embedFont(StandardFonts.Helvetica);
@@ -192,9 +200,10 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
 
   // Reserved letterhead area. The report intentionally leaves this blank for printing.
   y -= 105;
-  page.drawText("Date", { x: 365, y, size: 8, font: regular, color: black });
+  page.drawText("Date of Appointment", { x: 365, y, size: 8, font: regular, color: black });
   page.drawText(":", { x: 407, y, size: 8, font: regular, color: black });
-  page.drawText(formatDisplayDate(value(valuation.dateOfValuation)), { x: 420, y, size: 8, font: regular, color: black });
+  const appointmentDate = fieldVisitDate ?? valuation.dateOfValuation;
+  page.drawText(formatDisplayDate(value(appointmentDate)), { x: 420, y, size: 8, font: regular, color: black });
   y -= 13;
   page.drawText("Ref. No.", { x: 365, y, size: 8, font: regular, color: black });
   page.drawText(":", { x: 407, y, size: 8, font: regular, color: black });
@@ -297,7 +306,7 @@ function detailsOfValuationDocxTable(
   });
 }
 
-export async function generateMakerValuationReportDocx(valuation: MakerValuation): Promise<string> {
+export async function generateMakerValuationReportDocx(valuation: MakerValuation, fieldVisitDate?: string): Promise<string> {
   const borders = { style: BorderStyle.SINGLE, size: 4, color: "666666" } as const;
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   const cellMargins = { top: 70, bottom: 70, left: 90, right: 90 };
@@ -307,9 +316,10 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
       new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 23, row.valueBold) })] }),
     ]}),
   );
+  const appointmentDate = fieldVisitDate ?? valuation.dateOfValuation;
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
     new Paragraph({ spacing: { after: 2600 }, text: "" }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date       :  ${formatDisplayDate(value(valuation.dateOfValuation))}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date of Appointment:  ${formatDisplayDate(value(appointmentDate))}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
     new Paragraph({ spacing: { before: 500 }, children: [new TextRun({ text: "To", size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new TextRun({ text: "The Branch Manager", bold: true, size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new TextRun({ text: value(valuation.bankName), size: 23, font: "Arial" })] }),
@@ -635,7 +645,7 @@ function pageFiveRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "2.", description: "What are the factors favoring for an extra potential value?", value: value(valuation.positiveFactors) },
     { number: "3.", description: "Any negative factors are observed which affect the market value in general?", value: value(valuation.negativeFactors) },
     { description: "V.   RATE", section: true },
-    { number: "1.", description: "After analyzing the comparable sale instances, what is the composite rate for similar flat with same specifications in the adjoining locality? (Along with details of reference of at least two latest deals/transactions with respect to adjacent properties in the areas)", value: `Prevailing rate of flats in the locality is ${rate(valuation.rateRange)} to ${rate(valuation.rateRange)} Per Sq. ft. on BUA` },
+    { number: "1.", description: "After analyzing the comparable sale instances, what is the composite rate for similar flat with same specifications in the adjoining locality? (Along with details of reference of at least two latest deals/transactions with respect to adjacent properties in the areas)", value: `Prevailing rate of flats in the locality is ${value(valuation.rateRange)} Per Sq. ft. on BUA` },
     { number: "2.", description: "Assuming it is a new construction, what is the adopted basic composite rate of the flat under valuation after comparing with the specifications and other factors with the flat under comparison (give details).", value: `${rate(valuation.adoptedRate)} Per Sq. ft. on BUA` },
     { number: "3.", description: "Break-up for the rate", value: "" },
     { description: "i) Building", value: rate(valuation.buildingRate) },
