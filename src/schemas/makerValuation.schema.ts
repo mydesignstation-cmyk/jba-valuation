@@ -33,7 +33,7 @@ export const occupancyStatusOptions = [
   "Other",
 ] as const;
 
-export const qualityOptions = ["Good", "Average", "Poor"] as const;
+export const qualityOptions = ["Good", "Average", "Poor", "Under Construction"] as const;
 
 export const yesNoOptions = ["Yes", "No"] as const;
 
