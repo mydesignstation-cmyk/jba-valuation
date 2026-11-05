@@ -366,6 +366,19 @@ export function MakerValuationForm({
     );
   }, [form, govtReadyReckonerRatePerSqMtr]);
 
+  const adoptedRate = form.watch("adoptedRate");
+  const buildingRate = form.watch("buildingRate");
+  useEffect(() => {
+    const adopted = Number(adoptedRate);
+    const building = Number(buildingRate);
+    if (Number.isFinite(adopted) && Number.isFinite(building) && adopted > 0 && building > 0) {
+      const land = adopted - building;
+      form.setValue("landRate", land.toFixed(2), { shouldValidate: true });
+    } else if (adopted === 0 && building === 0) {
+      form.setValue("landRate", "", { shouldValidate: true });
+    }
+  }, [form, adoptedRate, buildingRate]);
+
   useEffect(() => {
     form.reset(
       initialValues ? makerValuationToFormValues(caseId, initialValues) : formDefaultValues,
@@ -2166,16 +2179,17 @@ export function MakerValuationForm({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="landRate"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Land Rate</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter rate" {...field} />
-                    </FormItem>
-                  )}
-                />
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-gray-700">Land Rate</label>
+                  <p className="text-xs text-muted-foreground">Adopted Rate - Building Rate</p>
+                  <div className="px-3 py-2 border border-gray-300 rounded bg-gray-50 text-sm">
+                    {form.watch("adoptedRate") && form.watch("buildingRate")
+                      ? (
+                          Number(form.watch("adoptedRate")) - Number(form.watch("buildingRate"))
+                        ).toFixed(2)
+                      : "—"}
+                  </div>
+                </div>
                 {/* Insurance Value (read-only, formula-based) */}
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-gray-700">Insurance Value</label>
