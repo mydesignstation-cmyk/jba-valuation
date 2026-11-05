@@ -24,7 +24,7 @@ export const genuinenessOptions = ["Yes", "No", "NA"] as const;
 
 export const occupancyOptions = ["Self-occupied", "Rented", "Seller-Occupied", "Other"] as const;
 
-export const boundaryMeasuredOptions = ["As per deed", "As per actuals"] as const;
+export const boundaryMeasuredOptions = ["As per deed", "As per actuals", "As per approved plan"] as const;
 
 export const occupancyStatusOptions = [
   "Self-occupied",
