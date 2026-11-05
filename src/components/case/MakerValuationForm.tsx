@@ -373,17 +373,21 @@ export function MakerValuationForm({
     const building = Number(buildingRate);
     if (Number.isFinite(adopted) && Number.isFinite(building) && adopted > 0 && building > 0) {
       const land = adopted - building;
-      form.setValue("landRate", land.toFixed(2), { shouldValidate: true });
+      form.setValue("landRate", land.toFixed(2), { shouldValidate: true, shouldDirty: true });
     } else if (adopted === 0 && building === 0) {
       form.setValue("landRate", "", { shouldValidate: true });
     }
   }, [form, adoptedRate, buildingRate]);
 
+  // Recalculate landRate after form reset (for editing existing records)
   useEffect(() => {
-    form.reset(
-      initialValues ? makerValuationToFormValues(caseId, initialValues) : formDefaultValues,
-    );
-  }, [caseId, initialValues, form, formDefaultValues]);
+    const adopted = Number(adoptedRate);
+    const building = Number(buildingRate);
+    if (Number.isFinite(adopted) && Number.isFinite(building) && adopted > 0 && building > 0) {
+      const land = adopted - building;
+      form.setValue("landRate", land.toFixed(2), { shouldValidate: true, shouldDirty: false });
+    }
+  }, [caseId, initialValues]);
   const handleAutoFill = () => {
     const today = new Date().toISOString().split("T")[0];
     form.reset({
