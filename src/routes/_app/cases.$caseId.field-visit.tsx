@@ -809,9 +809,7 @@ export function FieldVisitWizard({
                   form.setValue("relationship", "Owner");
                   form.setValue("otherRelationship", "");
                   form.setValue("relationshipRemarks", "");
-                  form.setValue("gpsLatitude", 19.076);
-                  form.setValue("gpsLongitude", 72.8777);
-                  form.setValue("fullAddress", "123 Main Street, Mumbai");
+                  form.setValue("fullAddress", "");
                   form.setValue("landmark", "Near Metro Station");
                   form.setValue("propertyType", "Industrial");
                   form.setValue("propertyTypeRemarks", "Modern facility");
