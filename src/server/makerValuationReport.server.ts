@@ -193,7 +193,7 @@ function textRunsWithBreaks(text: string, size: number, bold = false): TextRun[]
   ]);
 }
 
-export async function generateMakerValuationReportPdf(valuation: MakerValuation, fieldVisitDate?: string): Promise<string> {
+export async function generateMakerValuationReportPdf(valuation: MakerValuation): Promise<string> {
   const document = await PDFDocument.create();
   const page = document.addPage([PAGE_WIDTH, PAGE_HEIGHT]);
   const regular = await document.embedFont(StandardFonts.Helvetica);
@@ -210,7 +210,7 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation,
   y -= 105;
   page.drawText("Date of Appointment", { x: 365, y, size: 8, font: regular, color: black });
   page.drawText(":", { x: 407, y, size: 8, font: regular, color: black });
-  const appointmentDate = fieldVisitDate ?? valuation.dateOfValuation;
+  const appointmentDate = valuation.createdAt;
   page.drawText(formatDisplayDate(value(appointmentDate)), { x: 420, y, size: 8, font: regular, color: black });
   y -= 13;
   page.drawText("Ref. No.", { x: 365, y, size: 8, font: regular, color: black });
@@ -314,7 +314,7 @@ function detailsOfValuationDocxTable(
   });
 }
 
-export async function generateMakerValuationReportDocx(valuation: MakerValuation, fieldVisitDate?: string): Promise<string> {
+export async function generateMakerValuationReportDocx(valuation: MakerValuation): Promise<string> {
   const borders = { style: BorderStyle.SINGLE, size: 4, color: "666666" } as const;
   const cellBorders = { top: borders, bottom: borders, left: borders, right: borders };
   const cellMargins = { top: 70, bottom: 70, left: 90, right: 90 };
@@ -324,7 +324,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
       new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 23, row.valueBold) })] }),
     ]}),
   );
-  const appointmentDate = fieldVisitDate ?? valuation.dateOfValuation;
+  const appointmentDate = valuation.createdAt;
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
     new Paragraph({ spacing: { after: 2600 }, text: "" }),
     new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date of Appointment:  ${formatDisplayDate(value(appointmentDate))}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
