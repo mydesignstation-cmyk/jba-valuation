@@ -1987,7 +1987,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Physical Measured Area</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                      <Input type="text" placeholder="Enter area (e.g., 1000 or 1,000)" {...field} />
                     </FormItem>
                   )}
                 />
@@ -2018,7 +2018,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Documented Area</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                      <Input type="text" placeholder="Enter area (e.g., 1000 or 1,000)" {...field} />
                     </FormItem>
                   )}
                 />
@@ -2049,7 +2049,7 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Approved Plan Area</FormLabel>
-                      <Input type="number" step="0.01" placeholder="Enter area" {...field} />
+                      <Input type="text" placeholder="Enter area (e.g., 1000 or 1,000)" {...field} />
                     </FormItem>
                   )}
                 />
