@@ -558,8 +558,20 @@ export function MakerValuationForm({
         govtValue: values.govtValue || "",
       };
 
+      // These fields are auto-calculated or genuinely optional — exclude from
+      // the required-field gate so they never block submission.
+      const optionalOrCalculatedFields = new Set([
+        "insuranceValue",
+        "marketValue",
+        "fairMarketValue",
+        "realizableValue",
+        "distressValue",
+        "govtReadyReckonerRatePerSqFt",
+        "govtValue",
+      ]);
+
       const missingFields = makerValuationFields.filter(
-        (field) => !submissionData[field]?.trim(),
+        (field) => !optionalOrCalculatedFields.has(field) && !submissionData[field]?.trim(),
       );
       if (missingFields.length > 0) {
         const fieldLabels: Record<string, string> = {
