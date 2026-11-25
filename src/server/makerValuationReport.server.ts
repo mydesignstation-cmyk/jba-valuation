@@ -11,6 +11,7 @@ import {
   TableCell,
   TableRow,
   TextRun,
+  VerticalMergeType,
   WidthType,
 } from "docx";
 import { formatDisplayDate } from "@/lib/date-format";
@@ -372,6 +373,10 @@ type PageTwoRow = {
   descriptionBold?: boolean;
   boundarySite?: { deed?: string; actuals?: string; header?: "columns" | "labels"; };
   labeledValue?: [string, string][];
+  /** PDF/DOCX: merge the right-value cell downward across this many rows (1 = no merge). Used on the first row of a group. */
+  mergeValueDown?: number;
+  /** PDF/DOCX: row is a continuation of a mergeValueDown group — right cell is suppressed. */
+  mergeValueContinue?: boolean;
 };
 
 function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
@@ -471,9 +476,9 @@ function pageTwoDocxTable(
 function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
   return [
     { number: "8.", description: "City / Town", value: value(valuation.location) },
-    { description: "Residential Area", value: value(valuation.locality) },
-    { description: "Commercial Area", value: "" },
-    { description: "Industrial Area", value: "" },
+    { description: "Residential Area", value: value(valuation.locality), mergeValueDown: 3 },
+    { description: "Commercial Area", mergeValueContinue: true },
+    { description: "Industrial Area", mergeValueContinue: true },
     { number: "9.", description: "Classification of area", value: "" },
     { description: "i) High / Middle / Poor", value: value(valuation.classOfLocality1) },
     { description: "ii) Urban / Semi Urban / Rural", value: value(valuation.classOfLocality2) },
@@ -608,15 +613,36 @@ function renderStructuredPage(
       page.drawText(row.description, { x: tableX + numberWidth + padding, y: y - padding - fontSize, size: fontSize, font: bold, color: black });
     } else {
       page.drawLine({ start: { x: tableX + numberWidth, y }, end: { x: tableX + numberWidth, y: y - height }, thickness: 0.45, color: black });
-      page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: tableX + numberWidth + descriptionWidth, y: y - height }, thickness: 0.45, color: black });
+      // For mergeValueContinue rows, draw the description divider line but erase the right border of the previous row
+      // so the value area appears merged. We skip drawing the description→value divider on continuation rows.
+      if (!row.mergeValueContinue) {
+        page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: tableX + numberWidth + descriptionWidth, y: y - height }, thickness: 0.45, color: black });
+      } else {
+        // Erase the top border line of the value column for this continuation row to visually merge with above.
+        page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: PAGE_WIDTH - tableX, y }, thickness: 0.6, color: rgb(1, 1, 1) });
+        // Redraw only the description side of the divider (left of value area) to close the description column
+        page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth, y }, end: { x: tableX + numberWidth + descriptionWidth, y: y - height }, thickness: 0.45, color: black });
+      }
       if (row.boundarySite) page.drawLine({ start: { x: tableX + numberWidth + descriptionWidth + valueWidth / 2, y }, end: { x: tableX + numberWidth + descriptionWidth + valueWidth / 2, y: y - height }, thickness: 0.45, color: black });
       if (row.number) page.drawText(row.number, { x: tableX + 8, y: y - padding - fontSize, size: fontSize, font: regular, color: black });
       descriptionLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.descriptionBold ? bold : regular, color: black }));
       if (row.boundarySite) {
         boundaryDeedLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.boundarySite?.header ? bold : regular, color: black }));
         boundaryActualLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + valueWidth / 2 + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.boundarySite?.header ? bold : regular, color: black }));
-      } else {
-        valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.placeholder ? bold : regular, color: row.placeholder ? rgb(0.8, 0, 0) : black }));
+      } else if (!row.mergeValueContinue) {
+        if (row.mergeValueDown && row.mergeValueDown > 1) {
+          // Draw value centered vertically across the merged group of rows
+          const mergeCount = row.mergeValueDown;
+          const mergeRows = rows.slice(rowIndex, rowIndex + mergeCount);
+          const totalMergeHeight = mergeRows.reduce((acc, mr) => {
+            const dl = wrap(mr.description, regular, fontSize, descriptionWidth - padding * 2);
+            return acc + Math.max(dl.length, 1) * lineHeight + padding * 2;
+          }, 0);
+          const valueCenterY = y - totalMergeHeight / 2 + (valueLines.length * lineHeight) / 2 - fontSize;
+          valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: valueCenterY - index * lineHeight, size: fontSize, font: regular, color: black }));
+        } else {
+          valueLines.forEach((line, index) => page.drawText(line, { x: tableX + numberWidth + descriptionWidth + padding, y: y - padding - fontSize - index * lineHeight, size: fontSize, font: row.placeholder ? bold : regular, color: row.placeholder ? rgb(0.8, 0, 0) : black }));
+        }
       }
     }
     y -= height;
@@ -638,10 +664,16 @@ function structuredDocxTable(
       new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: [new TextRun({ text: row.boundarySite.deed ?? "", bold: Boolean(row.boundarySite.header), size: 23, font: "Arial" })] })] }),
       new TableCell({ width: { size: 20, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: [new TextRun({ text: row.boundarySite.actuals ?? "", bold: Boolean(row.boundarySite.header), size: 23, font: "Arial" })] })] }),
     ] });
+    // mergeValueContinue: value cell is a vertical merge continuation (empty, merged with the row above)
+    if (row.mergeValueContinue) return new TableRow({ cantSplit: true, children: [
+      new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: "", size: 23, font: "Arial" })] })] }),
+      new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.description, 23) })] }),
+      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, verticalMerge: VerticalMergeType.CONTINUE, children: [new Paragraph({ children: [] })] }),
+    ] });
     return new TableRow({ cantSplit: true, children: [
       new TableCell({ width: { size: 8, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: [new TextRun({ text: row.number ?? "", size: 23, font: "Arial" })] })] }),
       new TableCell({ width: { size: 52, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ keepNext: Boolean(row.boundarySite), children: textRunsWithBreaks(row.description, 23) })] }),
-      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: row.labeledValue ? row.labeledValue.map(([label, val]) => new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 23, font: "Arial" }), new TextRun({ text: val, size: 23, font: "Arial" })] })) : [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 23, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 23) })] }),
+      new TableCell({ columnSpan: 2, width: { size: 40, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, ...(row.mergeValueDown && row.mergeValueDown > 1 ? { verticalMerge: VerticalMergeType.RESTART } : {}), children: row.labeledValue ? row.labeledValue.map(([label, val]) => new Paragraph({ children: [new TextRun({ text: label, bold: true, size: 23, font: "Arial" }), new TextRun({ text: val, size: 23, font: "Arial" })] })) : [new Paragraph({ children: row.placeholder ? [new TextRun({ text: row.value ?? "", size: 23, bold: true, color: "C00000", font: "Arial" })] : textRunsWithBreaks(row.value ?? "", 23) })] }),
     ] });
   }) });
 }
