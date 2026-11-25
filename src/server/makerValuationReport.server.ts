@@ -402,7 +402,7 @@ function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "c)", description: "T. S. No. / Village", value: `Village ${value(valuation.village)}` },
     { number: "d)", description: "Ward / Taluka", value: `Taluka ${value(valuation.taluka)}` },
     { number: "e)", description: "Mandal / District", value: `District ${value(valuation.district)} (Pin Code ${value(valuation.pinCode)}).` },
-    { number: "f)", description: "Date of issue and validity of layout of approved map / Occupancy Certificate", value: value(valuation.documentsName2) },
+    { number: "f)", description: "Date of issue and validity of layout of approved map / Occupancy Certificate", value: value(valuation.documentsDetails2) },
     { number: "g)", description: "Approved map / occupancy Certificate issuing authority", value: value(valuation.municipalCorporation) },
     { number: "h)", description: "Whether genuineness or authenticity of approved map / plan is verified", value: value(valuation.genuinenessOrAuthenticity) },
     { number: "i)", description: "Any other comments by our employee / valuer on authentic of approved plan", value: value(valuation.anyOtherComments) },
