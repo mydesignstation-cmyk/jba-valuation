@@ -206,12 +206,25 @@ function MakerValuationDisplayRow({
       ? formatDisplayDate(value)
       : value;
 
+  const isRemarks = field.key === "remarks";
+  const lines = isRemarks && displayValue !== "—"
+    ? displayValue.split("\n").map((l) => l.trim()).filter(Boolean)
+    : null;
+
   return (
     <div className="space-y-1">
       <p className="text-xs font-medium uppercase tracking-wide text-muted-foreground">
         {field.label}
       </p>
-      <p className="whitespace-pre-wrap break-words text-sm font-medium">{displayValue}</p>
+      {lines ? (
+        <ul className="space-y-1 pl-4 list-disc text-sm font-medium">
+          {lines.map((line, i) => (
+            <li key={i}>{line}</li>
+          ))}
+        </ul>
+      ) : (
+        <p className="whitespace-pre-wrap break-words text-sm font-medium">{displayValue}</p>
+      )}
     </div>
   );
 }

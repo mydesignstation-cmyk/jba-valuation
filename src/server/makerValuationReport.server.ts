@@ -348,7 +348,12 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     new Paragraph({ pageBreakBefore: true, spacing: { before: 120, after: 120 }, children: [new TextRun({ text: "Details of Valuation", bold: true, size: 23, font: "Arial" })] }),
     detailsOfValuationDocxTable(valuation, borders, cellMargins),
     new Paragraph({ spacing: { before: 250 }, children: [new TextRun({ text: "Remark:-", bold: true, size: 23, font: "Arial" })] }),
-    new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: value(valuation.remarks), size: 23, font: "Arial" })] }),
+    ...(value(valuation.remarks) === EM_DASH
+      ? [new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: EM_DASH, size: 23, font: "Arial" })] })]
+      : value(valuation.remarks).split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) =>
+          new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: line, size: 23, font: "Arial" })] })
+        )
+    ),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 23, font: "Arial" })] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "DECLARATION FROM VALUERS", bold: true, size: 23, font: "Arial" })] }),
