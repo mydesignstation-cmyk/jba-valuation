@@ -91,7 +91,7 @@ export const createMakerValuationSchema = z.object({
   documentsName3: z.string().min(1, "This field is required"),
   documentsDetails3: z.string().min(1, "This field is required"),
   nameOfOwner: z.string().min(1, "This field is required"),
-  address: z.string().min(1, "This field is required"),
+  address: z.string().optional().or(z.literal("")),
   configurationInShort: z.string().min(1, "This field is required"),
   configurationFullDescription: z.string().min(1, "This field is required"),
   locality: z.string().min(1, "This field is required"),
