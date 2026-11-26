@@ -553,7 +553,7 @@ export function MakerValuationForm({
         distressValue: distressValue > 0 ? distressValue.toString() : values.distressValue || "",
         govtReadyReckonerRatePerSqFt:
           govtReadyReckonerRatePerSqMtr > 0
-            ? govtReadyReckonerRatePerSqFt.toString()
+            ? govtReadyReckonerRatePerSqFt.toFixed(2)
             : values.govtReadyReckonerRatePerSqFt || "",
         govtValue: values.govtValue || "",
       };
