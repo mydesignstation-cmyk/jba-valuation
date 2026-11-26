@@ -64,59 +64,46 @@ function money(input: unknown): string {
     : text;
 }
 
-// numberToWords disabled - not needed for current PDF output
-/*
-function numberToWords(num: number): string {
-  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine", "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
+function numberToWords(n: number): string {
+  const ones = ["", "One", "Two", "Three", "Four", "Five", "Six", "Seven", "Eight", "Nine",
+    "Ten", "Eleven", "Twelve", "Thirteen", "Fourteen", "Fifteen", "Sixteen", "Seventeen", "Eighteen", "Nineteen"];
   const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
-  
-  if (num === 0) return "Zero";
-  
-  const words: string[] = [];
-  const n = Math.floor(num);
-  
-  if (n >= 10000000) {
-    const _ones = ones as string[];
-    words.push(_ones[Math.floor(n / 10000000)] + " Crore");
-  }
-  
-  if (n >= 100000) {
-    const _ones = ones as string[];
-    words.push(_ones[Math.floor(n / 100000)] + " Lakh");
-  } else if (n >= 1000 && words.length === 0) {
-    const _ones = ones as string[];
-    words.push(_ones[Math.floor(n / 1000)] + " Thousand");
-  }
-  
-  if (n >= 100) {
-    const _ones = ones as string[];
-    words.push(_ones[Math.floor(n / 100)] + " Hundred");
-  }
-  
-  if (n >= 20) {
-    const _tens = tens as string[];
-    words.push(_tens[Math.floor(n / 10)]);
-  }
-  
-  if (n > 0 && n < 20) {
-    const _ones = ones as string[];
-    words.push(_ones[n]);
-  }
-  
-  return words.join(" ");
-}
-*/
 
-// valueInWords disabled - not needed for current PDF output
-/*
+  function below100(x: number): string {
+    if (x < 20) return ones[x] ?? "";
+    return (tens[Math.floor(x / 10)] ?? "") + (x % 10 ? " " + (ones[x % 10] ?? "") : "");
+  }
+  function below1000(x: number): string {
+    if (x < 100) return below100(x);
+    return (ones[Math.floor(x / 100)] ?? "") + " Hundred" + (x % 100 ? " " + below100(x % 100) : "");
+  }
+
+  const num = Math.floor(n);
+  if (num === 0) return "Zero";
+
+  const parts: string[] = [];
+  let rem = num;
+
+  const crore = Math.floor(rem / 10000000); rem %= 10000000;
+  const lakh = Math.floor(rem / 100000);    rem %= 100000;
+  const thousand = Math.floor(rem / 1000);  rem %= 1000;
+  const rest = rem;
+
+  if (crore)    parts.push(below1000(crore)   + " Crore");
+  if (lakh)     parts.push(below100(lakh)      + " Lakh");
+  if (thousand) parts.push(below100(thousand)  + " Thousand");
+  if (rest)     parts.push(below1000(rest));
+
+  return parts.join(" ");
+}
+
 function valueInWords(input: unknown): string {
   const text = value(input as string);
   if (text === EM_DASH) return text;
-  const number = Number(text.replace(/,/g, ""));
-  if (!Number.isFinite(number)) return text;
-  return numberToWords(Math.floor(number));
+  const number = Number(String(text).replace(/,/g, ""));
+  if (!Number.isFinite(number) || number <= 0) return text;
+  return numberToWords(number) + " Only";
 }
-*/
 
 function address(valuation: MakerValuation): string {
   return [
@@ -364,7 +351,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`Date: ${reportDate(valuation.dateOfValuation)}\nPlace: Mumbai`, 19, true) }),
     new Paragraph({ alignment: AlignmentType.RIGHT, spacing: { before: 500, after: 1440 }, children: [new TextRun({ text: "JBA Consulting & Advisory Services LLP", size: 19 })] }),
     new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks("Authorised Signature\n(Approved panel valuer)\nVr. Jasmin Bhatt - MRICS\nB-Tech (Civil), MSc Valuation, MBA in Finance\nGovt. Registered Valuer (IBBI), Chartered Surveyor,\nStructural Engineer, Town Planner, Project Management Consultant.", 19) }),
-    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: )`, 19, true) }),
+    new Paragraph({ spacing: { before: 500 }, children: textRunsWithBreaks(`The undersigned has inspected the property detailed in the Valuation Report dated ${reportDate(valuation.dateOfValuation)}. We are satisfied that the fair and reasonable market value of the property is ${money(valuation.marketValue)}.\n(In words: ${valueInWords(valuation.marketValue)})`, 19, true) }),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, spacing: { before: 500 }, children: [new TextRun({ text: "Property Photos", bold: true, size: 23, font: "Arial" })] }),
   ] }] });
