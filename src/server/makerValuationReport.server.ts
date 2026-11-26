@@ -351,9 +351,11 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     new Paragraph({ spacing: { before: 250 }, children: [new TextRun({ text: "Remark:-", bold: true, size: 23, font: "Arial" })] }),
     ...(value(valuation.remarks) === EM_DASH
       ? [new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: EM_DASH, size: 23, font: "Arial" })] })]
-      : value(valuation.remarks).split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, i) =>
-          new Paragraph({ spacing: { before: i === 0 ? 80 : 0, after: 0, line: 276, lineRule: LineRuleType.EXACT }, contextualSpacing: true, children: [new TextRun({ text: line, size: 23, font: "Arial" })] })
-        )
+      : value(valuation.remarks).split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, i) => {
+          // Replace any tab character (users type "1.\tText") with a single space
+          const cleaned = line.replace(/\t+/g, " ");
+          return new Paragraph({ spacing: { before: i === 0 ? 80 : 0, after: 0, line: 276, lineRule: LineRuleType.EXACT }, contextualSpacing: true, indent: { left: 0, hanging: 0 }, children: [new TextRun({ text: cleaned, size: 23, font: "Arial" })] });
+        })
     ),
     new Paragraph({ children: [new PageBreak()] }),
     new Paragraph({ alignment: AlignmentType.CENTER, children: [new TextRun({ text: "Annexure A", bold: true, size: 23, font: "Arial" })] }),
