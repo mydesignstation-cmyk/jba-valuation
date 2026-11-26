@@ -351,7 +351,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
     ...(value(valuation.remarks) === EM_DASH
       ? [new Paragraph({ spacing: { before: 80 }, children: [new TextRun({ text: EM_DASH, size: 23, font: "Arial" })] })]
       : value(valuation.remarks).split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line, i) =>
-          new Paragraph({ spacing: { before: i === 0 ? 80 : 0 }, children: [new TextRun({ text: line, size: 23, font: "Arial" })] })
+          new Paragraph({ spacing: { before: i === 0 ? 80 : 0, after: 0 }, children: [new TextRun({ text: line, size: 23, font: "Arial" })] })
         )
     ),
     new Paragraph({ children: [new PageBreak()] }),
