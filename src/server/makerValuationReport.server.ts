@@ -326,10 +326,9 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
       new TableCell({ width: { size: 58, type: WidthType.PERCENTAGE }, margins: cellMargins, borders: cellBorders, children: [new Paragraph({ children: textRunsWithBreaks(row.value, 23, row.valueBold) })] }),
     ]}),
   );
-  const appointmentDate = valuation.createdAt;
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
     new Paragraph({ spacing: { after: 2600 }, text: "" }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date of Appointment:  ${formatDisplayDate(value(appointmentDate))}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date of Appointment:  ${reportDate(valuation.dateOfInspection)}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
     new Paragraph({ spacing: { before: 500 }, children: [new TextRun({ text: "To", size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new TextRun({ text: "The Branch Manager", bold: true, size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new TextRun({ text: value(valuation.bankName), size: 23, font: "Arial" })] }),
@@ -396,8 +395,8 @@ function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
   return [
     { description: "GENERAL", section: true },
     { number: "1.", description: "Purpose for which valuation is made", value: `To Assess the ${value(valuation.purposeOfValuation)} of subject Property for Bank purpose.` },
-    { number: "2.", description: "a) Date of inspection", value: formatDisplayDate(value(valuation.dateOfInspection)) },
-    { description: "b) Date on which the valuation is made", value: formatDisplayDate(value(valuation.dateOfValuation)) },
+    { number: "2.", description: "a) Date of inspection", value: reportDate(valuation.dateOfInspection) },
+    { description: "b) Date on which the valuation is made", value: reportDate(valuation.dateOfValuation) },
     { number: "3.", description: "List of documents produced for perusal", value: documentList },
     { description: `a) ${value(valuation.documentsName1)}`, value: value(valuation.documentsDetails1) },
     { description: `b) ${value(valuation.documentsName2)}`, value: value(valuation.documentsDetails2) },
