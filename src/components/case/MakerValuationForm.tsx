@@ -568,6 +568,25 @@ export function MakerValuationForm({
         "distressValue",
         "govtReadyReckonerRatePerSqFt",
         "govtValue",
+        // Additional Details — optional
+        "flatNo",
+        "locatedOnFloor",
+        "wing",
+        "buildingName",
+        "landmark",
+        "roadNameArea",
+        "location",
+        "plotNo",
+        "ctsNo",
+        "sNo",
+        "other",
+        "village",
+        "wardNo",
+        "taluka",
+        "blockNo",
+        "district",
+        "pinCode",
+        "address",
       ]);
 
       const missingFields = makerValuationFields.filter(
