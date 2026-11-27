@@ -108,7 +108,7 @@ function valueInWords(input: unknown): string {
 function address(valuation: MakerValuation): string {
   return [
     valuation.flatNo && `Flat No. ${valuation.flatNo}`,
-    valuation.locatedOnFloor && `Floor - ${valuation.locatedOnFloor}`,
+    valuation.locatedOnFloor && `${valuation.locatedOnFloor} Floor`,
     valuation.wing && `Wing ${valuation.wing}`,
     valuation.buildingName,
     valuation.landmark,
