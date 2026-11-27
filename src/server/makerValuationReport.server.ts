@@ -105,6 +105,15 @@ function valueInWords(input: unknown): string {
   return numberToWords(number) + " Only";
 }
 
+function plotCtsSno(v: MakerValuation): string {
+  const skip = (s: string | undefined) => !s || s === "NA" || s === EM_DASH;
+  const parts: string[] = [];
+  if (!skip(v.plotNo)) parts.push(`Plot No. ${v.plotNo}`);
+  if (!skip(v.ctsNo))  parts.push(`C.T.S. No. ${v.ctsNo}`);
+  if (!skip(v.sNo))    parts.push(`Survey No. ${v.sNo}`);
+  return parts.join(", ") || EM_DASH;
+}
+
 function address(valuation: MakerValuation): string {
   return [
     valuation.flatNo && `Flat No. ${valuation.flatNo}`,
@@ -502,7 +511,7 @@ function pageThreeRows(valuation: MakerValuation): PageTwoRow[] {
     { description: "II.   APARTMENT BUILDING", section: true },
     { number: "1.", description: "Nature of the Apartment", value: `${value(valuation.configurationInShort)}\n${value(valuation.typeOfProperty)}: ${value(valuation.configurationFullDescription)}` },
     { number: "2.", description: "Location", value: value(valuation.location) },
-    { description: "C.T.S. No.", value: value(valuation.ctsNo) },
+    { description: "C.T.S. No.", value: plotCtsSno(valuation) },
     { description: "Block No.", value: value(valuation.blockNo) },
     { description: "Ward No.", value: value(valuation.wardNo) },
     { description: "Village / Municipality / Corporation / CIDCO", value: value(valuation.village) },
