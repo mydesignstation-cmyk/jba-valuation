@@ -197,10 +197,9 @@ export async function generateMakerValuationReportPdf(valuation: MakerValuation)
 
   // Reserved letterhead area. The report intentionally leaves this blank for printing.
   y -= 105;
-  page.drawText("Date of Appointment", { x: 365, y, size: 8, font: regular, color: black });
+  page.drawText("Date", { x: 365, y, size: 8, font: regular, color: black });
   page.drawText(":", { x: 407, y, size: 8, font: regular, color: black });
-  const appointmentDate = valuation.createdAt;
-  page.drawText(formatDisplayDate(value(appointmentDate)), { x: 420, y, size: 8, font: regular, color: black });
+  page.drawText(reportDateFromISOString(valuation.createdAt), { x: 420, y, size: 8, font: regular, color: black });
   y -= 13;
   page.drawText("Ref. No.", { x: 365, y, size: 8, font: regular, color: black });
   page.drawText(":", { x: 407, y, size: 8, font: regular, color: black });
@@ -315,7 +314,7 @@ export async function generateMakerValuationReportDocx(valuation: MakerValuation
   );
   const doc = new Document({ sections: [{ properties: { page: { size: { width: 11906, height: 16838 }, margin: { top: 720, bottom: 720, left: 1000, right: 1000 } } }, children: [
     new Paragraph({ spacing: { after: 2600 }, text: "" }),
-    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date of Appointment:  ${reportDate(valuation.dateOfInspection)}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
+    new Paragraph({ alignment: AlignmentType.RIGHT, children: textRunsWithBreaks(`Date :  ${reportDateFromISOString(valuation.createdAt)}\nRef. No.  :  ${value(valuation.refNo)}`, 23) }),
     new Paragraph({ spacing: { before: 500 }, children: [new TextRun({ text: "To", size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new TextRun({ text: "The Branch Manager", bold: true, size: 23, font: "Arial" })] }),
     new Paragraph({ children: [new TextRun({ text: value(valuation.bankName), size: 23, font: "Arial" })] }),
