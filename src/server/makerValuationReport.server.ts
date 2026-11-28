@@ -290,6 +290,20 @@ function detailsOfValuationDocxTable(
     ["1.", "Fair Market Value of the Property 100%", "", "", money(valuation.fairMarketValue)],
     ["2.", `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, "", "", money(valuation.realizableValue)],
     ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
+    ...(() => {
+      const pct = parseFloat(String(valuation.actualWorksCompleted ?? "100").replace(/,/g, ""));
+      if (!isFinite(pct) || pct >= 100) return [];
+      const fmv = Math.round((Number(String(valuation.fairMarketValue ?? "0").replace(/,/g, "")) * pct) / 100);
+      const rlPct = parseFloat(String(valuation.realizableValuePercent || "95"));
+      const dsPct = parseFloat(String(valuation.distressValuePercent || "80"));
+      const rl = Math.round((fmv * rlPct) / 100);
+      const ds = Math.round((fmv * dsPct) / 100);
+      return [
+        ["4.", `Fair Market Value of the Property ${pct}% completion`, "", "", money(fmv)],
+        ["5.", `Realizable Value of the Property (${isFinite(rlPct) ? rlPct.toFixed(2) : "95.00"}% of ${pct}% completion)`, "", "", money(rl)],
+        ["6.", `Distress Value of the Property (${isFinite(dsPct) ? dsPct.toFixed(2) : "80.00"}% of ${pct}% completion)`, "", "", money(ds)],
+      ];
+    })(),
     ["", "Govt. Value", "", "", money(valuation.govtValue)],
     ["", "Rental Value", "", "", `Approx. ${formattedNumber(valuation.rentRangePerMonth)} /- per month`],
     ["", "Insurance Value", "Area in Sq. Ft.\n(Built up)", "Rate per\nSq. Ft.", "Amount in Rs."],
@@ -767,6 +781,20 @@ function renderDetailsOfValuationPdf(document: PDFDocument, regular: PDFFont, bo
     ["1.", `Fair Market Value of the Property 100%`, "", "", money(valuation.fairMarketValue)],
     ["2.", `Realizable Value of the Property (${value(valuation.realizableValuePercent || "95")}%)`, "", "", money(valuation.realizableValue)],
     ["3.", `Distress Value of the Property (${value(valuation.distressValuePercent || "80")}%)`, "", "", money(valuation.distressValue)],
+    ...(() => {
+      const pct = parseFloat(String(valuation.actualWorksCompleted ?? "100").replace(/,/g, ""));
+      if (!isFinite(pct) || pct >= 100) return [];
+      const fmv = Math.round((Number(String(valuation.fairMarketValue ?? "0").replace(/,/g, "")) * pct) / 100);
+      const rlPct = parseFloat(String(valuation.realizableValuePercent || "95"));
+      const dsPct = parseFloat(String(valuation.distressValuePercent || "80"));
+      const rl = Math.round((fmv * rlPct) / 100);
+      const ds = Math.round((fmv * dsPct) / 100);
+      return [
+        ["4.", `Fair Market Value of the Property ${pct}% completion`, "", "", money(fmv)],
+        ["5.", `Realizable Value of the Property (${isFinite(rlPct) ? rlPct.toFixed(2) : "95.00"}% of ${pct}% completion)`, "", "", money(rl)],
+        ["6.", `Distress Value of the Property (${isFinite(dsPct) ? dsPct.toFixed(2) : "80.00"}% of ${pct}% completion)`, "", "", money(ds)],
+      ];
+    })(),
     ["", "Govt. Value", "", "", money(valuation.govtValue)],
     ["", "Rental Value", "", "", `Approx. ${formattedNumber(valuation.rentRangePerMonth)} /- per month`],
     ["", "Insurance Value", "Area in Sq. Ft.\n(Built up)", "Rate per\nSq. Ft.", "Amount in Rs."],
