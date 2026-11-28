@@ -288,6 +288,10 @@ export function MakerValuationForm({
             boundarySiteEast: "",
             boundarySiteWest: "",
             boundarySiteMeasured: "",
+            boundaryApprovedNorth: "",
+            boundaryApprovedSouth: "",
+            boundaryApprovedEast: "",
+            boundaryApprovedWest: "",
             latitude: fieldVisit?.gpsLatitude ?? "",
             longitude: fieldVisit?.gpsLongitude ?? "",
             ageOfBuilding: "",
@@ -450,6 +454,10 @@ export function MakerValuationForm({
       boundarySiteEast: "100m",
       boundarySiteWest: "100m",
       boundarySiteMeasured: "As per actuals",
+      boundaryApprovedNorth: "Lobby / Lifts / Staircase",
+      boundaryApprovedSouth: "Marginal Space",
+      boundaryApprovedEast: "Marginal Space",
+      boundaryApprovedWest: "Marginal Space",
       latitude: "19.0760",
       longitude: "72.8777",
       occupancy: "Self-occupied",
@@ -652,6 +660,10 @@ export function MakerValuationForm({
           boundarySiteEast: "Boundary Site East",
           boundarySiteWest: "Boundary Site West",
           boundarySiteMeasured: "Boundary Site Measured",
+          boundaryApprovedNorth: "Boundary Approved Plan North",
+          boundaryApprovedSouth: "Boundary Approved Plan South",
+          boundaryApprovedEast: "Boundary Approved Plan East",
+          boundaryApprovedWest: "Boundary Approved Plan West",
           latitude: "Latitude",
           longitude: "Longitude",
           occupancy: "Occupancy",
@@ -1480,6 +1492,52 @@ export function MakerValuationForm({
                       )}
                     />
                   </div>
+                </div>
+              </div>
+              {/* Boundary of Approved Plan - Full Width */}
+              <div className="mt-6">
+                <h4 className="font-medium text-sm mb-3 pb-2 border-b">Boundary of Approved Plan</h4>
+                <div className="grid gap-4 grid-cols-1 lg:grid-cols-2">
+                  <FormField
+                    control={form.control}
+                    name="boundaryApprovedNorth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>North</FormLabel>
+                        <Input placeholder="Enter north boundary" {...field} />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="boundaryApprovedSouth"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>South</FormLabel>
+                        <Input placeholder="Enter south boundary" {...field} />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="boundaryApprovedEast"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>East</FormLabel>
+                        <Input placeholder="Enter east boundary" {...field} />
+                      </FormItem>
+                    )}
+                  />
+                  <FormField
+                    control={form.control}
+                    name="boundaryApprovedWest"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>West</FormLabel>
+                        <Input placeholder="Enter west boundary" {...field} />
+                      </FormItem>
+                    )}
+                  />
                 </div>
               </div>
             </div>

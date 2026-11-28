@@ -283,6 +283,10 @@ export interface MakerValuation {
   boundarySiteEast?: string | undefined;
   boundarySiteWest?: string | undefined;
   boundarySiteMeasured?: string | undefined;
+  boundaryApprovedNorth?: string | undefined;
+  boundaryApprovedSouth?: string | undefined;
+  boundaryApprovedEast?: string | undefined;
+  boundaryApprovedWest?: string | undefined;
   latitude?: string | undefined;
   longitude?: string | undefined;
   occupancy?: string | undefined;
