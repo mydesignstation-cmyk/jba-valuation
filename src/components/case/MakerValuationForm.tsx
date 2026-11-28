@@ -72,6 +72,12 @@ const makerValuationFields = [
   "documentsDetails2",
   "documentsName3",
   "documentsDetails3",
+  "documentsName4",
+  "documentsDetails4",
+  "documentsName5",
+  "documentsDetails5",
+  "documentsName6",
+  "documentsDetails6",
   "nameOfOwner",
   "address",
   "configurationInShort",
@@ -263,6 +269,12 @@ export function MakerValuationForm({
             documentsDetails2: "",
             documentsName3: "",
             documentsDetails3: "",
+            documentsName4: "",
+            documentsDetails4: "",
+            documentsName5: "",
+            documentsDetails5: "",
+            documentsName6: "",
+            documentsDetails6: "",
             nameOfOwner: "",
             address: "",
             configurationInShort: "",
@@ -429,6 +441,12 @@ export function MakerValuationForm({
       documentsDetails2: "Document 2 details",
       documentsName3: "Plan",
       documentsDetails3: "Document 3 details",
+      documentsName4: "",
+      documentsDetails4: "",
+      documentsName5: "",
+      documentsDetails5: "",
+      documentsName6: "",
+      documentsDetails6: "",
       nameOfOwner: "Dev Owner",
       address: "123 Dev Street, Dev City",
       configurationInShort: "3BHK",
@@ -635,6 +653,12 @@ export function MakerValuationForm({
           documentsDetails2: "Details of Documents Name (2)",
           documentsName3: "Documents Name (3)",
           documentsDetails3: "Details of Documents Name (3)",
+          documentsName4: "Documents Name (4)",
+          documentsDetails4: "Details of Documents Name (4)",
+          documentsName5: "Documents Name (5)",
+          documentsDetails5: "Details of Documents Name (5)",
+          documentsName6: "Documents Name (6)",
+          documentsDetails6: "Details of Documents Name (6)",
           nameOfOwner: "Name of Owner",
           address: "Address",
           configurationInShort: "Configuration (In Short)",
@@ -1132,6 +1156,66 @@ export function MakerValuationForm({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Details of Documents Name (3)</FormLabel>
+                      <Input placeholder="Enter document details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsName4"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documents Name (4)</FormLabel>
+                      <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsDetails4"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details of Documents Name (4)</FormLabel>
+                      <Input placeholder="Enter document details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsName5"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documents Name (5)</FormLabel>
+                      <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsDetails5"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details of Documents Name (5)</FormLabel>
+                      <Input placeholder="Enter document details" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsName6"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Documents Name (6)</FormLabel>
+                      <Input placeholder="Enter document name" {...field} />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="documentsDetails6"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Details of Documents Name (6)</FormLabel>
                       <Input placeholder="Enter document details" {...field} />
                     </FormItem>
                   )}

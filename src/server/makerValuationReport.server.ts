@@ -383,10 +383,21 @@ type PageTwoRow = {
 };
 
 function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
-  const documentList = [valuation.documentsName1, valuation.documentsName2, valuation.documentsName3]
-    .map((item) => item?.trim())
-    .filter(Boolean)
-    .join(", ");
+  const docPairs: [string | undefined, string | undefined][] = [
+    [valuation.documentsName1, valuation.documentsDetails1],
+    [valuation.documentsName2, valuation.documentsDetails2],
+    [valuation.documentsName3, valuation.documentsDetails3],
+    [valuation.documentsName4, valuation.documentsDetails4],
+    [valuation.documentsName5, valuation.documentsDetails5],
+    [valuation.documentsName6, valuation.documentsDetails6],
+  ];
+  const labels = ["a", "b", "c", "d", "e", "f"];
+  const activePairs = docPairs.filter(([name]) => name && name.trim() && name.trim() !== "NA" && name.trim() !== EM_DASH);
+  const documentList = activePairs.map(([name]) => name!.trim()).join(", ");
+  const documentRows: PageTwoRow[] = activePairs.map(([name, details], i) => ({
+    description: `${labels[i]}) ${name!.trim()}`,
+    value: value(details),
+  }));
 
   return [
     { description: "GENERAL", section: true },
@@ -394,9 +405,7 @@ function pageTwoRows(valuation: MakerValuation): PageTwoRow[] {
     { number: "2.", description: "a) Date of inspection", value: reportDate(valuation.dateOfInspection) },
     { description: "b) Date on which the valuation is made", value: reportDate(valuation.dateOfValuation) },
     { number: "3.", description: "List of documents produced for perusal", value: documentList },
-    { description: `a) ${value(valuation.documentsName1)}`, value: value(valuation.documentsDetails1) },
-    { description: `b) ${value(valuation.documentsName2)}`, value: value(valuation.documentsDetails2) },
-    { description: `c) ${value(valuation.documentsName3)}`, value: value(valuation.documentsDetails3) },
+    ...documentRows,
     { number: "4.", description: "Name of owner(s) and his/their address (with phone no., details of share of each owner in case of joint ownership)", value: `${value(valuation.nameOfOwner)}.\nAdd: ${value(valuation.address)}` },
     { number: "5.", description: "Brief description of property.", value: `The property is a ${value(valuation.configurationInShort)} ${value(valuation.typeOfProperty)}, located on ${value(valuation.locatedOnFloor)} Floor in the ${value(valuation.buildingName)} Building comprises of ${value(valuation.nosOfFloor)} Floors with ${value(valuation.nosOfLifts)} Lifts & ${value(valuation.nosOfStaircase)} Staircase.` },
     { number: "6.", description: "Location of property", value: "" },

@@ -257,6 +257,12 @@ export interface MakerValuation {
   documentsDetails2?: string | undefined;
   documentsName3?: string | undefined;
   documentsDetails3?: string | undefined;
+  documentsName4?: string | undefined;
+  documentsDetails4?: string | undefined;
+  documentsName5?: string | undefined;
+  documentsDetails5?: string | undefined;
+  documentsName6?: string | undefined;
+  documentsDetails6?: string | undefined;
   nameOfOwner?: string | undefined;
   address?: string | undefined;
   configurationInShort?: string | undefined;
