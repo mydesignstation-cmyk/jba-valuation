@@ -1236,6 +1236,30 @@ function Page() {
                               Edit
                             </Button>
                           )}
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            void (async () => {
+                              try {
+                                const result = await api_downloadMakerValuationReport(valuationCase.id);
+                                const link = document.createElement("a");
+                                link.href = `data:application/vnd.openxmlformats-officedocument.wordprocessingml.document;base64,${result.docxBase64}`;
+                                link.download = result.docxFilename;
+                                document.body.appendChild(link);
+                                link.click();
+                                document.body.removeChild(link);
+                                toast.success("BOI DOCX downloaded");
+                              } catch (error) {
+                                toast.error("Failed to download BOI DOCX");
+                                console.error("BOI DOCX error:", error);
+                              }
+                            })();
+                          }}
+                        >
+                          <FileText className="mr-2 h-4 w-4" />
+                          BOI Docx
+                        </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
                             <Button variant="outline" size="sm">
