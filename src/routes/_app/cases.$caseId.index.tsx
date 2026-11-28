@@ -321,7 +321,13 @@ function MakerValuationSection({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className={title === "Remarks" ? "space-y-4" : "grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3"}>
+        <div className={
+          title === "Remarks"
+            ? "space-y-4"
+            : title === "General"
+              ? "grid gap-x-6 gap-y-4 sm:grid-cols-2"
+              : "grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3"
+        }>
           {fields.map((field) => (
             <MakerValuationDisplayRow key={field.key} valuation={valuation} field={field} />
           ))}
@@ -1359,17 +1365,30 @@ function Page() {
 
                       </CardContent>
                   </Card>
-                  {/* General section: full-width above the column grid (22 fields, always tall) */}
-                  {makerValuationSections.filter((s) => s.title === "General").map((section) => (
-                    <MakerValuationSection
-                      key={section.title}
-                      valuation={makerValuation}
-                      title={section.title}
-                      fields={section.fields}
-                    />
-                  ))}
+                  {/* Top row: Basic (1/3) + General (2/3) side by side */}
+                  <div className="grid grid-cols-3 gap-4 items-start">
+                    {makerValuationSections.filter((s) => s.title === "Basic").map((section) => (
+                      <div key={section.title} className="col-span-1">
+                        <MakerValuationSection
+                          valuation={makerValuation}
+                          title={section.title}
+                          fields={section.fields}
+                        />
+                      </div>
+                    ))}
+                    {makerValuationSections.filter((s) => s.title === "General").map((section) => (
+                      <div key={section.title} className="col-span-2">
+                        <MakerValuationSection
+                          valuation={makerValuation}
+                          title={section.title}
+                          fields={section.fields}
+                        />
+                      </div>
+                    ))}
+                  </div>
+                  {/* Rest of sections in masonry columns */}
                   <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
-                    {makerValuationSections.filter((s) => s.title !== "General").map((section) => (
+                    {makerValuationSections.filter((s) => s.title !== "Basic" && s.title !== "General").map((section) => (
                       <MakerValuationSection
                         key={section.title}
                         valuation={makerValuation}
