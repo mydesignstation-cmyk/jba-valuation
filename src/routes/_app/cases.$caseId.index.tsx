@@ -1359,8 +1359,17 @@ function Page() {
 
                       </CardContent>
                   </Card>
+                  {/* General section: full-width above the column grid (22 fields, always tall) */}
+                  {makerValuationSections.filter((s) => s.title === "General").map((section) => (
+                    <MakerValuationSection
+                      key={section.title}
+                      valuation={makerValuation}
+                      title={section.title}
+                      fields={section.fields}
+                    />
+                  ))}
                   <div className="columns-1 gap-4 md:columns-2 lg:columns-3">
-                    {makerValuationSections.map((section) => (
+                    {makerValuationSections.filter((s) => s.title !== "General").map((section) => (
                       <MakerValuationSection
                         key={section.title}
                         valuation={makerValuation}
