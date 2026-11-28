@@ -321,7 +321,7 @@ function MakerValuationSection({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div className={title === "Remarks" ? "space-y-4" : "grid gap-x-6 gap-y-4 sm:grid-cols-2 lg:grid-cols-3"}>
           {fields.map((field) => (
             <MakerValuationDisplayRow key={field.key} valuation={valuation} field={field} />
           ))}
